@@ -5,19 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "jasmine",
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${file}",
-            "outFiles": []
-        },
-        {
-            "type": "node",
-            "request": "attach",
-            "name": "Attach to Port",
-            "address": "localhost",
-            "port": 5858,
-            "outFiles": []
+            "program": "${workspaceRoot}/../../../node_modules/jasmine/bin/jasmine.js",
+            "stopOnEntry": false,
+            "args": ["--config=spec/support/jasmine.json"],
+            "cwd": "${workspaceRoot}/Tests",
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "preLaunchTask": "Run tests",
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }

@@ -15,6 +15,14 @@
             }
         },
         {
+            "label": "Run tests",
+            "type": "typescript",
+            "tsconfig": "tsconfig_tests.json",
+            "problemMatcher": [
+                "$tsc"
+            ]
+        },
+        {
             "taskName": "Run in chrome",
             "command": "Chrome",
             "windows": {

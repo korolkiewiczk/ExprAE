@@ -5,9 +5,6 @@
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true,
-        "outFile": "combined.js"
-    },
-    "exclude": [
-        "Tests"
-    ]
+        "outFile": "combined_tests.js"
+    }
 }

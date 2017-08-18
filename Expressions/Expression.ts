@@ -9,8 +9,8 @@ module ExprAE.Expressions {
         private removeSpaces(expr: string): string {
             var stron = false;
             var strbson = false;
-            var strchar;
-            var exprbuf = [];
+            var strchar: any;
+            var exprbuf: any[] = [];
             for (var i = 0; i < expr.length; i++) {
                 var c = expr[i];
                 if (stron) {
