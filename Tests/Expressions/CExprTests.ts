@@ -2,6 +2,15 @@
 /// <reference path="../../Expressions/CExpr.ts" />
 module ExprAE.Tests {
     describe("CExpr", () => {
+
+        describe("set", () => {
+            it("should set valid onp structure", () => {
+                var expression = new Expressions.CExpr(new Expressions.CLib());
+                var result = expression.set("10+20*30/40");
+                expect(result).toBe(Expressions.ErrorCodes.NoErr);
+            });
+        });
+
         describe("removeSpaces", () => {
             it("should return expression without spaces", () => {
                 var expression = new Expressions.CExpr();
@@ -49,7 +58,7 @@ module ExprAE.Tests {
                 var result1 = expression["htoi"]("10".split(""));
                 var result2 = expression["htoi"]("2F".split(""));
                 expect(result1).toBe(16);
-                expect(result2).toBe(16*2+15);
+                expect(result2).toBe(16 * 2 + 15);
             });
         });
 
@@ -59,7 +68,7 @@ module ExprAE.Tests {
                 var result1 = expression["strlen"]("100".split(""));
                 var result2 = expression["strlen"]("876abc".split(""), 1);
                 var result3 = expression["strlen"]("1\0002\0005\0006".split(""), 4);
-                var result4 = expression["strlen"]("200\00001".split(""),4);
+                var result4 = expression["strlen"]("200\00001".split(""), 4);
                 expect(result1).toBe(3);
                 expect(result2).toBe(5);
                 expect(result3).toBe(1);
@@ -84,10 +93,10 @@ module ExprAE.Tests {
         describe("chartype", () => {
             it("should return valid character type", () => {
                 var expression = new Expressions.CExpr();
-                var result1=expression["chartype"]("5");
-                var result2=expression["chartype"]("A");
-                var result3=expression["chartype"]("(");
-                var result4=expression["chartype"]('"');
+                var result1 = expression["chartype"]("5");
+                var result2 = expression["chartype"]("A");
+                var result3 = expression["chartype"]("(");
+                var result4 = expression["chartype"]('"');
                 expect(result1).toBe(expression["CHAR_NUM"]);
                 expect(result2).toBe(expression["CHAR_LETTER"]);
                 expect(result3).toBe(expression["CHAR_LBRACKET"]);

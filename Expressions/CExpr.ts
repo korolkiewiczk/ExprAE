@@ -29,15 +29,42 @@ module ExprAE.Expressions {
         hashtab: number[];
         strcount: number;
 
-        onp: number[][];
+        onp: any[][];
         onpl: number;
         onpstack: number[][];
         onpsl: number;
         tag: number;
 
+        constructor(public library: CLib = null) {
+            this.onpl = 0;
+            this.onp = [];
+            this.onpstack = [];
+
+            this.exprstr = [];
+            this.exprstr[0] = '\0';
+
+            this.strdata = [];
+            this.strdata[0] = '\0';
+
+            this.retstr = [];
+            this.retstr[0] = '\0';
+
+            if (library) {
+                for (var i = 0; i < this.CExpr_operands.length; i++) {
+                    var e: ELEMENT = new ELEMENT(
+                        this.CExpr_operands[i].fname,
+                        this.CExpr_operands[i].ref,
+                        library.VAL_FLOAT,
+                        2, 0, 0);
+                    this.library.addElement(e);
+                }
+            }
+
+            //todo add core functions
+        }
+
         set(expr: string): ErrorCodes {
 
-            
             if (Checker.nullEmpty(expr)) {
                 return ErrorCodes.NullStr;
             }
@@ -47,15 +74,15 @@ module ExprAE.Expressions {
                 return ErrorCodes.SyntaxError;
             }
 
-            var bf: string[];
-            var exprbuf: string[];
-            var stack: number[][];
+            var bf: string[] = [];
+            var exprbuf: string[] = [];
+            var stack: any[][] = [];
             var sl: number = -1;
             var pom: number = 0;
             var pctype: number = -1;
             var ctype: number = -1;
             var stype: number = 0;
-            var funcstack: number[][];
+            var funcstack: number[][] = [];
             var funcsl: number = -1;
 
             const freq: number = 0;
@@ -88,7 +115,11 @@ module ExprAE.Expressions {
             this.onpl = 0;
 
             while (true) {
-                var c = expr[exprPos++];
+                var c: string;
+                if (exprPos >= expr.length)
+                    c = "\0";
+                else
+                    c = expr[exprPos];
 
                 if (stron) {
                     if (!strbson && c == '\\') {
@@ -98,6 +129,7 @@ module ExprAE.Expressions {
                         if (c == strchar && !strbson) {
                             this.strdata[strl++] = '\0';
                             if (stron == 2) {
+                                this.ionp();
                                 this.onp[this.onpl][0] = this.ONP_NUM;
                                 this.onp[this.onpl][1] = this.strlen(this.strdata, strl0);
                                 //*(float*)((int)onp+onpl*8+4)=(float)strlen((char*)(strl0+(int)strdata));
@@ -105,6 +137,7 @@ module ExprAE.Expressions {
                             }
                             else {
                                 if (this.strcount == this.MAXSTRINGS) return ErrorCodes.BufOverflow;
+                                this.ionp();
                                 this.onp[this.onpl][0] = this.ONP_INUM;
                                 this.onp[this.onpl++][1] = strl0;
                                 this.hashtab[this.strcount++] = this.str2hash(this.strdata, strl0);
@@ -163,35 +196,40 @@ module ExprAE.Expressions {
                                     pom = this.atof(bf);
                                     break;
                                 case this.CHAR_LETTER:
-                                    /*NAME * n;
-                                    n = library ->Find(bf);
-                                    if (n == 0) CExpr_SetErr(UndefinedName)
-                                    if ((n ->parattr & 0x80000000) == 0) {
-                                        if (sref) CExpr_SetErr(SyntaxError)
-                                        stack[++sl][0] = (unsigned int)n;
+                                    var n = this.library.find(this.getStrAt(bf));
+                                    if (n == null) return ErrorCodes.UndefinedName;
+                                    if ((n.parattr & 0x80000000) == 0) {
+                                        if (sref) return ErrorCodes.SyntaxError;
+
+                                        this.i(stack, sl + 1);
+                                        this.i(funcstack, funcsl + 1);
+                                        stack[++sl][0] = n;
                                         stack[sl][1] = 10000;
                                         funcstack[++funcsl][freq] = -1; //wymus uzycie nawiasu
-                                        funcstack[funcsl][npar] = n ->parattr & 255;
+                                        funcstack[funcsl][npar] = n.parattr & 255;
                                         vcount -= funcstack[funcsl][npar] - 1;
-                                        funcstack[funcsl][partype] = n ->partypes;
+                                        funcstack[funcsl][partype] = n.partypes;
                                         funcstack[funcsl][parl] = 0;
                                         funcstack[funcsl][bracketv] = bcount;
-                                        for (unsigned int j= 0; j < n ->parattr & 255; j++)
-                                        {
-                                            if (GET_PAR(n ->partypes, j) == VAL_STR) isextracode = 1;
+                                        var count = n.parattr & 255;
+                                        for (var j = 0; j < count; j++) {
+                                            if (this.library.getPar(n.partypes, j) == this.library.VAL_STR)
+                                                isextracode = 1;
                                         }
-                                        if (n ->tag & (TAG_EXTRACODE)) isextracode = 1;
+                                        if (n.tag & (this.library.TAG_EXTRACODE)) isextracode = 1;
                                     }
                                     else {
                                         vcount++;
+                                        this.ionp();
                                         if (sref) {
-                                            onp[onpl][0] = ONP_NAMEREF;
+                                            this.onp[this.onpl][0] = this.ONP_NAMEREF;
                                             sref = 0;
                                         }
-                                        else
-                                            onp[onpl][0] = ONP_NAME;
-                                        onp[onpl++][1] = (unsigned int)n;
-                                    }*/
+                                        else {
+                                            this.onp[this.onpl][0] = this.ONP_NAME;
+                                        }
+                                        this.onp[this.onpl++][1] = n;
+                                    }
                                     break;
                                 case this.CHAR_HEXNUM:
                                     pom = this.htoi(bf);
@@ -200,26 +238,30 @@ module ExprAE.Expressions {
                                     var oi: number;
                                     oi = this.opindex(bf);
                                     if (oi == -1) return ErrorCodes.UnreconOp;
-                                    /*if ((vstart == 1) && (oi == 1)) {
-                                        n = library ->Find("CHS");
-                                        if (n == 0) CExpr_SetErr(UndefinedName)
-                                        stack[++sl][0] = (unsigned int)n;
+                                    if ((vstart == 1) && (oi == 1)) {
+                                        var n = this.library.find("CHS");
+                                        if (n == null) return ErrorCodes.UndefinedName;
+
+                                        this.i(stack, sl + 1);
+                                        stack[++sl][0] = n;
                                         stack[sl][1] = 10000;
                                     }
                                     else {
-                                        n = library ->Find(CExpr_operands[oi].fname);
-                                        if (n == 0) CExpr_SetErr(UndefinedName)
+                                        var n = this.library.find(this.CExpr_operands[oi].fname);
+                                        if (n == null) return ErrorCodes.UndefinedName;
                                         vcount -= 1;
 
                                         //zdejmij operandy o wyzszym/rownym priorytecie
-                                        while ((sl >= 0) && (stack[sl][1] >= CExpr_operands[oi].p)) {
-                                            onp[onpl][0] = ONP_NAME;
-                                            onp[onpl++][1] = stack[sl--][0];
-                                            if (onpl >= MAXONPBUFLEN) CExpr_SetErr(BufOverflow)
+                                        while ((sl >= 0) && (stack[sl][1] >= this.CExpr_operands[oi].p)) {
+                                            this.ionp();
+                                            this.onp[this.onpl][0] = this.ONP_NAME;
+                                            this.onp[this.onpl++][1] = stack[sl--][0];
+                                            if (this.onpl >= this.MAXONPBUFLEN) return ErrorCodes.BufOverflow;
                                         }
-                                        stack[++sl][0] = (unsigned int)n;
-                                        stack[sl][1] = CExpr_operands[oi].p;
-                                    }*/
+                                        this.i(stack, sl + 1);
+                                        stack[++sl][0] = n;
+                                        stack[sl][1] = this.CExpr_operands[oi].p;
+                                    }
                                     break;
                                 case this.CHAR_LSBRACKET:
                                     sbcount++;
@@ -234,6 +276,7 @@ module ExprAE.Expressions {
                                             funcstack[funcsl][freq] = 2;
                                     }
                                     vstart = 2;
+                                    this.i(stack, sl + 1);
                                     stack[++sl][1] = 0;
                                     bcount++;
                                     break;
@@ -243,6 +286,7 @@ module ExprAE.Expressions {
                                     if (bcount < 0) return ErrorCodes.SyntaxError;
                                     //zdejmij ze stosu wszystkie wartosci az do namiasu (
                                     while ((sl >= 0) && (stack[sl][1] > 0)) {
+                                        this.ionp();
                                         this.onp[this.onpl][0] = this.ONP_NAME;
                                         this.onp[this.onpl++][1] = stack[sl--][0];
                                         if (this.onpl >= this.MAXONPBUFLEN) return ErrorCodes.BufOverflow;
@@ -252,6 +296,7 @@ module ExprAE.Expressions {
                                         if (funcstack[funcsl][bracketv] == bcount) {
                                             if ((funcstack[funcsl][freq] != 2) && (funcstack[funcsl][parl] != funcstack[funcsl][npar] - 1))
                                                 return ErrorCodes.TooFewParams;
+                                            this.ionp();
                                             this.onp[this.onpl][0] = this.ONP_NAME;
                                             this.onp[this.onpl++][1] = stack[sl--][0];
                                             if (this.onpl >= this.MAXONPBUFLEN) return ErrorCodes.BufOverflow;
@@ -260,10 +305,11 @@ module ExprAE.Expressions {
                                     if (stype == this.CHAR_RSBRACKET) {
                                         if (sbcount <= 0) return ErrorCodes.SyntaxError;
                                         sbcount--;
-                                        /*n = library ->Find("PTR");
-                                        if (n == 0) CExpr_SetErr(UndefinedName)
-                                        onp[onpl][0] = ONP_NAME;
-                                        onp[onpl++][1] = (int)n;*/
+                                        var n = this.library.find("PTR");
+                                        if (n == null) return ErrorCodes.UndefinedName;
+                                        this.ionp();
+                                        this.onp[this.onpl][0] = this.ONP_NAME;
+                                        this.onp[this.onpl++][1] = n;
                                         vcount--;
                                     }
                                     else
@@ -272,12 +318,14 @@ module ExprAE.Expressions {
                                 case this.CHAR_COMMA:
                                     if (funcsl == -1) return ErrorCodes.SyntaxError;
                                     while ((sl >= 0) && (stack[sl][1] > 0)) {
+                                        this.ionp();
                                         this.onp[this.onpl][0] = this.ONP_NAME;
                                         this.onp[this.onpl++][1] = stack[sl--][0];
                                         if (this.onpl >= this.MAXONPBUFLEN) return ErrorCodes.BufOverflow;
                                     }
                                     sl--;
                                     vstart = 2;
+                                    this.i(stack, sl + 1);
                                     stack[++sl][1] = 0;
                                     funcstack[funcsl][parl]++;
                                     if (funcstack[funcsl][parl] >= funcstack[funcsl][npar])
@@ -286,11 +334,11 @@ module ExprAE.Expressions {
                                 case this.CHAR_QUOT:
                                     if (funcsl == -1) return ErrorCodes.SyntaxError;
                                     vcount++;
-                                    /*if (GET_PAR(funcstack[funcsl][partype], funcstack[funcsl][parl]) != VAL_STR)
+                                    if (this.library.getPar(funcstack[funcsl][partype], funcstack[funcsl][parl]) != this.library.VAL_STR)
                                         stron = 2;
                                     else
                                         stron = 1;
-                                    strchar =*(expr - 1);*/
+                                    strchar = expr[exprPos - 1];
                                     strbson = 0;
                                     continue;
                                 case this.CHAR_REF:
@@ -301,8 +349,9 @@ module ExprAE.Expressions {
 
                             if ((stype == this.CHAR_NUM) || (stype == this.CHAR_HEXNUM)) {
                                 vcount++;
+                                this.ionp();
                                 this.onp[this.onpl][0] = this.ONP_NUM;
-                                this.onp[this.onpl][1]=pom;
+                                this.onp[this.onpl][1] = pom;
                                 //*(float *)((int)onp+ onpl * 8 + 4)=pom;
                                 this.onpl++;
                             }
@@ -314,19 +363,20 @@ module ExprAE.Expressions {
                                 var oi: number;
                                 oi = this.opindex(["*"]);
                                 if (oi == -1) return ErrorCodes.UnreconOp;
-                                /*NAME * n;
-                                n = library ->Find(CExpr_operands[oi].fname);
-                                if (n == 0) CExpr_SetErr(UndefinedName)
+                                var n = this.library.find(this.CExpr_operands[oi].fname);
+                                if (n == null) return ErrorCodes.UndefinedName;
                                 vcount -= 1;
 
                                 //zdejmij operandy o wyzszym/rownym priorytecie
-                                while ((sl >= 0) && (stack[sl][1] >= CExpr_operands[oi].p)) {
-                                    onp[onpl][0] = ONP_NAME;
-                                    onp[onpl++][1] = stack[sl--][0];
-                                    if (onpl >= MAXONPBUFLEN) CExpr_SetErr(BufOverflow)
+                                while ((sl >= 0) && (stack[sl][1] >= this.CExpr_operands[oi].p)) {
+                                    this.ionp();
+                                    this.onp[this.onpl][0] = this.ONP_NAME;
+                                    this.onp[this.onpl++][1] = stack[sl--][0];
+                                    if (this.onpl >= this.MAXONPBUFLEN) return ErrorCodes.BufOverflow;
                                 }
-                                stack[++sl][0] = (unsigned int)n;
-                                stack[sl][1] = CExpr_operands[oi].p;*/
+                                this.i(stack, sl + 1);
+                                stack[++sl][0] = n;
+                                stack[sl][1] = this.CExpr_operands[oi].p;
                             }
                         }
 
@@ -346,15 +396,15 @@ module ExprAE.Expressions {
                 exprPos++;
             }
 
-            if (funcsl>=0)
-            if (funcstack[funcsl][freq]!=0) return ErrorCodes.SyntaxError;
-            if ((bcount>0)||(sbcount>0)) return ErrorCodes.SyntaxError;
-            if (vcount!=1) return ErrorCodes.SyntaxError;
-            while (sl>=0)
-            {
-                this.onp[this.onpl][0]=this.ONP_NAME;
-                this.onp[this.onpl++][1]=stack[sl--][0];
-                if (this.onpl>=this.MAXONPBUFLEN) return ErrorCodes.BufOverflow;
+            if (funcsl >= 0)
+                if (funcstack[funcsl][freq] != 0) return ErrorCodes.SyntaxError;
+            if ((bcount > 0) || (sbcount > 0)) return ErrorCodes.SyntaxError;
+            if (vcount != 1) return ErrorCodes.SyntaxError;
+            while (sl >= 0) {
+                this.ionp();
+                this.onp[this.onpl][0] = this.ONP_NAME;
+                this.onp[this.onpl++][1] = stack[sl--][0];
+                if (this.onpl >= this.MAXONPBUFLEN) return ErrorCodes.BufOverflow;
             }
 
             this.exprstr = exprbuf;
@@ -363,18 +413,18 @@ module ExprAE.Expressions {
         }
 
         private atoi(arr: string[], start: number = 0): number {
-            return parseInt(this.getStrAt(arr,start), 10);
+            return parseInt(this.getStrAt(arr, start), 10);
         }
 
         private htoi(arr: string[], start: number = 0): number {
-            return parseInt(this.getStrAt(arr,start), 16);
+            return parseInt(this.getStrAt(arr, start), 16);
         }
 
         private atof(arr: string[], start: number = 0): number {
-            return parseFloat(this.getStrAt(arr,start));
+            return parseFloat(this.getStrAt(arr, start));
         }
 
-        private getStrAt(arr: string[], start: number=0): string {
+        private getStrAt(arr: string[], start: number = 0): string {
             var str = arr.join("");
             var index = str.indexOf('\0', start);
             if (index == -1) index = str.length;
@@ -416,11 +466,10 @@ module ExprAE.Expressions {
         }
 
         private opindex(s: string[]): number {
-            for (var i=0; i<this.NUMOFOP; i++)
-            {
-                var j=0;
-                while ((this.CExpr_operands[i].opname[j]==s[j])&&(s[j]!='\0')) j++;
-                if (s[j]=='\0') return i;
+            for (var i = 0; i < this.NUMOFOP; i++) {
+                var j = 0;
+                while ((this.CExpr_operands[i].opname[j] == s[j]) && (s[j] != '\0')) j++;
+                if (s[j] == '\0') return i;
             }
             return -1;
         }
@@ -457,33 +506,38 @@ module ExprAE.Expressions {
             return resultBuf.join('');
         }
 
+        ionp() {
+            if (this.onp[this.onpl] == undefined)
+                this.onp[this.onpl] = [];
+        }
+
+        i(a: any[], p: number) {
+            if (a[p] == undefined)
+                a[p] = [];
+        }
 
         //operators
         CExpr_operands: OP[] = new Array(
-            new OP("+","ADD",this.CExpr_op_add,100),
-            new OP("-","SUB",this.CExpr_op_sub,100),
-            new OP("*","MUL",this.CExpr_op_mul,200),
-            new OP("/","DIV",this.CExpr_op_div,200)
+            new OP("+", "ADD", this.CExpr_op_add, 100),
+            new OP("-", "SUB", this.CExpr_op_sub, 100),
+            new OP("*", "MUL", this.CExpr_op_mul, 200),
+            new OP("/", "DIV", this.CExpr_op_div, 200)
         );
 
-        CExpr_op_add(a:number,b:number):number
-        {
-            return a+b;
+        CExpr_op_add(a: number, b: number): number {
+            return a + b;
         }
-        
-        CExpr_op_sub(a:number,b:number):number
-        {
-            return a-b;
+
+        CExpr_op_sub(a: number, b: number): number {
+            return a - b;
         }
-        
-        CExpr_op_mul(a:number,b:number):number
-        {
-            return a*b;
+
+        CExpr_op_mul(a: number, b: number): number {
+            return a * b;
         }
-        
-        CExpr_op_div(a:number,b:number):number
-        {
-            return a/b;
+
+        CExpr_op_div(a: number, b: number): number {
+            return a / b;
         }
     }
 }

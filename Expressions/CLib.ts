@@ -7,24 +7,23 @@ module ExprAE.Expressions {
         VAL_PTR: number = 3;
         VAR: number = 0xffffffff;
         MAXTXTLEN: number = 1024;
+        TAG_EXTRACODE:number = 0x10000;
 
         private root: ND;
 
-        constructor() {
+        constructor(elist: ELEMENT[] = null) {
             this.root = new ND();
+            if (elist)
+                this.addList(elist);
         }
 
         addElement(e: ELEMENT): void {
-            var i: number, j: number, sl = e.name.length;
-            if (sl > this.MAXNAMELEN) sl = this.MAXNAMELEN;
-            var itab: number[]=[];
-            for (i = 0; i < sl; i++) {
-                itab[i] = this.index(e.name[i]);
-                if (itab[i] == -1) return;
-            }
+            var i: number, j: number;
+            var itab: number[] = this.toIndexTab(e.name);
+
             var nd: ND;
             nd = this.root;
-            for (i = 0; i < sl; i++) {
+            for (i = 0; i < itab.length; i++) {
                 j = itab[i];
                 if (nd.l[j] == null) {
                     nd.l[j] = new ND();
@@ -50,6 +49,61 @@ module ExprAE.Expressions {
                 }
             }
             nd.n.tag = e.tag;
+        }
+
+        delElement(name: string): void {
+            var i: number, j: number
+            var itab: number[] = this.toIndexTab(name);
+
+            var nd: ND;
+            nd = this.root;
+            for (i = 0; i < itab.length; i++) {
+                j = itab[i];
+                if (nd.l[j] == null) return;
+                nd = nd.l[j];
+            }
+            if (nd.n) {
+                nd.n = null;
+            }
+        }
+
+        addList(elist: ELEMENT[]): void {
+            for (var i = 0; i < elist.length; i++) {
+                this.addElement(elist[i]);
+            }
+        }
+
+        find(name: string): NAME
+        {
+            var i: number, j: number
+            var itab: number[] = this.toIndexTab(name);
+
+            var nd: ND;
+            nd = this.root;
+            for (i=0; i<itab.length; i++)
+            {
+                j=itab[i];
+                if (nd.l[j]==null) return null;
+                nd=nd.l[j];
+            }
+            return nd.n;
+        }
+
+        //todo NListFromTxt(char *_t,char *ret,char schar)
+
+        getPar(p:number,n:number) :number {
+            return (((p)>>((n)<<1))&3);
+        }
+
+        private toIndexTab(str: string): number[] {
+            var sl = str.length;
+            if (sl > this.MAXNAMELEN) sl = this.MAXNAMELEN;
+            var itab: number[] = [];
+            for (var i = 0; i < sl; i++) {
+                itab[i] = this.index(str[i]);
+                if (itab[i] == -1) return;
+            }
+            return itab;
         }
 
         private index(c: string): number {
@@ -86,8 +140,8 @@ module ExprAE.Expressions {
 
     export class ND {
         constructor() {
-            this.l=[];
-            this.n=null;
+            this.l = [];
+            this.n = null;
         }
         public l: ND[];
         public n: NAME;
