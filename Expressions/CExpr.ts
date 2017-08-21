@@ -1,5 +1,5 @@
 module ExprAE.Expressions {
-    export class Expression {
+    export class CExpr {
         ONPSTACKBUFLEN = 16;
         NUMOFOP = 19;
         ONP_NUM = 0;
