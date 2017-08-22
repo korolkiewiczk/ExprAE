@@ -1,5 +1,7 @@
 /// <reference path="../typings/jasmine/jasmine.d.ts" />
 /// <reference path="../../Expressions/CExpr.ts" />
+/// <reference path="../../Expressions/ErrorCodes.ts" />
+/// <reference path="../../Expressions/CLib.ts" />
 module ExprAE.Tests {
     describe("CExpr", () => {
 
@@ -7,7 +9,9 @@ module ExprAE.Tests {
             it("should set valid onp structure", () => {
                 var expression = new Expressions.CExpr(new Expressions.CLib());
                 var result = expression.set("10+20*30/40");
+                var onp = expression["onp"].length;
                 expect(result).toBe(Expressions.ErrorCodes.NoErr);
+                expect(onp).toBe(7);    //7 tokens
             });
         });
 

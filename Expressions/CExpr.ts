@@ -1,41 +1,41 @@
 module ExprAE.Expressions {
     export class CExpr {
-        ONPSTACKBUFLEN = 16;
-        NUMOFOP = 19;
-        ONP_NUM = 0;
-        ONP_NAME = 1;
-        ONP_NAMEREF = 2;
-        ONP_INUM = 3;
-        EXPR_SET_BUFLEN = 512;
-        MAXONPBUFLEN = this.EXPR_SET_BUFLEN;
-        CHAR_NUM = 0;
-        CHAR_LETTER = 1;
-        CHAR_LBRACKET = 2;
-        CHAR_RBRACKET = 3;
-        CHAR_COMMA = 4;
-        CHAR_QUOT = 5;
-        CHAR_LSBRACKET = 6;
-        CHAR_RSBRACKET = 7;
-        CHAR_OTHER = 8;
-        CHAR_HEXNUM = 9;
-        CHAR_REF = 10;
-        STRDATALEN = 256;
-        RETSTRLEN = 64;
-        MAXSTRINGS = 16;
+        private ONPSTACKBUFLEN = 16;
+        private NUMOFOP = 19;
+        private ONP_NUM = 0;
+        private ONP_NAME = 1;
+        private ONP_NAMEREF = 2;
+        private ONP_INUM = 3;
+        private EXPR_SET_BUFLEN = 512;
+        private MAXONPBUFLEN = this.EXPR_SET_BUFLEN;
+        private CHAR_NUM = 0;
+        private CHAR_LETTER = 1;
+        private CHAR_LBRACKET = 2;
+        private CHAR_RBRACKET = 3;
+        private CHAR_COMMA = 4;
+        private CHAR_QUOT = 5;
+        private CHAR_LSBRACKET = 6;
+        private CHAR_RSBRACKET = 7;
+        private CHAR_OTHER = 8;
+        private CHAR_HEXNUM = 9;
+        private CHAR_REF = 10;
+        private STRDATALEN = 256;
+        private RETSTRLEN = 64;
+        private MAXSTRINGS = 16;
 
-        exprstr: string[];
-        strdata: string[];
-        retstr: string[];
-        hashtab: number[];
-        strcount: number;
+        private exprstr: string[];
+        private strdata: string[];
+        private retstr: string[];
+        private hashtab: number[];
+        private strcount: number;
 
-        onp: any[][];
-        onpl: number;
-        onpstack: number[][];
-        onpsl: number;
-        tag: number;
+        private onp: any[][];
+        private onpl: number;
+        private onpstack: number[][];
+        private onpsl: number;
+        private tag: number;
 
-        constructor(public library: CLib = null) {
+        constructor(private library: CLib = null) {
             this.onpl = 0;
             this.onp = [];
             this.onpstack = [];
@@ -412,6 +412,10 @@ module ExprAE.Expressions {
             return ErrorCodes.NoErr;
         }
 
+        do(): number {
+            return 0;
+        }
+
         private atoi(arr: string[], start: number = 0): number {
             return parseInt(this.getStrAt(arr, start), 10);
         }
@@ -506,37 +510,37 @@ module ExprAE.Expressions {
             return resultBuf.join('');
         }
 
-        ionp() {
+        private ionp() {
             if (this.onp[this.onpl] == undefined)
                 this.onp[this.onpl] = [];
         }
 
-        i(a: any[], p: number) {
+        private i(a: any[], p: number) {
             if (a[p] == undefined)
                 a[p] = [];
         }
 
         //operators
-        CExpr_operands: OP[] = new Array(
+        private CExpr_operands: OP[] = new Array(
             new OP("+", "ADD", this.CExpr_op_add, 100),
             new OP("-", "SUB", this.CExpr_op_sub, 100),
             new OP("*", "MUL", this.CExpr_op_mul, 200),
             new OP("/", "DIV", this.CExpr_op_div, 200)
         );
 
-        CExpr_op_add(a: number, b: number): number {
+        private CExpr_op_add(a: number, b: number): number {
             return a + b;
         }
 
-        CExpr_op_sub(a: number, b: number): number {
+        private CExpr_op_sub(a: number, b: number): number {
             return a - b;
         }
 
-        CExpr_op_mul(a: number, b: number): number {
+        private CExpr_op_mul(a: number, b: number): number {
             return a * b;
         }
 
-        CExpr_op_div(a: number, b: number): number {
+        private CExpr_op_div(a: number, b: number): number {
             return a / b;
         }
     }
