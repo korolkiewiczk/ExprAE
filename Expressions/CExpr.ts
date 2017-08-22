@@ -56,7 +56,7 @@ module ExprAE.Expressions {
                     var e: ELEMENT = new ELEMENT(
                         this.CExpr_operands[i].fname,
                         this.CExpr_operands[i].ref,
-                        library.VAL_FLOAT,
+                        CLib.VAL_FLOAT,
                         2, 0, 0);
                     this.library.addElement(e);
                 }
@@ -221,10 +221,10 @@ module ExprAE.Expressions {
                                         funcstack[funcsl][bracketv] = bcount;
                                         var count = n.parattr & 255;
                                         for (var j = 0; j < count; j++) {
-                                            if (this.library.getPar(n.partypes, j) == this.library.VAL_STR)
+                                            if (this.library.getPar(n.partypes, j) == CLib.VAL_STR)
                                                 isextracode = 1;
                                         }
-                                        if (n.tag & (this.library.TAG_EXTRACODE)) isextracode = 1;
+                                        if (n.tag & (CLib.TAG_EXTRACODE)) isextracode = 1;
                                     }
                                     else {
                                         vcount++;
@@ -342,7 +342,7 @@ module ExprAE.Expressions {
                                 case this.CHAR_QUOT:
                                     if (funcsl == -1) return ErrorCodes.SyntaxError;
                                     vcount++;
-                                    if (this.library.getPar(funcstack[funcsl][partype], funcstack[funcsl][parl]) != this.library.VAL_STR)
+                                    if (this.library.getPar(funcstack[funcsl][partype], funcstack[funcsl][parl]) != CLib.VAL_STR)
                                         stron = 2;
                                     else
                                         stron = 1;
@@ -369,7 +369,7 @@ module ExprAE.Expressions {
                                 ((stype == this.CHAR_RBRACKET) && (ctype == this.CHAR_LBRACKET))
                             ) {
                                 var oi: number;
-                                oi = this.opindex(["*"]);
+                                oi = this.opindex(['*','\0']);
                                 if (oi == -1) return ErrorCodes.UnreconOp;
                                 var n = this.library.find(this.CExpr_operands[oi].fname);
                                 if (n == null) return ErrorCodes.UndefinedName;
@@ -430,7 +430,7 @@ module ExprAE.Expressions {
                 switch (this.onp[i][0]) {
                     case this.ONP_NUM:
                         this.i(this.onpstack, this.onpsl + 1);
-                        this.onpstack[++this.onpsl][0] = this.library.VAL_FLOAT;
+                        this.onpstack[++this.onpsl][0] = CLib.VAL_FLOAT;
                         this.onpstack[this.onpsl][1] = this.onp[i][1];
                         break;
                     case this.ONP_NAME:
@@ -442,19 +442,19 @@ module ExprAE.Expressions {
                             this.onpsl++;
                             this.i(this.onpstack, this.onpsl);
                             switch ((npa >> 8) & 255) {
-                                case this.library.VAL_FLOAT:
-                                    this.onpstack[this.onpsl][0] = this.library.VAL_FLOAT;
-                                    this.onpstack[this.onpsl][1] = n.fptr; //todo
+                                case CLib.VAL_FLOAT:
+                                    this.onpstack[this.onpsl][0] = CLib.VAL_FLOAT;
+                                    this.onpstack[this.onpsl][1] = n.fptr(); //todo
                                     //*(float*)((int)onpstack+onpsl*8+4)=*(float*)(n->fptr);
                                     break;
-                                case this.library.VAL_INT:
-                                    this.onpstack[this.onpsl][0] = this.library.VAL_FLOAT;
-                                    this.onpstack[this.onpsl][1] = n.fptr; //todo
+                                case CLib.VAL_INT:
+                                    this.onpstack[this.onpsl][0] = CLib.VAL_FLOAT;
+                                    this.onpstack[this.onpsl][1] = n.fptr(); //todo
                                     //*(float*)((int)onpstack+onpsl*8+4)=(float)*(unsigned int*)(n->fptr);
                                     break;
-                                case this.library.VAL_STR: //VAL_STR=VAL_PTR
-                                    this.onpstack[this.onpsl][0] = this.library.VAL_STR;
-                                    this.onpstack[this.onpsl][1] = n.fptr;
+                                case CLib.VAL_STR: //VAL_STR=VAL_PTR
+                                    this.onpstack[this.onpsl][0] = CLib.VAL_STR;
+                                    this.onpstack[this.onpsl][1] = n.fptr();
                                     //onpstack[onpsl][1]=*(unsigned int*)(n->fptr);
                                     break;
                                 default: return 0;
@@ -471,15 +471,15 @@ module ExprAE.Expressions {
                                 var pt = this.library.getPar(n.partypes, j);
                                 var st = this.onpstack[si][0];
                                 if (pt != st) {
-                                    if (st == this.library.VAL_STR + 10) stradd++;
-                                    if ((pt == this.library.VAL_FLOAT) && (st != this.library.VAL_FLOAT)) {
-                                        this.onpstack[si][0] = this.library.VAL_FLOAT;
+                                    if (st == CLib.VAL_STR + 10) stradd++;
+                                    if ((pt == CLib.VAL_FLOAT) && (st != CLib.VAL_FLOAT)) {
+                                        this.onpstack[si][0] = CLib.VAL_FLOAT;
                                         //this.onpstack[si][1]=this.onpstack[si][1]; //todo
                                         //*(float*)((int)onpstack+si*8+4)=(float)onpstack[si][1];
                                     }
                                     else
-                                        if ((pt != this.library.VAL_FLOAT) && (st == this.library.VAL_FLOAT)) {
-                                            this.onpstack[si][0] = this.library.VAL_INT;
+                                        if ((pt != CLib.VAL_FLOAT) && (st == CLib.VAL_FLOAT)) {
+                                            this.onpstack[si][0] = CLib.VAL_INT;
                                             //this.onpstack[si][1]=this.onpstack[si][1]; //todo
                                             //onpstack[si][1]=(unsigned int)*(float*)((int)onpstack+si*8+4);
                                         }
@@ -487,32 +487,32 @@ module ExprAE.Expressions {
                                 si++;
                             }
                             this.tag = n.tag;
-                            if (rt == this.library.VAL_FLOAT) {
+                            if (rt == CLib.VAL_FLOAT) {
                                 this.faddr = n.fptr;
                                 this.calltab[pc](this);
-                                this.onpstack[this.onpsl][0] = this.library.VAL_FLOAT;
+                                this.onpstack[this.onpsl][0] = CLib.VAL_FLOAT;
                             }
                             else {
                                 this.faddr = n.fptr;
                                 this.calltab[pc](this);
-                                if (rt == this.library.VAL_INT) {
-                                    this.onpstack[this.onpsl][0] = this.library.VAL_FLOAT;
+                                if (rt == CLib.VAL_INT) {
+                                    this.onpstack[this.onpsl][0] = CLib.VAL_FLOAT;
                                     //*(float*)((int)onpstack+onpsl*8+4)=(float)((int)onpstack[onpsl][1]);
                                 }
                                 else {
-                                    this.onpstack[this.onpsl][0] = this.library.VAL_INT;
+                                    this.onpstack[this.onpsl][0] = CLib.VAL_INT;
                                 }
                             }
                             this.strcount += stradd;
                         }
                         break;
                     case this.ONP_INUM:
-                        this.onpstack[++this.onpsl][0] = this.library.VAL_PTR + 10;
+                        this.onpstack[++this.onpsl][0] = CLib.VAL_PTR + 10;
                         this.onpstack[this.onpsl][1] = this.onp[i][1];
                         break;
                     case this.ONP_NAMEREF:
                         n = this.onp[i][1];
-                        this.onpstack[++this.onpsl][0] = this.library.VAL_PTR;
+                        this.onpstack[++this.onpsl][0] = CLib.VAL_PTR;
                         this.onpstack[this.onpsl][1] = n.fptr;
                         //this.onpstack[onpsl][1]=(unsigned int)(n->fptr);
                         break;
@@ -629,18 +629,18 @@ module ExprAE.Expressions {
         }
 
         //callers
-        static CExpr_f0_i(e: CExpr) {
+        private static CExpr_f0_i(e: CExpr) {
             e.onpstack[++e.onpsl][1] = e.faddr();
         }
 
-        static CExpr_f1_i(e: CExpr) {
+        private static CExpr_f1_i(e: CExpr) {
             e.onpstack[e.onpsl][1] = e.faddr
                 (
                 e.onpstack[e.onpsl][1]
                 );
         }
 
-        static CExpr_f2_i(e: CExpr) {
+        private static CExpr_f2_i(e: CExpr) {
             e.onpstack[e.onpsl - 1][1] = e.faddr
                 (
                 e.onpstack[e.onpsl - 1][1],
@@ -654,7 +654,7 @@ module ExprAE.Expressions {
         //calltab
 
         //[][0]-float [][1]-int
-        calltab: ICallback[] = new Array(
+        private calltab: ICallback[] = new Array(
             CExpr.CExpr_f0_i, CExpr.CExpr_f1_i, CExpr.CExpr_f2_i
         );
 

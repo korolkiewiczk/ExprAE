@@ -1,13 +1,13 @@
 module ExprAE.Expressions {
     export class CLib {
-        MAXNAMELEN: number = 64;
-        VAL_FLOAT: number = 0;
-        VAL_INT: number = 2;
-        VAL_STR: number = 3;
-        VAL_PTR: number = 3;
-        VAR: number = 0xffffffff;
-        MAXTXTLEN: number = 1024;
-        TAG_EXTRACODE:number = 0x10000;
+        static MAXNAMELEN: number = 64;
+        static VAL_FLOAT: number = 0;
+        static VAL_INT: number = 2;
+        static VAL_STR: number = 3;
+        static VAL_PTR: number = 3;
+        static VAR: number = 0xffffffff;
+        static MAXTXTLEN: number = 1024;
+        static TAG_EXTRACODE:number = 0x10000;
 
         private root: ND;
 
@@ -34,7 +34,7 @@ module ExprAE.Expressions {
                 nd.n = new NAME(e.fptr);
 
             i = e.parcount;
-            if (i == this.VAR)
+            if (i == CLib.VAR)
             //jesli zmienna
             {
                 nd.n.parattr = ((e.rtype & 255) << 8) | 0x80000000;
@@ -97,7 +97,7 @@ module ExprAE.Expressions {
 
         private toIndexTab(str: string): number[] {
             var sl = str.length;
-            if (sl > this.MAXNAMELEN) sl = this.MAXNAMELEN;
+            if (sl > CLib.MAXNAMELEN) sl = CLib.MAXNAMELEN;
             var itab: number[] = [];
             for (var i = 0; i < sl; i++) {
                 itab[i] = this.index(str[i]);
@@ -130,7 +130,7 @@ module ExprAE.Expressions {
 
     export class NAME {
         constructor(
-            public fptr: ICallback,
+            public fptr: ICallback,   //func or var
             public parattr: number = 0,
             public partypes: number = 0,
             public tag: number = 0) {
