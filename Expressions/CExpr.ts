@@ -55,6 +55,7 @@ module ExprAE.Expressions {
                 for (var i = 0; i < this.CExpr_operands.length; i++) {
                     var e: ELEMENT = new ELEMENT(
                         this.CExpr_operands[i].fname,
+                        this,
                         this.CExpr_operands[i].ref,
                         CLib.VAL_FLOAT,
                         2, 0, 0);
@@ -64,6 +65,7 @@ module ExprAE.Expressions {
                 //chs
                 this.library.addElement(new ELEMENT(
                     "CHS",
+                    this,
                     this.CExpr_op_chs,
                     0, 1, 0, 0));
 
@@ -369,7 +371,7 @@ module ExprAE.Expressions {
                                 ((stype == this.CHAR_RBRACKET) && (ctype == this.CHAR_LBRACKET))
                             ) {
                                 var oi: number;
-                                oi = this.opindex(['*','\0']);
+                                oi = this.opindex(['*', '\0']);
                                 if (oi == -1) return ErrorCodes.UnreconOp;
                                 var n = this.library.find(this.CExpr_operands[oi].fname);
                                 if (n == null) return ErrorCodes.UndefinedName;
@@ -444,17 +446,17 @@ module ExprAE.Expressions {
                             switch ((npa >> 8) & 255) {
                                 case CLib.VAL_FLOAT:
                                     this.onpstack[this.onpsl][0] = CLib.VAL_FLOAT;
-                                    this.onpstack[this.onpsl][1] = n.fptr(); //todo
+                                    this.onpstack[this.onpsl][1] = n.fptr(n.th); //todo
                                     //*(float*)((int)onpstack+onpsl*8+4)=*(float*)(n->fptr);
                                     break;
                                 case CLib.VAL_INT:
                                     this.onpstack[this.onpsl][0] = CLib.VAL_FLOAT;
-                                    this.onpstack[this.onpsl][1] = n.fptr(); //todo
+                                    this.onpstack[this.onpsl][1] = n.fptr(n.th); //todo
                                     //*(float*)((int)onpstack+onpsl*8+4)=(float)*(unsigned int*)(n->fptr);
                                     break;
                                 case CLib.VAL_STR: //VAL_STR=VAL_PTR
                                     this.onpstack[this.onpsl][0] = CLib.VAL_STR;
-                                    this.onpstack[this.onpsl][1] = n.fptr();
+                                    this.onpstack[this.onpsl][1] = n.fptr(n.th);
                                     //onpstack[onpsl][1]=*(unsigned int*)(n->fptr);
                                     break;
                                 default: return 0;

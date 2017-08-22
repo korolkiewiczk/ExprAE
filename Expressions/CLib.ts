@@ -7,7 +7,7 @@ module ExprAE.Expressions {
         static VAL_PTR: number = 3;
         static VAR: number = 0xffffffff;
         static MAXTXTLEN: number = 1024;
-        static TAG_EXTRACODE:number = 0x10000;
+        static TAG_EXTRACODE: number = 0x10000;
 
         private root: ND;
 
@@ -31,7 +31,7 @@ module ExprAE.Expressions {
                 nd = nd.l[j];
             }
             if (nd.n == null)
-                nd.n = new NAME(e.fptr);
+                nd.n = new NAME(e.th, e.fptr);
 
             i = e.parcount;
             if (i == CLib.VAR)
@@ -73,26 +73,24 @@ module ExprAE.Expressions {
             }
         }
 
-        find(name: string): NAME
-        {
+        find(name: string): NAME {
             var i: number, j: number
             var itab: number[] = this.toIndexTab(name);
 
             var nd: ND;
             nd = this.root;
-            for (i=0; i<itab.length; i++)
-            {
-                j=itab[i];
-                if (nd.l[j]==null) return null;
-                nd=nd.l[j];
+            for (i = 0; i < itab.length; i++) {
+                j = itab[i];
+                if (nd.l[j] == null) return null;
+                nd = nd.l[j];
             }
             return nd.n;
         }
 
         //todo NListFromTxt(char *_t,char *ret,char schar)
 
-        getPar(p:number,n:number) :number {
-            return (((p)>>((n)<<1))&3);
+        getPar(p: number, n: number): number {
+            return (((p) >> ((n) << 1)) & 3);
         }
 
         private toIndexTab(str: string): number[] {
@@ -130,6 +128,7 @@ module ExprAE.Expressions {
 
     export class NAME {
         constructor(
+            public th: any,
             public fptr: ICallback,   //func or var
             public parattr: number = 0,
             public partypes: number = 0,
@@ -150,12 +149,12 @@ module ExprAE.Expressions {
     export class ELEMENT {
         constructor(
             public name: string,
+            public th: any,
             public fptr: ICallback,
             public rtype: number,
             public parcount: number,
             public partypes: number,
             public tag: number) {
-
         }
     }
 }

@@ -3,7 +3,7 @@
 /// <reference path="../../Expressions/ErrorCodes.ts" />
 /// <reference path="../../Expressions/CLib.ts" />
 /// <reference path="../../Expressions/Stdlib.ts" />
-import Stdlib  = ExprAE.Expressions.Stdlib;
+import Stdlib = ExprAE.Expressions.Stdlib;
 
 module ExprAE.Tests {
     describe("CExpr", () => {
@@ -30,7 +30,7 @@ module ExprAE.Tests {
                 var result3 = expression.do();
                 expect(expression.set("(1/2+5/2)*(2/3)-6/3*2")).toBe(Expressions.ErrorCodes.NoErr);
                 var result4 = expression.do();
-                
+
                 expect(result1).toBe(25);
                 expect(result2).toBe(1.5);
                 expect(result3).toBe(1.0201);
@@ -40,17 +40,19 @@ module ExprAE.Tests {
 
         describe("do (with simple variables, functions and numerics)", () => {
             it("should return valid expression result", () => {
-                var expression = new Expressions.CExpr(new Expressions.CLib(Stdlib.expr_estdlib));
-                Stdlib.expr_x(0);
+                var stdlib = new Stdlib();
+                var expression = new Expressions.CExpr(new Expressions.CLib(stdlib.expr_estdlib));
+
+                stdlib.expr_x = 0;
                 expect(expression.set("sin(x)+cos(pi)")).toBe(Expressions.ErrorCodes.NoErr);
                 var result1 = expression.do();
 
-                Stdlib.expr_x(Math.PI);
-                Stdlib.expr_y(2*Math.PI);
+                stdlib.expr_x = Math.PI;
+                stdlib.expr_y = 2 * Math.PI;
                 expect(expression.set("sin(x)/cos(y)+sqrt(abs(-4))")).toBe(Expressions.ErrorCodes.NoErr);
                 var result2 = expression.do();
 
-                Stdlib.expr_x(2);
+                stdlib.expr_x = 2;
                 expect(expression.set("4x*(Log(100)-PI+pi)")).toBe(Expressions.ErrorCodes.NoErr);
                 var result3 = expression.do();
 
@@ -60,8 +62,8 @@ module ExprAE.Tests {
             });
         });
         //***do TESTS***
-        
-        
+
+
         describe("removeSpaces", () => {
             it("should return expression without spaces", () => {
                 var expression = new Expressions.CExpr();
