@@ -31,9 +31,11 @@ module ExprAE.Expressions {
 
         private onp: any[][];
         private onpl: number;
-        private onpstack: number[][];
+        private onpstack: any[][];
         private onpsl: number;
         private tag: number;
+
+        private faddr: ICallback;
 
         constructor(private library: CLib = null) {
             this.onpl = 0;
@@ -58,9 +60,15 @@ module ExprAE.Expressions {
                         2, 0, 0);
                     this.library.addElement(e);
                 }
-            }
 
-            //todo add core functions
+                //chs
+                this.library.addElement(new ELEMENT(
+                    "CHS",
+                    this.CExpr_op_chs,
+                    0, 1, 0, 0));
+
+                //todo add core functions
+            }
         }
 
         set(expr: string): ErrorCodes {
@@ -77,38 +85,38 @@ module ExprAE.Expressions {
             var bf: string[] = [];
             var exprbuf: string[] = [];
             var stack: any[][] = [];
-            var sl: number = -1;
-            var pom: number = 0;
-            var pctype: number = -1;
-            var ctype: number = -1;
-            var stype: number = 0;
+            var sl = -1;
+            var pom = 0;
+            var pctype = -1;
+            var ctype = -1;
+            var stype = 0;
             var funcstack: number[][] = [];
-            var funcsl: number = -1;
+            var funcsl = -1;
 
-            const freq: number = 0;
-            const npar: number = 1;
-            const parl: number = 2;
-            const partype: number = 3;
-            const bracketv: number = 4;
+            const freq = 0;
+            const npar = 1;
+            const parl = 2;
+            const partype = 3;
+            const bracketv = 4;
 
-            var stron: number = 0;
-            var strl: number = 0;
-            var strl0: number = 0;
-            var strbson: number = 0;
-            var strchar: string = '\0';
+            var stron = 0;
+            var strl = 0;
+            var strl0 = 0;
+            var strbson = 0;
+            var strchar = '\0';
 
-            var vstart: number = 2;  //okresla czy piewszy znak po nawiasie ( lub poczatek
+            var vstart = 2;  //okresla czy piewszy znak po nawiasie ( lub poczatek
 
-            var vcount: number = 0; //licznik ilosci wartosci na stosie
-            var bcount: number = 0; //licznik nawiasow
-            var sbcount: number = 0; //licznik nawiasow kwadratowych
-            var sref: number = 0;    //czy stosowac referencje
+            var vcount = 0; //licznik ilosci wartosci na stosie
+            var bcount = 0; //licznik nawiasow
+            var sbcount = 0; //licznik nawiasow kwadratowych
+            var sref = 0;    //czy stosowac referencje
             var i: number;
             var c: string;
             this.strcount = 0;
             this.exprstr[0] = '\0';
 
-            var isextracode: number = 0; //dla trybu do_code
+            var isextracode = 0; //dla trybu do_code
             var exprPos = 0;
 
             i = 0;
@@ -413,7 +421,107 @@ module ExprAE.Expressions {
         }
 
         do(): number {
-            return 0;
+            //pcexpr=CExpr::cexpr;
+            //CExpr::cexpr=this;
+            this.onpsl = -1;
+            var n: NAME;
+            this.strcount = 0;
+            for (var i = 0; i < this.onpl; i++) {
+                switch (this.onp[i][0]) {
+                    case this.ONP_NUM:
+                        this.i(this.onpstack, this.onpsl + 1);
+                        this.onpstack[++this.onpsl][0] = this.library.VAL_FLOAT;
+                        this.onpstack[this.onpsl][1] = this.onp[i][1];
+                        break;
+                    case this.ONP_NAME:
+                        n = this.onp[i][1];
+                        var npa = n.parattr;
+                        if (npa & 0x80000000)
+                        //zmienna
+                        {
+                            this.onpsl++;
+                            this.i(this.onpstack, this.onpsl);
+                            switch ((npa >> 8) & 255) {
+                                case this.library.VAL_FLOAT:
+                                    this.onpstack[this.onpsl][0] = this.library.VAL_FLOAT;
+                                    this.onpstack[this.onpsl][1] = n.fptr; //todo
+                                    //*(float*)((int)onpstack+onpsl*8+4)=*(float*)(n->fptr);
+                                    break;
+                                case this.library.VAL_INT:
+                                    this.onpstack[this.onpsl][0] = this.library.VAL_FLOAT;
+                                    this.onpstack[this.onpsl][1] = n.fptr; //todo
+                                    //*(float*)((int)onpstack+onpsl*8+4)=(float)*(unsigned int*)(n->fptr);
+                                    break;
+                                case this.library.VAL_STR: //VAL_STR=VAL_PTR
+                                    this.onpstack[this.onpsl][0] = this.library.VAL_STR;
+                                    this.onpstack[this.onpsl][1] = n.fptr;
+                                    //onpstack[onpsl][1]=*(unsigned int*)(n->fptr);
+                                    break;
+                                default: return 0;
+                            }
+                        }
+                        else
+                        //funkcja
+                        {
+                            var pc = npa & 255;
+                            var rt = (npa >> 8) & 3;
+                            var stradd = 0;
+                            var si = this.onpsl - pc + 1;
+                            for (var j = 0; j < pc; j++) {
+                                var pt = this.library.getPar(n.partypes, j);
+                                var st = this.onpstack[si][0];
+                                if (pt != st) {
+                                    if (st == this.library.VAL_STR + 10) stradd++;
+                                    if ((pt == this.library.VAL_FLOAT) && (st != this.library.VAL_FLOAT)) {
+                                        this.onpstack[si][0] = this.library.VAL_FLOAT;
+                                        //this.onpstack[si][1]=this.onpstack[si][1]; //todo
+                                        //*(float*)((int)onpstack+si*8+4)=(float)onpstack[si][1];
+                                    }
+                                    else
+                                        if ((pt != this.library.VAL_FLOAT) && (st == this.library.VAL_FLOAT)) {
+                                            this.onpstack[si][0] = this.library.VAL_INT;
+                                            //this.onpstack[si][1]=this.onpstack[si][1]; //todo
+                                            //onpstack[si][1]=(unsigned int)*(float*)((int)onpstack+si*8+4);
+                                        }
+                                }
+                                si++;
+                            }
+                            this.tag = n.tag;
+                            if (rt == this.library.VAL_FLOAT) {
+                                this.faddr = n.fptr;
+                                this.calltab[pc](this);
+                                this.onpstack[this.onpsl][0] = this.library.VAL_FLOAT;
+                            }
+                            else {
+                                this.faddr = n.fptr;
+                                this.calltab[pc](this);
+                                if (rt == this.library.VAL_INT) {
+                                    this.onpstack[this.onpsl][0] = this.library.VAL_FLOAT;
+                                    //*(float*)((int)onpstack+onpsl*8+4)=(float)((int)onpstack[onpsl][1]);
+                                }
+                                else {
+                                    this.onpstack[this.onpsl][0] = this.library.VAL_INT;
+                                }
+                            }
+                            this.strcount += stradd;
+                        }
+                        break;
+                    case this.ONP_INUM:
+                        this.onpstack[++this.onpsl][0] = this.library.VAL_PTR + 10;
+                        this.onpstack[this.onpsl][1] = this.onp[i][1];
+                        break;
+                    case this.ONP_NAMEREF:
+                        n = this.onp[i][1];
+                        this.onpstack[++this.onpsl][0] = this.library.VAL_PTR;
+                        this.onpstack[this.onpsl][1] = n.fptr;
+                        //this.onpstack[onpsl][1]=(unsigned int)(n->fptr);
+                        break;
+                }
+            }
+            //CExpr::cexpr=pcexpr;
+            //printf("%d %x\n",onpsl,onpstack[0][1]);
+            return this.onpstack[0][1];
+            //return *(float*)((int)onpstack+4);
         }
 
         private atoi(arr: string[], start: number = 0): number {
@@ -520,6 +628,38 @@ module ExprAE.Expressions {
                 a[p] = [];
         }
 
+        //callers
+        static CExpr_f0_i(e: CExpr) {
+            e.onpstack[++e.onpsl][1] = e.faddr();
+        }
+
+        static CExpr_f1_i(e: CExpr) {
+            e.onpstack[e.onpsl][1] = e.faddr
+                (
+                e.onpstack[e.onpsl][1]
+                );
+        }
+
+        static CExpr_f2_i(e: CExpr) {
+            e.onpstack[e.onpsl - 1][1] = e.faddr
+                (
+                e.onpstack[e.onpsl - 1][1],
+                e.onpstack[e.onpsl][1]
+                );
+            e.onpsl -= 1;
+        }
+
+        //todo more callers
+
+        //calltab
+
+        //[][0]-float [][1]-int
+        calltab: ICallback[] = new Array(
+            CExpr.CExpr_f0_i, CExpr.CExpr_f1_i, CExpr.CExpr_f2_i
+        );
+
+        //todo more calltab
+
         //operators
         private CExpr_operands: OP[] = new Array(
             new OP("+", "ADD", this.CExpr_op_add, 100),
@@ -542,6 +682,10 @@ module ExprAE.Expressions {
 
         private CExpr_op_div(a: number, b: number): number {
             return a / b;
+        }
+
+        private CExpr_op_chs(a: number): number {
+            return -a;
         }
     }
 }

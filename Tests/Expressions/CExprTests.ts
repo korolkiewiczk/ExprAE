@@ -15,6 +15,23 @@ module ExprAE.Tests {
             });
         });
 
+        //do tests
+        describe("do (with simple operators and numerics)", () => {
+            it("should return valid expression result", () => {
+                var expression = new Expressions.CExpr(new Expressions.CLib());
+                expect(expression.set("10+20*30/40")).toBe(Expressions.ErrorCodes.NoErr);
+                var result1 = expression.do();
+                expect(expression.set("1.5*(2.5-3/2)")).toBe(Expressions.ErrorCodes.NoErr);
+                var result2 = expression.do();
+                expect(expression.set("-(-1+(1-1.01)*(1+1.01))")).toBe(Expressions.ErrorCodes.NoErr);
+                var result3 = expression.do();
+                
+                expect(result1).toBe(25);
+                expect(result2).toBe(1.5);
+                expect(result3).toBe(1.0201);
+            });
+        });
+
         describe("removeSpaces", () => {
             it("should return expression without spaces", () => {
                 var expression = new Expressions.CExpr();
