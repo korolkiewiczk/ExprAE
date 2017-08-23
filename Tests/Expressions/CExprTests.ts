@@ -73,8 +73,13 @@ module ExprAE.Tests {
                 expect(expression.set('concat(concat("cde", toupper("abc")), "XyZ")')).toBe(Expressions.ErrorCodes.NoErr);
                 var result2=expression.do();
 
+                stdlib.expr_str="test";
+                expect(expression.set('concat(concat("cde", toupper(STR)), "XyZ")')).toBe(Expressions.ErrorCodes.NoErr);
+                var result3=expression.do();
+
                 expect(result1).toBe("ABC");
                 expect(result2).toBe("cdeABCXyZ");
+                expect(result3).toBe("cdeTESTXyZ");
             });
         });
 
@@ -88,7 +93,7 @@ module ExprAE.Tests {
                 expect(result1).toBe(2);
                 expect(stdlib.expr_x).toBe(2);
 
-                
+
                 stdlib.expr_x=10;
                 stdlib.expr_y=10;
                 expect(expression.set('@y:=(x+y)*(x-0.5y)')).toBe(Expressions.ErrorCodes.NoErr);

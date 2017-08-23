@@ -196,6 +196,14 @@ module ExprAE.Expressions {
                 return (args[0] as Stdlib).expr_time;
         }
 
+        expr_str: string;
+        private static __expr_str(...args: any[]): string {
+            if (args.length == 2)
+                return (args[0] as Stdlib).expr_str = args[1];
+            else
+                return (args[0] as Stdlib).expr_str;
+        }
+
 
         expr_estdlib: ELEMENT[] = new Array(
             new ELEMENT("SIN", Stdlib.expr_sin, CLib.VAL_FLOAT, 1, CLib.VAL_FLOAT, 0),
@@ -262,7 +270,8 @@ module ExprAE.Expressions {
             new ELEMENT("K", Stdlib.__expr_k, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
             new ELEMENT("PI", Stdlib.__expr_pi, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
             new ELEMENT("E", Stdlib.__expr_e, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
-            new ELEMENT("TIME", Stdlib.__expr_time, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this)
+            new ELEMENT("TIME", Stdlib.__expr_time, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
+            new ELEMENT("STR", Stdlib.__expr_str, CLib.VAL_STR, CLib.VAR, 0, 0, this)
         );
     }
 }
