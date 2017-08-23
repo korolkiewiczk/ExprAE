@@ -157,4 +157,13 @@ module ExprAE.Expressions {
             public th: any = null) {
         }
     }
+
+    export class POINTER {
+        constructor(
+            public th: any,
+            public fptr: ICallback
+        ) {
+            
+        }
+    }
 }

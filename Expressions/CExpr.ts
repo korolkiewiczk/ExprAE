@@ -38,6 +38,34 @@ module ExprAE.Expressions {
         private faddr: ICallback;
 
         constructor(private library: CLib = null) {
+            if (library) {
+                for (var i = 0; i < this.CExpr_operands.length - 1; i++) {
+                    this.library.addElement(new ELEMENT(
+                        this.CExpr_operands[i].fname,
+                        this.CExpr_operands[i].ref,
+                        CLib.VAL_FLOAT,
+                        2, 0, 0));
+                }
+
+                //SET
+                this.library.addElement(new ELEMENT(
+                    this.CExpr_operands[i].fname,
+                    this.CExpr_operands[i].ref,
+                    CLib.VAL_FLOAT,
+                    2, CLib.VAL_PTR, 0));
+
+                //chs
+                this.library.addElement(new ELEMENT(
+                    "CHS",
+                    this.CExpr_op_chs,
+                    0, 1, 0, 0));
+
+                //todo add core functions
+            }
+        }
+
+        set(expr: string): ErrorCodes {
+
             this.onpl = 0;
             this.onp = [];
             this.onpstack = [];
@@ -51,34 +79,6 @@ module ExprAE.Expressions {
 
             this.retstr = [];
             this.retstr[0] = '\0';
-
-            if (library) {
-                for (var i = 0; i < this.CExpr_operands.length-1; i++) {
-                    this.library.addElement(new ELEMENT(
-                        this.CExpr_operands[i].fname,
-                        this.CExpr_operands[i].ref,
-                        CLib.VAL_FLOAT,
-                        2, 0, 0));
-                }
-
-                //SET
-                this.library.addElement(new ELEMENT(
-                    this.CExpr_operands[i].fname,
-                    this.CExpr_operands[i].ref,
-                    CLib.VAL_FLOAT,
-                    3, CLib.VAL_PTR, 0));
-
-                //chs
-                this.library.addElement(new ELEMENT(
-                    "CHS",
-                    this.CExpr_op_chs,
-                    0, 1, 0, 0));
-
-                //todo add core functions
-            }
-        }
-
-        set(expr: string): ErrorCodes {
 
             if (Checker.nullEmpty(expr)) {
                 return ErrorCodes.NullStr;
@@ -427,7 +427,7 @@ module ExprAE.Expressions {
             return ErrorCodes.NoErr;
         }
 
-        do(): number {
+        do(): any {
             //pcexpr=CExpr::cexpr;
             //CExpr::cexpr=this;
             this.onpsl = -1;
@@ -521,19 +521,18 @@ module ExprAE.Expressions {
                     case this.ONP_NAMEREF:
                         n = this.onp[i][1];
                         this.i(this.onpstack, this.onpsl + 1);
-                        this.i(this.onpstack, this.onpsl + 2);
                         this.onpstack[++this.onpsl][0] = CLib.VAL_PTR;
-                        this.onpstack[this.onpsl][1] = n.th;
-                        this.onpstack[++this.onpsl][0] = CLib.VAL_PTR;
-                        this.onpstack[this.onpsl][1] = n.fptr;
+                        this.onpstack[this.onpsl][1] = new POINTER(n.th, n.fptr);
                         //this.onpstack[onpsl][1]=(unsigned int)(n->fptr);
                         break;
                 }
             }
             //CExpr::cexpr=pcexpr;
             //printf("%d %x\n",onpsl,onpstack[0][1]);
-            return this.onpstack[0][1];
-            //return *(float*)((int)onpstack+4);
+            if (this.onpsl > 0)
+                throw "Invalid stack";
+            else
+                return this.onpstack[0][1];
         }
 
         private atoi(arr: string[], start: number = 0): number {
@@ -708,8 +707,8 @@ module ExprAE.Expressions {
             return a / b;
         }
 
-        private CExpr_op_set(th: any, cb: ICallback, val: number): number {
-            return cb(th, val);
+        private CExpr_op_set(ptr: POINTER, val: number): number {
+            return ptr.fptr(ptr.th, val);
         }
 
         private CExpr_op_chs(a: number): number {

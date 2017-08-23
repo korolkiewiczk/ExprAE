@@ -181,7 +181,7 @@ module ExprAE.Expressions {
         }
 
         expr_k: number;
-        static __expr_k(...args: any[]): number {
+        private static __expr_k(...args: any[]): number {
             if (args.length == 2)
                 return (args[0] as Stdlib).expr_k = args[1];
             else

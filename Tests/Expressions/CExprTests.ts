@@ -85,17 +85,26 @@ module ExprAE.Tests {
 
                 expect(expression.set('@x:=2')).toBe(Expressions.ErrorCodes.NoErr);
                 var result1=expression.do();
-
                 expect(result1).toBe(2);
                 expect(stdlib.expr_x).toBe(2);
 
+                
                 stdlib.expr_x=10;
                 stdlib.expr_y=10;
                 expect(expression.set('@y:=(x+y)*(x-0.5y)')).toBe(Expressions.ErrorCodes.NoErr);
                 var result2=expression.do();
-
                 expect(result2).toBe(100);
                 expect(stdlib.expr_y).toBe(100);
+                
+
+                expect(expression.set('@x:="abc"')).toBe(Expressions.ErrorCodes.SyntaxError);
+
+
+                stdlib.expr_x=10;
+                expect(expression.set('@x')).toBe(Expressions.ErrorCodes.NoErr);
+                var result3=expression.do() as Expressions.POINTER;
+                expect(result3.th).toBe(stdlib);
+                expect(result3.fptr(result3.th)).toBe(10);
             });
         });
         //***do TESTS***
