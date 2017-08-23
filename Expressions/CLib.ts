@@ -128,7 +128,7 @@ module ExprAE.Expressions {
 
     export class NAME {
         constructor(
-            public th: any,
+            public th: any, //"this" for variables
             public fptr: ICallback,   //func or var
             public parattr: number = 0,
             public partypes: number = 0,
@@ -149,12 +149,12 @@ module ExprAE.Expressions {
     export class ELEMENT {
         constructor(
             public name: string,
-            public th: any,
             public fptr: ICallback,
             public rtype: number,
             public parcount: number,
             public partypes: number,
-            public tag: number) {
+            public tag: number,
+            public th: any = null) {
         }
     }
 }

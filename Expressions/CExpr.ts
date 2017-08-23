@@ -52,20 +52,24 @@ module ExprAE.Expressions {
             this.retstr[0] = '\0';
 
             if (library) {
-                for (var i = 0; i < this.CExpr_operands.length; i++) {
-                    var e: ELEMENT = new ELEMENT(
+                for (var i = 0; i < this.CExpr_operands.length-1; i++) {
+                    this.library.addElement(new ELEMENT(
                         this.CExpr_operands[i].fname,
-                        this,
                         this.CExpr_operands[i].ref,
                         CLib.VAL_FLOAT,
-                        2, 0, 0);
-                    this.library.addElement(e);
+                        2, 0, 0));
                 }
+
+                //SET
+                this.library.addElement(new ELEMENT(
+                    this.CExpr_operands[i].fname,
+                    this.CExpr_operands[i].ref,
+                    CLib.VAL_FLOAT,
+                    3, CLib.VAL_PTR, 0));
 
                 //chs
                 this.library.addElement(new ELEMENT(
                     "CHS",
-                    this,
                     this.CExpr_op_chs,
                     0, 1, 0, 0));
 
@@ -667,7 +671,8 @@ module ExprAE.Expressions {
             new OP("+", "ADD", this.CExpr_op_add, 100),
             new OP("-", "SUB", this.CExpr_op_sub, 100),
             new OP("*", "MUL", this.CExpr_op_mul, 200),
-            new OP("/", "DIV", this.CExpr_op_div, 200)
+            new OP("/", "DIV", this.CExpr_op_div, 200),
+            new OP(":=", "SET", this.CExpr_op_set, 50)
         );
 
         private CExpr_op_add(a: number, b: number): number {
@@ -684,6 +689,10 @@ module ExprAE.Expressions {
 
         private CExpr_op_div(a: number, b: number): number {
             return a / b;
+        }
+
+        private CExpr_op_set(th: any, cb: ICallback, val: number): number {
+            return cb(th, val);
         }
 
         private CExpr_op_chs(a: number): number {
