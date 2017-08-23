@@ -41,6 +41,7 @@ module ExprAE.Expressions {
             this.onpl = 0;
             this.onp = [];
             this.onpstack = [];
+            this.hashtab = [];
 
             this.exprstr = [];
             this.exprstr[0] = '\0';
@@ -242,7 +243,7 @@ module ExprAE.Expressions {
                                         else {
                                             this.onp[this.onpl][0] = this.ONP_NAME;
                                         }
-                                        this.onp[this.onpl++][1] = n;
+                                        this.onp[this.onpl++][1] = n;   //todo (as ptr)
                                     }
                                     break;
                                 case this.CHAR_HEXNUM:
@@ -513,11 +514,13 @@ module ExprAE.Expressions {
                         }
                         break;
                     case this.ONP_INUM:
+                        this.i(this.onpstack, this.onpsl + 1);
                         this.onpstack[++this.onpsl][0] = CLib.VAL_PTR + 10;
-                        this.onpstack[this.onpsl][1] = this.onp[i][1];
+                        this.onpstack[this.onpsl][1] = this.getStrAt(this.strdata, this.onp[i][1]);
                         break;
                     case this.ONP_NAMEREF:
                         n = this.onp[i][1];
+                        this.i(this.onpstack, this.onpsl + 1);
                         this.onpstack[++this.onpsl][0] = CLib.VAL_PTR;
                         this.onpstack[this.onpsl][1] = n.fptr;
                         //this.onpstack[onpsl][1]=(unsigned int)(n->fptr);

@@ -38,7 +38,7 @@ module ExprAE.Tests {
             });
         });
 
-        describe("do (with simple variables, functions and numerics)", () => {
+        describe("do with simple variables, functions and numerics", () => {
             it("should return valid expression result", () => {
                 var stdlib = new Stdlib();
                 var expression = new Expressions.CExpr(new Expressions.CLib(stdlib.expr_estdlib));
@@ -59,6 +59,22 @@ module ExprAE.Tests {
                 expect(result1).toBe(-1);
                 expect(result2).toBe(2);
                 expect(result3).toBe(16);
+            });
+        });
+
+        describe("do with strings", () => {
+            it("should return valid expression result", () => {
+                var stdlib = new Stdlib();
+                var expression = new Expressions.CExpr(new Expressions.CLib(stdlib.expr_estdlib));
+
+                expect(expression.set('toupper("abc")')).toBe(Expressions.ErrorCodes.NoErr);
+                var result1=expression.do();
+
+                expect(expression.set('concat(concat("cde", toupper("abc")), "XyZ")')).toBe(Expressions.ErrorCodes.NoErr);
+                var result2=expression.do();
+
+                expect(result1).toBe("ABC");
+                expect(result2).toBe("cdeABCXyZ");
             });
         });
         //***do TESTS***

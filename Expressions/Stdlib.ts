@@ -128,6 +128,16 @@ module ExprAE.Expressions {
             return Math.sqrt(a * a + b * b);
         }
 
+        //string functions
+
+        private static expr_toupper(a: string): string {
+            return a.toUpperCase();
+        }
+
+        private static expr_concat(a: string,b: string): string {
+            return a+b;
+        }
+
         //todo other functions
 
         expr_e: number = Math.E;
@@ -217,6 +227,8 @@ module ExprAE.Expressions {
             new ELEMENT("MIN", Stdlib.expr_min, CLib.VAL_FLOAT, 2, CLib.VAL_FLOAT + CLib.VAL_FLOAT * 4, 0),
             new ELEMENT("MAX", Stdlib.expr_max, CLib.VAL_FLOAT, 2, CLib.VAL_FLOAT + CLib.VAL_FLOAT * 4, 0),
             new ELEMENT("DIST", Stdlib.expr_dist, CLib.VAL_FLOAT, 2, CLib.VAL_FLOAT + CLib.VAL_FLOAT * 4, 0),
+            new ELEMENT("TOUPPER", Stdlib.expr_toupper, CLib.VAL_STR, 1, CLib.VAL_STR, 0),
+            new ELEMENT("CONCAT", Stdlib.expr_concat, CLib.VAL_STR, 2, CLib.VAL_STR + CLib.VAL_STR * 4, 0),
             /*new ELEMENT("RND", Stdlib.expr_rnd,CLib.VAL_FLOAT,0,0,0),
             new ELEMENT("SRND", Stdlib.expr_srnd,CLib.VAL_INT,1,CLib.VAL_INT,0),
             new ELEMENT("GAMMA", Stdlib.expr_gamma,CLib.VAL_FLOAT,1,CLib.VAL_FLOAT,0),
