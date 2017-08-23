@@ -77,6 +77,27 @@ module ExprAE.Tests {
                 expect(result2).toBe("cdeABCXyZ");
             });
         });
+
+        describe("do with setting par", () => {
+            it("should return valid expression result", () => {
+                var stdlib = new Stdlib();
+                var expression = new Expressions.CExpr(new Expressions.CLib(stdlib.expr_estdlib));
+
+                expect(expression.set('@x:=2')).toBe(Expressions.ErrorCodes.NoErr);
+                var result1=expression.do();
+
+                expect(result1).toBe(2);
+                expect(stdlib.expr_x).toBe(2);
+
+                stdlib.expr_x=10;
+                stdlib.expr_y=10;
+                expect(expression.set('@y:=(x+y)*(x-0.5y)')).toBe(Expressions.ErrorCodes.NoErr);
+                var result2=expression.do();
+
+                expect(result2).toBe(100);
+                expect(stdlib.expr_y).toBe(100);
+            });
+        });
         //***do TESTS***
 
 

@@ -243,7 +243,7 @@ module ExprAE.Expressions {
                                         else {
                                             this.onp[this.onpl][0] = this.ONP_NAME;
                                         }
-                                        this.onp[this.onpl++][1] = n;   //todo (as ptr)
+                                        this.onp[this.onpl++][1] = n;
                                     }
                                     break;
                                 case this.CHAR_HEXNUM:
@@ -521,6 +521,9 @@ module ExprAE.Expressions {
                     case this.ONP_NAMEREF:
                         n = this.onp[i][1];
                         this.i(this.onpstack, this.onpsl + 1);
+                        this.i(this.onpstack, this.onpsl + 2);
+                        this.onpstack[++this.onpsl][0] = CLib.VAL_PTR;
+                        this.onpstack[this.onpsl][1] = n.th;
                         this.onpstack[++this.onpsl][0] = CLib.VAL_PTR;
                         this.onpstack[this.onpsl][1] = n.fptr;
                         //this.onpstack[onpsl][1]=(unsigned int)(n->fptr);
@@ -658,13 +661,24 @@ module ExprAE.Expressions {
             e.onpsl -= 1;
         }
 
+        private static CExpr_f3_i(e: CExpr) {
+            e.onpstack[e.onpsl - 2][1] = e.faddr
+                (
+                e.onpstack[e.onpsl - 2][1],
+                e.onpstack[e.onpsl - 1][1],
+                e.onpstack[e.onpsl][1]
+                );
+            e.onpsl -= 2;
+        }
+
         //todo more callers
 
         //calltab
 
         //[][0]-float [][1]-int
         private calltab: ICallback[] = new Array(
-            CExpr.CExpr_f0_i, CExpr.CExpr_f1_i, CExpr.CExpr_f2_i
+            CExpr.CExpr_f0_i, CExpr.CExpr_f1_i, CExpr.CExpr_f2_i,
+            CExpr.CExpr_f3_i
         );
 
         //todo more calltab
