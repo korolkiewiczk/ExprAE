@@ -41,7 +41,7 @@ module ExprAE.Tests {
         describe("do with simple variables, functions and numerics", () => {
             it("should return valid expression result", () => {
                 var stdlib = new Stdlib();
-                var expression = new Expressions.CExpr(new Expressions.CLib(stdlib.expr_estdlib));
+                var expression = new Expressions.CExpr(stdlib.init(new Expressions.CLib()));
 
                 stdlib.expr_x = 0;
                 expect(expression.set("sin(x)+cos(pi)")).toBe(Expressions.ErrorCodes.NoErr);
@@ -65,7 +65,7 @@ module ExprAE.Tests {
         describe("do with strings", () => {
             it("should return valid expression result", () => {
                 var stdlib = new Stdlib();
-                var expression = new Expressions.CExpr(new Expressions.CLib(stdlib.expr_estdlib));
+                var expression = new Expressions.CExpr(stdlib.init(new Expressions.CLib()));
 
                 expect(expression.set('toupper("abc")')).toBe(Expressions.ErrorCodes.NoErr);
                 var result1=expression.do();
@@ -86,7 +86,7 @@ module ExprAE.Tests {
         describe("do with setting par", () => {
             it("should return valid expression result", () => {
                 var stdlib = new Stdlib();
-                var expression = new Expressions.CExpr(new Expressions.CLib(stdlib.expr_estdlib));
+                var expression = new Expressions.CExpr(stdlib.init(new Expressions.CLib()));
 
                 expect(expression.set('@x:=2')).toBe(Expressions.ErrorCodes.NoErr);
                 var result1=expression.do();

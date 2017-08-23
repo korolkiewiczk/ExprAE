@@ -204,8 +204,12 @@ module ExprAE.Expressions {
                 return (args[0] as Stdlib).expr_str;
         }
 
+        init(lib:CLib): CLib {
+            lib.addList(this.expr_estdlib);
+            return lib;
+        }
 
-        expr_estdlib: ELEMENT[] = new Array(
+        private expr_estdlib: ELEMENT[] = new Array(
             new ELEMENT("SIN", Stdlib.expr_sin, CLib.VAL_FLOAT, 1, CLib.VAL_FLOAT, 0),
             new ELEMENT("COS", Stdlib.expr_cos, CLib.VAL_FLOAT, 1, CLib.VAL_FLOAT, 0),
             new ELEMENT("TAN", Stdlib.expr_tan, CLib.VAL_FLOAT, 1, CLib.VAL_FLOAT, 0),
