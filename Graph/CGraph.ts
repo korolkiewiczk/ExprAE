@@ -1,5 +1,5 @@
-module ExpreAE.Graph {
+module ExprAE.Graph {
     export class CGraph {
-        
+
     }
 }
