@@ -31,7 +31,7 @@ module ExprAE.System {
             D.RGB32(255, 0, 0),
             D.RGB32(0, 0, 0));
 
-        private static windows: any[];
+        private static windows: Drawing.CWin[];
         private static activewin: number;
         private static varlib: Expressions.CLib;
         /*int CSys::DLibrariesC=0;
@@ -53,6 +53,9 @@ module ExprAE.System {
         void *CSys::RecBuf=0;
         int CSys::RecBufPos=0;
         FILE *CSys::logfile=(FILE*)-1;*/
+
+        private static simulatedkeytab: number[];
+        private static keytab: number[];
 
         static DColor = 0;
         static PresentWait = 0;
@@ -77,27 +80,6 @@ module ExprAE.System {
             //Cursor(c); todo document.getElementById('nocursor').style.cursor = 'none';
         }
 
-        private static __ScrWidth(...args: any[]): number {
-            if (args.length == 1)
-                CSys.ScrWidth = args[0];
-            else
-                return CSys.ScrWidth;
-        }
-
-        private static __ScrHeight(...args: any[]): number {
-            if (args.length == 1)
-                CSys.ScrWidth = args[0];
-            else
-                return CSys.ScrWidth;
-        }
-
-        private static __Color(...args: any[]): any {
-            if (args.length == 1)
-                CSys.Color = args[0];
-            else
-                return CSys.Color;
-        }
-
         static Init(): any {
             CSys.AddVar("scrwidth", CSys.__ScrWidth, CSys.VAR_DWORD);
             CSys.AddVar("scrheight",CSys.__ScrHeight, CSys.VAR_DWORD);
@@ -117,16 +99,45 @@ module ExprAE.System {
 
         Run(): void {
             while (1) {
+                //if (!WinControl()) break;
+                
+                var md=CSys.GetMouseWheelDelta();
+                if (md>0) CSys.SimulateKey(Keys.K_PAGE_UP);
+                if (md<0) CSys.SimulateKey(Keys.K_PAGE_DOWN);
+                //if (MouseKeyPressed(WINGRAPH_MMID)) {wingraph_mousekeystate[1]=0; SetCur();}
 
+                for (var i=0; i<256; i++) 
+                    CSys.keytab[i]|=CSys.simulatedkeytab[i];
+
+                var shift=0,ctrl=0;
+                if (CSys.KeyPressed(Keys.K_SHIFT)) shift=256;
+                if (CSys.KeyPressed(Keys.K_CONTROL)) ctrl=65536;
+                if (ctrl==0) {
+                    //todo
+                }
+                //todo keys
+
+                CSys.windows[CSys.activewin].Process();
+                //if (PresentWait==0) PresentBuf();
             }
         }
 
         static KeyPressed(code: Keys): boolean {
-            var keynum;
-            
-            //todo get keynum
+            return CSys.keytab[code.valueOf()] == 1;
+        }
 
-            return keynum==code;
+        static GetKey(code: Keys): boolean {
+            var pressed = CSys.keytab[code.valueOf()] == 1;
+            CSys.keytab[code.valueOf()]=0;
+            return pressed;
+        }
+
+        static GetMouseWheelDelta(): number {
+            return 0; //todo mouse delta
+        }
+
+        static SimulateKey(code: Keys): void {
+            CSys.simulatedkeytab[code.valueOf()]=1;
         }
 
         static AddVar(name: string, addr: ICB, flags: number) {
@@ -147,6 +158,28 @@ module ExprAE.System {
 
         static VidMode(w: number, h: number): void {
             //todo
+        }
+
+
+        private static __ScrWidth(...args: any[]): number {
+            if (args.length == 1)
+                CSys.ScrWidth = args[0];
+            else
+                return CSys.ScrWidth;
+        }
+
+        private static __ScrHeight(...args: any[]): number {
+            if (args.length == 1)
+                CSys.ScrWidth = args[0];
+            else
+                return CSys.ScrWidth;
+        }
+
+        private static __Color(...args: any[]): any {
+            if (args.length == 1)
+                CSys.Color = args[0];
+            else
+                return CSys.Color;
         }
     }
 }
