@@ -2,7 +2,7 @@ import ICB = ExprAE.Expressions.ICallback;
 
 module ExprAE.System {
     export class CSys {
-        
+
 
         static MAXWIN = 5;
         static MAXLIB = 8;
@@ -31,8 +31,8 @@ module ExprAE.System {
             D.RGB32(255, 0, 0),
             D.RGB32(0, 0, 0));
 
-        private static windows: Drawing.CWin[];
-        private static activewin: number;
+        private static windows: Drawing.CWin[] = [];
+        private static activewin: number = 0;
         private static varlib: Expressions.CLib;
         /*int CSys::DLibrariesC=0;
         char CSys::DLibrariesNames[MAXLIB][64];*/
@@ -54,8 +54,8 @@ module ExprAE.System {
         int CSys::RecBufPos=0;
         FILE *CSys::logfile=(FILE*)-1;*/
 
-        private static simulatedkeytab: number[];
-        private static keytab: number[];
+        private static simulatedkeytab: number[] = [];
+        private static keytab: number[] = [];
 
         static DColor = 0;
         static PresentWait = 0;
@@ -69,6 +69,18 @@ module ExprAE.System {
         static SoundMixerBufSize = 0;
         static SRand0 = 0;
 
+        private static buf: Uint32Array;
+        static getBuf(): Uint32Array {
+            if (!CSys.buf) {
+                var element: HTMLCanvasElement = document.getElementById("buf") as HTMLCanvasElement;
+                var ctx = element.getContext("2d");
+                var imgData: ImageData = ctx.createImageData(CSys.ScrWidth, CSys.ScrHeight);
+                CSys.buf = new Uint32Array(imgData.data);
+            }
+
+            return CSys.buf;
+        }
+
         /*#ifdef MENU
         static Menu: CMenu;
         ::361
@@ -81,9 +93,10 @@ module ExprAE.System {
         }
 
         static Init(): any {
+            CSys.varlib = new Expressions.CLib();
             CSys.AddVar("scrwidth", CSys.__ScrWidth, CSys.VAR_DWORD);
-            CSys.AddVar("scrheight",CSys.__ScrHeight, CSys.VAR_DWORD);
-            CSys.AddVar("color",CSys.__Color, CSys.VAR_RGB);
+            CSys.AddVar("scrheight", CSys.__ScrHeight, CSys.VAR_DWORD);
+            CSys.AddVar("color", CSys.__Color, CSys.VAR_RGB);
             CSys.ExecCfg();
             CSys.DelVar("scrwidth");
             CSys.DelVar("scrheight");
@@ -94,32 +107,66 @@ module ExprAE.System {
 
             CSys.VidMode(CSys.ScrWidth, CSys.ScrHeight);
 
-            CSys.SRand0=(new Date().getTime());
+            CSys.SRand0 = (new Date().getTime());
         }
 
-        Run(): void {
-            while (1) {
+        static Run(): void {
+            //while (1) {
+            {
                 //if (!WinControl()) break;
-                
-                var md=CSys.GetMouseWheelDelta();
-                if (md>0) CSys.SimulateKey(Keys.K_PAGE_UP);
-                if (md<0) CSys.SimulateKey(Keys.K_PAGE_DOWN);
+
+                var md = CSys.GetMouseWheelDelta();
+                if (md > 0) CSys.SimulateKey(Keys.K_PAGE_UP);
+                if (md < 0) CSys.SimulateKey(Keys.K_PAGE_DOWN);
                 //if (MouseKeyPressed(WINGRAPH_MMID)) {wingraph_mousekeystate[1]=0; SetCur();}
 
-                for (var i=0; i<256; i++) 
-                    CSys.keytab[i]|=CSys.simulatedkeytab[i];
+                for (var i = 0; i < 256; i++)
+                    CSys.keytab[i] |= CSys.simulatedkeytab[i];
 
-                var shift=0,ctrl=0;
-                if (CSys.KeyPressed(Keys.K_SHIFT)) shift=256;
-                if (CSys.KeyPressed(Keys.K_CONTROL)) ctrl=65536;
-                if (ctrl==0) {
+                var shift = 0, ctrl = 0;
+                if (CSys.KeyPressed(Keys.K_SHIFT)) shift = 256;
+                if (CSys.KeyPressed(Keys.K_CONTROL)) ctrl = 65536;
+                if (ctrl == 0) {
+                    for (var i = 0; i < 256; i++) {
+                        if (CSys.KeyPressed(i)) CSys.activeWin().KeyFunc(i | shift);
+                    }
+                    //todo
+                } else {
                     //todo
                 }
-                //todo keys
 
-                CSys.windows[CSys.activewin].Process();
+                shift = CSys.keytab[Keys.K_SHIFT];
+                ctrl = CSys.keytab[Keys.K_CONTROL];
+                for (var i = 0; i < 256; i++)
+                    CSys.keytab[i] = 0;
+                CSys.keytab[Keys.K_SHIFT] = shift;
+                CSys.keytab[Keys.K_CONTROL] = ctrl;
+                for (var i = 0; i < 256; i++) {
+                    CSys.keytab[i] &= ~CSys.simulatedkeytab[i];
+                    CSys.simulatedkeytab[i] = 0;
+                }
+
+                //#ifdef MENU
+                //todo
+                //#endif
+
+                if (CSys.activeWin().GetBuf() != CSys.getBuf()) CSys.activeWin().Change(CSys.getBuf());
+                CSys.activeWin().Process();
                 //if (PresentWait==0) PresentBuf();
             }
+            requestAnimationFrame(CSys.Run);
+        }
+
+        private static activeWin(): Drawing.CWin {
+            return CSys.windows[CSys.activewin];
+        }
+
+        static SetWindow(w: Drawing.CWin, num: number): void {
+            CSys.windows[num] = w;
+        }
+
+        static SetActiveWindow(num: Windows): void {
+            CSys.activewin = num;
         }
 
         static KeyPressed(code: Keys): boolean {
@@ -128,7 +175,7 @@ module ExprAE.System {
 
         static GetKey(code: Keys): boolean {
             var pressed = CSys.keytab[code.valueOf()] == 1;
-            CSys.keytab[code.valueOf()]=0;
+            CSys.keytab[code.valueOf()] = 0;
             return pressed;
         }
 
@@ -137,14 +184,11 @@ module ExprAE.System {
         }
 
         static SimulateKey(code: Keys): void {
-            CSys.simulatedkeytab[code.valueOf()]=1;
+            CSys.simulatedkeytab[code.valueOf()] = 1;
         }
 
         static AddVar(name: string, addr: ICB, flags: number) {
-            var e: Expressions.ELEMENT;
-            e.name = name;
-            e.fptr = addr;
-            e.tag = flags;
+            var e = new Expressions.ELEMENT(name, addr, 0, 0, 0, flags);
             CSys.varlib.addElement(e);
         }
 
@@ -182,4 +226,12 @@ module ExprAE.System {
                 return CSys.Color;
         }
     }
+
+    export enum Windows {
+        Win_Con,
+        Win_Graph,
+        Win_Sound,
+        Win_Help,
+        Win_Winlib
+    };
 }

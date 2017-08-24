@@ -4,7 +4,7 @@ module ExprAE {
             return (((r) & 255) << 16) | (((g) & 255) << 8) | ((b) & 255);
         }
 
-        static SetBuf32(buf: any[], pitch = 0, x = 0, y = 0, c = 0) {
+        static SetBuf32(buf: Uint32Array, pitch = 0, x = 0, y = 0, c = 0) {
             buf[y * pitch + (x << 2)] = c;
         }
     }
