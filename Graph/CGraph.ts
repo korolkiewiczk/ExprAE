@@ -1,3 +1,4 @@
+/// <reference path="../Drawing/CWin.ts" />
 module ExprAE.Graph {
     export class CGraph extends Drawing.CWin {
 
@@ -11,14 +12,18 @@ module ExprAE.Graph {
 
         }
         Process(): void {
-            D.SetBuf32(this.buf, this.width, 0, 0, D.RGB32(0, 255, 255));
-            D.SetBuf32(this.buf, this.width, 1, 1, D.RGB32(255, 0, 255));
-            D.SetBuf32(this.buf, this.width, 2, 2, D.RGB32(255, 255, 0));
+            for(var i=0; i<100; i++) {
+                D.SetBuf32(this.buf, this.width, i, 10, D.RGB32(0, 0, 0));
+                D.SetBuf32(this.buf, this.width, i, 20, D.RGB32(255, 0, 0));
+                D.SetBuf32(this.buf, this.width, i, 30, D.RGB32(0, 255, 0));
+                D.SetBuf32(this.buf, this.width, i, 40, D.RGB32(0, 0, 255));
+            }
         }
 
         Change(w: number, h: number, b: Uint32Array): void;
         Change(b: Uint32Array): void;
         Change(w: any, h?: any, b?: any) {
+            this.buf=b;
         }
         ChangeActiveState(state: number): void {
         }

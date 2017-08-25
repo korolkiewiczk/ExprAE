@@ -2,8 +2,7 @@ import ICB = ExprAE.Expressions.ICallback;
 
 module ExprAE.System {
     export class CSys {
-
-
+        
         static MAXWIN = 5;
         static MAXLIB = 8;
         static OPTMIXBUFLEN_SEC = 0.08;
@@ -70,16 +69,8 @@ module ExprAE.System {
         static SRand0 = 0;
 
         private static buf: Uint32Array;
-        static getBuf(): Uint32Array {
-            if (!CSys.buf) {
-                var element: HTMLCanvasElement = document.getElementById("buf") as HTMLCanvasElement;
-                var ctx = element.getContext("2d");
-                var imgData: ImageData = ctx.createImageData(CSys.ScrWidth, CSys.ScrHeight);
-                CSys.buf = new Uint32Array(imgData.data);
-            }
-
-            return CSys.buf;
-        }
+        private static buf8: Uint8Array;
+        private static imgData: ImageData;
 
         /*#ifdef MENU
         static Menu: CMenu;
@@ -152,7 +143,7 @@ module ExprAE.System {
 
                 if (CSys.activeWin().GetBuf() != CSys.getBuf()) CSys.activeWin().Change(CSys.getBuf());
                 CSys.activeWin().Process();
-                //if (PresentWait==0) PresentBuf();
+                if (CSys.PresentWait==0) CSys.presentBuf();
             }
             requestAnimationFrame(CSys.Run);
         }
@@ -177,6 +168,30 @@ module ExprAE.System {
             var pressed = CSys.keytab[code.valueOf()] == 1;
             CSys.keytab[code.valueOf()] = 0;
             return pressed;
+        }
+
+        static getBuf(): Uint32Array {
+            if (!CSys.buf) {
+                var ctx = CSys.getDrawingContext();
+                CSys.imgData = ctx.getImageData(0, 0, CSys.ScrWidth, CSys.ScrHeight);
+                var data = CSys.imgData.data;
+                var arrayBuf = new ArrayBuffer(CSys.imgData.data.length);
+                CSys.buf8 = new Uint8ClampedArray(arrayBuf);
+                CSys.buf = new Uint32Array(arrayBuf);
+            }
+
+            return CSys.buf;
+        }
+
+        private static getDrawingContext(): CanvasRenderingContext2D {
+            var element: HTMLCanvasElement = document.getElementById("buf") as HTMLCanvasElement;
+            return element.getContext("2d");
+        }
+
+        private static presentBuf(): any {
+            CSys.imgData.data.set(CSys.buf8);
+            var ctx = CSys.getDrawingContext();
+            ctx.putImageData(CSys.imgData, 0, 0);
         }
 
         static GetMouseWheelDelta(): number {
