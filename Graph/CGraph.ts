@@ -1,8 +1,11 @@
 /// <reference path="../Drawing/CWin.ts" />
+import keys = ExprAE.System.Keys;
+import sys = ExprAE.System.CSys;
 module ExprAE.Graph {
     export class CGraph extends Drawing.CWin {
 
-        posy=0;
+        posx = 0;
+        posy = 0;
 
         constructor(width: number,
             height: number,
@@ -10,24 +13,38 @@ module ExprAE.Graph {
             super(width, height, buf);
         }
 
-        KeyFunc(k: System.Keys): void {
-
+        KeyFunc(k: keys): void {
+            if (k == keys.K_UP)
+                this.posy -= 10;
+            if (k == keys.K_DOWN)
+                this.posy += 10;
+            if (k == keys.K_PAGE_UP)
+                this.posy -= 25;
+            if (k == keys.K_PAGE_DOWN)
+                this.posy += 25;
         }
+
         Process(): void {
-            for(var i=0; i<100; i++) {
-                D.SetBuf32(this.buf, this.width, i, 10+this.posy, D.RGB32(0, 0, 0));
-                D.SetBuf32(this.buf, this.width, i, 20+this.posy, D.RGB32(255, 0, 0));
-                D.SetBuf32(this.buf, this.width, i, 30+this.posy, D.RGB32(0, 255, 0));
-                D.SetBuf32(this.buf, this.width, i, 40+this.posy, D.RGB32(0, 0, 255));
+            var mk = sys.MouseKey();
+            if (mk) {
+                this.posx = sys.getMouseX();
+                this.posy = sys.getMouseY();
             }
 
-            this.posy=(this.posy+10)%this.height;
+            for (var i = 0; i < 100; i++) {
+                D.SetBuf32(this.buf, this.width, i + this.posx, this.posy, D.RGB32(255, 255, 255));
+                D.SetBuf32(this.buf, this.width, i + this.posx, 10 + this.posy, D.RGB32(255, 0, 0));
+                D.SetBuf32(this.buf, this.width, i + this.posx, 20 + this.posy, D.RGB32(0, 255, 0));
+                D.SetBuf32(this.buf, this.width, i + this.posx, 30 + this.posy, D.RGB32(0, 0, 255));
+            }
+
+            this.posy = (this.posy + 1) % this.height;
         }
 
         Change(w: number, h: number, b: Uint32Array): void;
         Change(b: Uint32Array): void;
         Change(w: any, h?: any, b?: any) {
-            this.buf=b;
+            this.buf = b;
         }
         ChangeActiveState(state: number): void {
         }

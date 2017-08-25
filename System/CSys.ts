@@ -2,7 +2,7 @@ import ICB = ExprAE.Expressions.ICallback;
 
 module ExprAE.System {
     export class CSys {
-        
+
         static MAXWIN = 5;
         static MAXLIB = 8;
         static OPTMIXBUFLEN_SEC = 0.08;
@@ -56,6 +56,11 @@ module ExprAE.System {
         private static simulatedkeytab: number[] = [];
         private static keytab: number[] = [];
 
+        private static mousekeystate: number[] = [];
+        private static mouseX: number;
+        private static mouseY: number;
+        private static mouseWhellDelta: number;
+
         static DColor = 0;
         static PresentWait = 0;
         static ScrWidth = 640;
@@ -99,6 +104,37 @@ module ExprAE.System {
             CSys.VidMode(CSys.ScrWidth, CSys.ScrHeight);
 
             CSys.SRand0 = (new Date().getTime());
+
+            CSys.initEvents();
+        }
+
+        private static initEvents() {
+            document.onkeydown = function (event: KeyboardEvent) {
+                event = event || window.event as KeyboardEvent;
+                CSys.keytab[event.keyCode as Keys] = 1;
+            }
+
+            document.onkeyup = function (event: KeyboardEvent) {
+                event = event || window.event as KeyboardEvent;
+                CSys.keytab[event.keyCode as Keys] = 0;
+            }
+
+            document.onmousedown = function (event: MouseEvent) {
+                CSys.mousekeystate[event.button] = 1;
+            }
+
+            document.onmouseup = function (event: MouseEvent) {
+                CSys.mousekeystate[event.button] = 0;
+            }
+
+            document.onmousemove = function (event: MouseEvent) {
+                CSys.mouseX = event.offsetX;
+                CSys.mouseY = event.offsetY;
+            }
+
+            document.onwheel = function (event: WheelEvent) {
+                CSys.mouseWhellDelta = -event.deltaY;
+            }
         }
 
         static Run(): void {
@@ -143,7 +179,7 @@ module ExprAE.System {
 
                 if (CSys.activeWin().GetBuf() != CSys.getBuf()) CSys.activeWin().Change(CSys.getBuf());
                 CSys.activeWin().Process();
-                if (CSys.PresentWait==0) CSys.presentBuf();
+                if (CSys.PresentWait == 0) CSys.presentBuf();
             }
             requestAnimationFrame(CSys.Run);
         }
@@ -196,11 +232,29 @@ module ExprAE.System {
         }
 
         static GetMouseWheelDelta(): number {
-            return 0; //todo mouse delta
+            var delta = CSys.mouseWhellDelta;
+            CSys.mouseWhellDelta = 0;
+            return delta;
         }
 
         static SimulateKey(code: Keys): void {
             CSys.simulatedkeytab[code.valueOf()] = 1;
+        }
+
+        static MouseKeyPressed(key: Keys): boolean {
+            return CSys.mousekeystate[key.valueOf()] == 1;
+        }
+
+        static MouseKey(): number {
+            return CSys.mousekeystate[Keys.M_LEFT] | CSys.mousekeystate[Keys.M_RIGHT] << 1;
+        }
+
+        static getMouseX(): number {
+            return CSys.mouseX;
+        }
+
+        static getMouseY(): number {
+            return CSys.mouseY;
         }
 
         static AddVar(name: string, addr: ICB, flags: number) {

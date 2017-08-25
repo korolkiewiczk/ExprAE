@@ -187,5 +187,8 @@ module ExprAE.System {
         K_PA1=253,
         K_WIN_OEM_CLEAR=254,
         
+        M_LEFT=0,
+        M_MID=1,
+        M_RIGHT=2
     }
 }
