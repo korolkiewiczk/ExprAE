@@ -192,6 +192,7 @@ module ExprAE.System {
             CSys.imgData.data.set(CSys.buf8);
             var ctx = CSys.getDrawingContext();
             ctx.putImageData(CSys.imgData, 0, 0);
+            CSys.buf.fill(0xff000000);
         }
 
         static GetMouseWheelDelta(): number {
