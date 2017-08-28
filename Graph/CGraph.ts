@@ -37,11 +37,21 @@ module ExprAE.Graph {
                 D.SetBuf32(this.buf, this.width, i + this.posx, 20 + this.posy, D.RGB32(0, 255, 0));
                 D.SetBuf32(this.buf, this.width, i + this.posx, 30 + this.posy, D.RGB32(0, 0, 255));*/
 
-                this.Line(this.posx,this.posy,this.posx+100,this.posy+(50-i*2),D.RGB32(255, 255, 255));
+                this.Line(this.posx-50, this.posy-50, this.posx + 100, this.posy + (50 - i * 2), D.RGB32(255, 255, 255));
             }
 
-            this.HLine(100,100,200,D.RGB32(255, 255, 255));
-            this.VLine(100,100,200,D.RGB32(255, 255, 255));
+            this.HLine(100, 100, 200, D.RGB32(255, 255, 255));
+            this.VLine(100, 100, 200, D.RGB32(255, 255, 255));
+
+            this.Bar(230,230,270,250, D.RGB32(255,0,0));
+
+            this.fontheight=8;
+            this.DrawText(500,300,D.RGB32(255,0,0),"A");
+            this.DrawText(10, 10, D.RGB32(250, 250, 250), "Hello world!!! (x=" + this.posx + ", y=" + this.posy + ")");
+            this.fontheight=16;
+            this.DrawText(10, 30, D.RGB32(250, 250, 250), "Hello world!!! (x=" + this.posx + ", y=" + this.posy + ")");
+
+            this.DrawText3X5(10, 50, D.RGB32(250, 250, 250), "Hello world!!! (x=" + this.posx + ", y=" + this.posy + ")");
 
             this.posy = (this.posy + 1) % this.height;
         }
