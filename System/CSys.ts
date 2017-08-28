@@ -89,6 +89,10 @@ module ExprAE.System {
         }
 
         static Init(): any {
+            var canvas = CSys.getDrawingCanvas();
+            CSys.ScrWidth = canvas.width;
+            CSys.ScrHeight = canvas.height;
+
             CSys.varlib = new Expressions.CLib();
             CSys.AddVar("scrwidth", CSys.__ScrWidth, CSys.VAR_DWORD);
             CSys.AddVar("scrheight", CSys.__ScrHeight, CSys.VAR_DWORD);
@@ -177,7 +181,7 @@ module ExprAE.System {
                 //todo
                 //#endif
 
-                if (CSys.activeWin().GetBuf() != CSys.getBuf()) 
+                if (CSys.activeWin().GetBuf() != CSys.getBuf())
                     CSys.activeWin().Change(CSys.getBuf());
                 CSys.activeWin().Process();
                 if (CSys.PresentWait == 0) CSys.presentBuf();
@@ -220,9 +224,12 @@ module ExprAE.System {
             return CSys.buf;
         }
 
+        private static getDrawingCanvas(): HTMLCanvasElement {
+            return document.getElementById("buf") as HTMLCanvasElement;
+        }
+
         private static getDrawingContext(): CanvasRenderingContext2D {
-            var element: HTMLCanvasElement = document.getElementById("buf") as HTMLCanvasElement;
-            return element.getContext("2d");
+            return CSys.getDrawingCanvas().getContext("2d");
         }
 
         private static presentBuf(): any {

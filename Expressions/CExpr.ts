@@ -80,7 +80,7 @@ module ExprAE.Expressions {
             this.retstr = [];
             this.retstr[0] = '\0';
 
-            if (Checker.nullEmpty(expr)) {
+            if (!expr || 0 === expr.length) {
                 return ErrorCodes.NullStr;
             }
 
