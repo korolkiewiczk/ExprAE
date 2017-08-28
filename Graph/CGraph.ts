@@ -32,20 +32,20 @@ module ExprAE.Graph {
             }
 
             for (var i = 0; i < 100; i++) {
-                D.SetBuf32(this.buf, this.width, i + this.posx, this.posy, D.RGB32(255, 255, 255));
+                /*D.SetBuf32(this.buf, this.width, i + this.posx, this.posy, D.RGB32(255, 255, 255));
                 D.SetBuf32(this.buf, this.width, i + this.posx, 10 + this.posy, D.RGB32(255, 0, 0));
                 D.SetBuf32(this.buf, this.width, i + this.posx, 20 + this.posy, D.RGB32(0, 255, 0));
-                D.SetBuf32(this.buf, this.width, i + this.posx, 30 + this.posy, D.RGB32(0, 0, 255));
+                D.SetBuf32(this.buf, this.width, i + this.posx, 30 + this.posy, D.RGB32(0, 0, 255));*/
+
+                this.Line(this.posx,this.posy,this.posx+100,this.posy+(50-i*2),D.RGB32(255, 255, 255));
             }
+
+            this.HLine(100,100,200,D.RGB32(255, 255, 255));
+            this.VLine(100,100,200,D.RGB32(255, 255, 255));
 
             this.posy = (this.posy + 1) % this.height;
         }
 
-        Change(w: number, h: number, b: Uint32Array): void;
-        Change(b: Uint32Array): void;
-        Change(w: any, h?: any, b?: any) {
-            this.buf = b;
-        }
         ChangeActiveState(state: number): void {
         }
 

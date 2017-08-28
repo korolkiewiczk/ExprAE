@@ -177,7 +177,8 @@ module ExprAE.System {
                 //todo
                 //#endif
 
-                if (CSys.activeWin().GetBuf() != CSys.getBuf()) CSys.activeWin().Change(CSys.getBuf());
+                if (CSys.activeWin().GetBuf() != CSys.getBuf()) 
+                    CSys.activeWin().Change(CSys.getBuf());
                 CSys.activeWin().Process();
                 if (CSys.PresentWait == 0) CSys.presentBuf();
             }
