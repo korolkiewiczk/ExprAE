@@ -1,34 +1,43 @@
 module ExprAE {
     export class Main {
+        private expr: Expressions.CExpr;
+
         main(): void {
             System.CSys.Init();
-            var library=new Expressions.CLib();
-            var stdlib=new Expressions.Stdlib();
+            var library = new Expressions.CLib();
+            var stdlib = new Expressions.Stdlib();
             stdlib.init(library);
 
-            var expr=new Expressions.CExpr(library);
+            this.expr = new Expressions.CExpr(library);
 
-            /*libwin=new CLibWin(CSys::ScrWidth,CSys::ScrHeight,buf,
-                20,20,CSys::ScrWidth-20,CSys::ScrHeight*2/3,library);
+            var libwin: Console.CLibWin = null;
+            /*libwin=new CLibWin(System.CSys.ScrWidth,System.CSys.ScrHeight,buf,
+                20,20,System.CSys.ScrWidth-20,System.CSys.ScrHeight*2/3,library);*/
 
-            con=new CCon(CSys::ScrWidth,CSys::ScrHeight,buf,comp,libwin);*/
-            var graph=new Graph.CGraph(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf());
-            /*sound=new CSound(CSys::ScrWidth,CSys::ScrHeight,buf);
+            var con = new Console.CCon(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf(), new Expressions.POINTER(this, this.comp), libwin);
+            var graph = new Graph.CGraph(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf());
+            /*sound=new CSound(System.CSys.ScrWidth,System.CSys.ScrHeight,buf);
             CGraph::currentgraph=graph;
             CSound::currentsound=sound;
             CCon::currentcon=con;
-            CSys::SetDMode(CGraph::K2DF1);
-            help=new CHelp(CSys::ScrWidth,CSys::ScrHeight,buf,"readme.txt");
+            System.CSys.SetDMode(CGraph::K2DF1);
+            help=new CHelp(System.CSys.ScrWidth,System.CSys.ScrHeight,buf,"readme.txt");
             UserFunc_Init(library);
-
-            CSys::SetWindow(con,CSys::Win_Con);*/
+            */
+            System.CSys.SetWindow(con, System.Windows.Win_Con);
             System.CSys.SetWindow(graph, System.Windows.Win_Graph);
-            /*CSys::SetWindow(help,CSys::Win_Help);
-            CSys::SetWindow(sound,CSys::Win_Sound);
-            CSys::SetWindow(libwin,CSys::Win_Winlib);*/
-            //CSys::SetActiveWin(CSys::Win_Con);
-            System.CSys.SetActiveWindow(System.Windows.Win_Graph);
+            /*System.CSys.SetWindow(help,System.CSys.Win_Help);
+            System.CSys.SetWindow(sound,System.CSys.Win_Sound);
+            System.CSys.SetWindow(libwin,System.CSys.Win_Winlib);*/
+            //System.CSys.SetActiveWin(System.CSys.Win_Con);
+            //System.CSys.SetActiveWindow(System.Windows.Win_Graph);
+            System.CSys.SetActiveWindow(System.Windows.Win_Con);
             System.CSys.Run();
+        }
+
+        comp(th: any, s: string): string {
+            th.expr.set(s);
+            return th.expr.do();
         }
     }
 }

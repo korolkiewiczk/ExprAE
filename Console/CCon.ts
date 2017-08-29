@@ -18,7 +18,7 @@ module ExprAE.Console {
 
         private lines: string[] = [];
         private edit: string[] = [];
-        private prompt: string = "";
+        private prompt: string = null;
         private wskl: number = 0;
         private wsklv: number = 0;
         private wske: number = 0;
@@ -37,10 +37,11 @@ module ExprAE.Console {
         constructor(protected width: number,
             protected height: number,
             protected buf: Uint32Array,
-            private reffunc: Expressions.ICallback,
+            private reffunc: Expressions.POINTER,
             private libwin: CLibWin) {
             super(width, height, buf);
             //todo
+            this.edit[0]="";
         }
 
         Edit(c: string) {
@@ -86,7 +87,7 @@ module ExprAE.Console {
             var edited = this.edit[this.wske % CCon.EDIT]
             if (!edited) return;
             //currentcon=this;
-            var bf = this.reffunc(edited) as string;
+            var bf = this.reffunc.fptr(this.reffunc.th,edited) as string;
 
             if (!bf) {
                 this.lines[this.wskl % CCon.LINES], this.edit[this.wske % CCon.EDIT]
@@ -107,7 +108,7 @@ module ExprAE.Console {
                 this.wskl--;
             }
             this.
-                //CSys::Log_Printf(edit[wske%EDIT]);
+                //csys.Log_Printf(edit[wske%EDIT]);
                 wskl++;
             if (this.wske > 0) {
                 if (this.edit[this.wske % CCon.EDIT] === this.edit[(this.wske - 1) % CCon.EDIT]) this.wske--;
@@ -205,8 +206,8 @@ module ExprAE.Console {
                                                     }
                                                     else
                                                         if ((k == keys.K_ENTER) && (shift)) {
-                                                            //char *t;
-                                                            //t=CSys::GetClipboardText();
+                                                            //var *t;
+                                                            //t=csys.GetClipboardText();
                                                             //if (t)
                                                             //while (*t) Edit(*(t++));
                                                         }
@@ -225,8 +226,106 @@ module ExprAE.Console {
                                                                     this.Edit(c);
                                                         }
             if ((this.ecursor - this.estart) < 0) this.estart = this.ecursor;
-            var ewidth = (this.width - this.fontwidth) / this.fontwidth - this.prompt.length;
+            var ewidth = (this.width - this.fontwidth) / this.fontwidth - (this.prompt? this.prompt.length : 0);
             if (this.ecursor - this.estart >= ewidth) this.estart = this.ecursor - ewidth + 1;
+        }
+
+        Process()
+        {
+            /*if (fexecsl!=-1)
+            {
+                var bf[BUFLEN];
+                fgets(bf,BUFLEN,fexecstack[fexecsl]);
+                var l=strlen(bf);
+                while ((l>=0)&&(bf[--l]<=32));
+                bf[l+1]=0;
+                l=0;
+                while ((bf[l]<=32)&&(bf[l]!=0)) l++;
+                var i=0;
+                while (bf[l]!=0) bf[i++]=bf[l++];
+                bf[i]=0;
+                if (feof(fexecstack[fexecsl])) {fclose(fexecstack[fexecsl]); fexecsl--;}
+                if (((bf[0]!='/')||(bf[1]!='/'))&&(bf[0]!=0))
+                {
+                    if (echo==1)
+                    {
+                        strcpy(edit[wske%EDIT],bf);
+                        Enter();
+                    }
+                    else
+                    {
+                        reffunc(bf);
+                    }
+                }
+            }*/
+            
+            this.Clear();
+            this.HLine(0,this.height-this.fontheight-4,this.width-1,csys.Color[csys.CFaded]);
+            var plen=1;
+            if (this.prompt)
+            {
+                plen += this.prompt.length * this.fontwidth;
+            }
+            var ewidth = (this.width - this.fontwidth) / this.fontwidth - (this.prompt? this.prompt.length:0);
+            /*var pom = this.estart + ewidth; //for this.edit[this.wske % CCon.EDIT]
+            var cpom=pom;
+            *pom=0;*/
+            this.DrawTextHighlighted(-this.estart * this.fontwidth + plen, this.height - this.fontheight - 2, csys.Color[csys.CHighlighted], 255, this.edit[this.wske % CCon.EDIT]);
+            //*pom=cpom;
+
+            if ((csys.GetTime()*1000)%(CCon.CURSORINTERVAL*2)<CCon.CURSORINTERVAL)
+                this.DrawText((this.ecursor - this.estart) * this.fontwidth + plen, this.height - this.fontheight - 1, csys.Color[csys.CHighlighted], "_");
+            
+            if (this.prompt)
+            {
+                this.Bar(0,this.height-this.fontheight-2,plen-1,this.height-1,csys.Color[csys.CPattern]);
+                this.DrawText(1,this.height-this.fontheight-2,this.FadeColor(/*CGraph::Color[csys.DColor]*/D.RGB32(255,255,255),128),this.prompt);
+            }
+            
+            var y=this.height-2*this.fontheight-4;
+            var l: number,i: number;
+            i=this.wsklv-1;
+            l=y/this.fontheight+1;
+            if (l>CCon.LINES) l=CCon.LINES;
+            if (l>this.wsklv) l=this.wsklv;
+            while (l--)
+            {
+                if (this.colshf>0)
+                {
+                    this.DrawTextHighlighted(1 - (this.colshf - 1) * this.fontwidth, y, csys.Color[csys.CNormal], 220, this.lines[i % CCon.LINES]);
+                }
+                else
+                    this.DrawTextHighlighted(1, y, csys.Color[csys.CNormal], 220, this.lines[i % CCon.LINES]);
+                i--;
+                y -= this.fontheight;
+            }
+            if (this.colshf>0)
+            {
+                y=this.height-2*this.fontheight-4;
+                while (y>=0)
+                {
+                    this.Bar(0,y,this.fontwidth,y+this.fontheight-1,csys.Color[csys.CPattern]);
+                    this.DrawText(1,y,csys.Color[csys.CNormal],"<");
+                    y-=this.fontheight;
+                }
+            }
+            //if (this.libwinon) this.libwin.Draw(); todo
+        }
+
+        Put(s: string)
+        {
+            var l=0,l2=0;
+            var sl=s.length;
+            var bufl: string;
+            while (l<sl)
+            {
+                while (l<sl&&(s[l]!='\n')) l++;
+                this.lines[this.wskl % CCon.LINES] = s.slice(l2,l);
+                l2=++l;
+                this.wskl++;
+            }
+            this.wsklv = this.wskl;
+            //csys.Log_Printf(s);
         }
     }
 }

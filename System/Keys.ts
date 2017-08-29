@@ -6,7 +6,8 @@ module ExprAE.System {
         K_TAB = 9,
         K_CLEAR = 12,
         K_RETURN = 13,
-        K_ENTER = 14,
+        K_ENTER = 13,
+        //K_ENTER = 14, //not fired
         K_SHIFT = 16,
         K_CONTROL = 17,
         K_ALT = 18,

@@ -262,6 +262,10 @@ module ExprAE.Drawing {
             }
         }
 
+        DrawTextHighlighted(x: number, y: number, color: number, fade: number, s: string) {
+            this.DrawText(x,y,color,s);
+        }
+
         DrawText3X5(x: number, y: number, color: number, s: string) {
             if (y + 5 > this.height) return;
             if (y < 0) return;
@@ -292,6 +296,10 @@ module ExprAE.Drawing {
         FadeColor(c: number, fade: number) {
             return (((((c >> 16) & 255) * fade) << 8) & 0xff0000) | ((((c >> 8) & 255) * fade) & 0xff00) |
                 ((((c & 255) * fade) >> 8) & 0xff) | 0xff000000;
+        }
+
+        Clear() {
+            this.buf.fill(D.RGB32(0, 0, 0), 0, this.buf.length);
         }
     }
 }

@@ -32,6 +32,7 @@ module ExprAE.Graph {
         }
 
         Process(): void {
+            this.Clear();
             var mk = sys.MouseKey();
             if (mk) {
                 this.posx = sys.getMouseX();

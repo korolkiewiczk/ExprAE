@@ -19,6 +19,16 @@ module ExprAE.System {
         static VAR_RGB = 4;
         static VAR_STR = 5;
 
+        static CNormal=0;
+        static CHighlighted=1;
+        static CFaded=2;
+        static CFavour=3;
+        static CHelp=4;
+        static CNum=5;
+        static COp=6;
+        static CTxt=7;
+        static CPattern=8;
+        
         static Color = new Array(
             D.RGB32(210, 210, 210),
             D.RGB32(230, 230, 230),
@@ -236,7 +246,6 @@ module ExprAE.System {
             CSys.imgData.data.set(CSys.buf8);
             var ctx = CSys.getDrawingContext();
             ctx.putImageData(CSys.imgData, 0, 0);
-            CSys.buf.fill(0xff000000);
         }
 
         static GetMouseWheelDelta(): number {
@@ -282,6 +291,9 @@ module ExprAE.System {
             //todo
         }
 
+        static GetTime(): number {
+            return new Date().getTime() / 1000;
+        }
 
         private static __ScrWidth(...args: any[]): number {
             if (args.length == 1)
