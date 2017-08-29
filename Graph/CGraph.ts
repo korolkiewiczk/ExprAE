@@ -18,6 +18,10 @@ module ExprAE.Graph {
                 this.posy -= 10;
             if (k == keys.K_DOWN)
                 this.posy += 10;
+            if (k == keys.K_RIGHT)
+                this.posx += 10;
+            if (k == keys.K_LEFT)
+                this.posx -= 10;
             if (k == keys.K_PAGE_UP)
                 this.posy -= 25;
             if (k == keys.K_PAGE_DOWN)
