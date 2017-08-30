@@ -86,16 +86,17 @@ module ExprAE.Tests {
 
                 console.KeyFunc(System.Keys.K_X);
                 console.KeyFunc(System.Keys.K_X);
+                console.KeyFunc(System.Keys.K_LEFT);
+                console.KeyFunc(System.Keys.K_LEFT);
                 console.KeyFunc(System.Keys.K_X);
+                console.KeyFunc(System.Keys.K_LEFT);
                 console.KeyFunc(System.Keys.K_X);
                 console.KeyFunc(System.Keys.K_LEFT);
-                console.KeyFunc(System.Keys.K_LEFT);
-                console.KeyFunc(System.Keys.K_LEFT);
                 console.KeyFunc(System.Keys.K_DELETE);
                 console.KeyFunc(System.Keys.K_DELETE);
                 console.KeyFunc(System.Keys.K_DELETE);
                 console.KeyFunc(System.Keys.K_LEFT);
-                console.KeyFunc(System.Keys.K_E | 0xff00);
+                console.KeyFunc(System.Keys.K_E | System.Keys.SHIFT);
                 console.KeyFunc(System.Keys.K_RIGHT);
                 console.KeyFunc(System.Keys.K_RIGHT);
                 console.KeyFunc(System.Keys.K_P);

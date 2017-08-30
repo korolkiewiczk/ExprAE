@@ -83,7 +83,7 @@ module ExprAE.Tests {
             });
         });
 
-        describe("do with setting par", () => {
+        describe("do with setting variable", () => {
             it("should return valid expression result", () => {
                 var stdlib = new Stdlib();
                 var expression = new Expressions.CExpr(stdlib.init(new Expressions.CLib()));
@@ -104,12 +104,39 @@ module ExprAE.Tests {
 
                 expect(expression.set('@x:="abc"')).toBe(Expressions.ErrorCodes.SyntaxError);
 
+                /*expect(expression.set('@str:="abc"')).toBe(Expressions.ErrorCodes.NoErr);
+                var result3=expression.do() as string;
+                expect(result3).toBe("abc");
+                expect(stdlib.expr_str).toBe("abc");*/  //todo string support
+
 
                 stdlib.expr_x=10;
                 expect(expression.set('@x')).toBe(Expressions.ErrorCodes.NoErr);
-                var result3=expression.do() as Expressions.POINTER;
-                expect(result3.th).toBe(stdlib);
-                expect(result3.fptr(result3.th)).toBe(10);
+                var result4=expression.do() as Expressions.POINTER;
+                expect(result4.th).toBe(stdlib);
+                expect(result4.fptr(result4.th)).toBe(10);
+            });
+        });
+
+        describe("do with invalid expressions", () => {
+            it("should return valid expression result", () => {
+                var stdlib = new Stdlib();
+                var expression = new Expressions.CExpr(stdlib.init(new Expressions.CLib()));
+
+                expect(expression.set('@x=2')).toBe(Expressions.ErrorCodes.UnreconOp);
+                expect(expression.do()).toBe(null);
+            });
+        });
+
+        describe("do with dangerous expressions", () => {
+            it("should return valid expression result", () => {
+                var stdlib = new Stdlib();
+                var expression = new Expressions.CExpr(stdlib.init(new Expressions.CLib()));
+
+                stdlib.expr_x=10;
+                expect(expression.set('set(x,2)')).toBe(Expressions.ErrorCodes.NoErr);
+                expect(expression.do()).toBe(0);
+                expect(stdlib.expr_x).toBe(10);
             });
         });
         //***do TESTS***

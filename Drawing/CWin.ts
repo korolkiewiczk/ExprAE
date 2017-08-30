@@ -238,6 +238,7 @@ module ExprAE.Drawing {
         }
 
         DrawText(x: number, y: number, color: number, s: string) {
+            if (!s) return;
             var pal: number[] = [];
             var ch: number;
             if (this.fontheight < 16) ch = 8; else ch = 16;

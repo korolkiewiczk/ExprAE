@@ -41,7 +41,7 @@ module ExprAE.Console {
             private libwin: CLibWin) {
             super(width, height, buf);
             //todo
-            this.edit[0]="";
+            this.edit[0] = "";
         }
 
         Edit(c: string) {
@@ -50,33 +50,33 @@ module ExprAE.Console {
             if (!this.edit[w])
                 this.edit[w] = "";
 
-            if ((c.charCodeAt(0) == 8) && (this.elen > 0) && (this.ecursor > 0)) //bspace
+            if ((c.charCodeAt(0) == keyMap.BACKSPACE) && (this.elen > 0) && (this.ecursor > 0)) //bspace
             {
                 //if (this.ecursor != this.elen) {
                 //for (var i = this.ecursor - 1; i < this.elen; i++) this.edit[w][i] = this.edit[w][i + 1];
-                this.edit[w] = this.edit[w].slice(0, this.ecursor - 1) + this.edit[w].slice(this.ecursor, this.elen - 1);
+                this.edit[w] = this.edit[w].slice(0, this.ecursor - 1) + this.edit[w].slice(this.ecursor, this.elen);
                 //}
                 this.elen--;
                 this.ecursor--;
             }
             else
-                if ((c.charCodeAt(0) == 127) && (this.elen > 0) && (this.ecursor != this.elen))    //del
+                if ((c.charCodeAt(0) == keyMap.DELETE) && (this.elen > 0) && (this.ecursor != this.elen))    //del
                 {
                     //for (var i=ecursor; i<elen; i++) edit[w][i]=edit[w][i+1];
-                    this.edit[w] = this.edit[w].slice(0, this.ecursor) + this.edit[w].slice(this.ecursor + 1, this.elen - 1);
+                    this.edit[w] = this.edit[w].slice(0, this.ecursor) + this.edit[w].slice(this.ecursor + 1, this.elen);
                     this.elen--;
                 }
                 else
                     if (c == '\n') this.Enter();
                     else
-                        if ((c.charCodeAt(0) != 127) && (c.charCodeAt(0) != 8) && (this.elen < CCon.BUFLEN - 1) && (c.charCodeAt(0) >= 32)) {
+                        if ((c.charCodeAt(0) != keyMap.DELETE) && (c.charCodeAt(0) != keyMap.BACKSPACE) && (this.elen < CCon.BUFLEN - 1) && (c.charCodeAt(0) >= 32)) {
                             if (this.ecursor == this.elen) {
                                 this.edit[w] = this.edit[w] + c;
                                 this.ecursor++;
                             }
                             else {
                                 //for (var i=elen-1; i>=ecursor; i--) edit[w][i+1]=edit[w][i];
-                                this.edit[w] = this.edit[w].slice(0, this.ecursor - 1) + c + this.edit[w].slice(this.ecursor);
+                                this.edit[w] = this.edit[w].slice(0, this.ecursor) + c + this.edit[w].slice(this.ecursor, this.elen);
                                 this.ecursor++;
                             }
                             this.elen++;
@@ -87,7 +87,7 @@ module ExprAE.Console {
             var edited = this.edit[this.wske % CCon.EDIT]
             if (!edited) return;
             //currentcon=this;
-            var bf = this.reffunc.fptr(this.reffunc.th,edited) as string;
+            var bf = this.reffunc.fptr(this.reffunc.th, edited)+"";
 
             if (!bf) {
                 this.lines[this.wskl % CCon.LINES], this.edit[this.wske % CCon.EDIT]
@@ -123,12 +123,12 @@ module ExprAE.Console {
         }
 
         KeyFunc(k: keys) {
-            var shift = (k >> 8) > 0;
+            var shift = k & keys.SHIFT;
 
             //todo remove depend.
             if (csys.MouseKeyPressed(keys.M_LEFT)) k |= keys.K_ENTER;
             if (csys.MouseKeyPressed(keys.M_RIGHT)) k |= keys.K_ESCAPE;
-            k &= 255;
+            k &= keys.REGULAR;
             if (k == keys.K_TAB) {
                 this.libwinon = 1 - this.libwinon;
                 if (this.libwinon) {
@@ -226,12 +226,11 @@ module ExprAE.Console {
                                                                     this.Edit(c);
                                                         }
             if ((this.ecursor - this.estart) < 0) this.estart = this.ecursor;
-            var ewidth = (this.width - this.fontwidth) / this.fontwidth - (this.prompt? this.prompt.length : 0);
+            var ewidth = (this.width - this.fontwidth) / this.fontwidth - (this.prompt ? this.prompt.length : 0);
             if (this.ecursor - this.estart >= ewidth) this.estart = this.ecursor - ewidth + 1;
         }
 
-        Process()
-        {
+        Process() {
             /*if (fexecsl!=-1)
             {
                 var bf[BUFLEN];
@@ -258,40 +257,36 @@ module ExprAE.Console {
                     }
                 }
             }*/
-            
+
             this.Clear();
-            this.HLine(0,this.height-this.fontheight-4,this.width-1,csys.Color[csys.CFaded]);
-            var plen=1;
-            if (this.prompt)
-            {
+            this.HLine(0, this.height - this.fontheight - 4, this.width - 1, csys.Color[csys.CFaded]);
+            var plen = 1;
+            if (this.prompt) {
                 plen += this.prompt.length * this.fontwidth;
             }
-            var ewidth = (this.width - this.fontwidth) / this.fontwidth - (this.prompt? this.prompt.length:0);
+            var ewidth = (this.width - this.fontwidth) / this.fontwidth - (this.prompt ? this.prompt.length : 0);
             /*var pom = this.estart + ewidth; //for this.edit[this.wske % CCon.EDIT]
             var cpom=pom;
             *pom=0;*/
             this.DrawTextHighlighted(-this.estart * this.fontwidth + plen, this.height - this.fontheight - 2, csys.Color[csys.CHighlighted], 255, this.edit[this.wske % CCon.EDIT]);
             //*pom=cpom;
 
-            if ((csys.GetTime()*1000)%(CCon.CURSORINTERVAL*2)<CCon.CURSORINTERVAL)
+            if ((csys.GetTime() * 1000) % (CCon.CURSORINTERVAL * 2) < CCon.CURSORINTERVAL)
                 this.DrawText((this.ecursor - this.estart) * this.fontwidth + plen, this.height - this.fontheight - 1, csys.Color[csys.CHighlighted], "_");
-            
-            if (this.prompt)
-            {
-                this.Bar(0,this.height-this.fontheight-2,plen-1,this.height-1,csys.Color[csys.CPattern]);
-                this.DrawText(1,this.height-this.fontheight-2,this.FadeColor(/*CGraph::Color[csys.DColor]*/D.RGB32(255,255,255),128),this.prompt);
+
+            if (this.prompt) {
+                this.Bar(0, this.height - this.fontheight - 2, plen - 1, this.height - 1, csys.Color[csys.CPattern]);
+                this.DrawText(1, this.height - this.fontheight - 2, this.FadeColor(/*CGraph::Color[csys.DColor]*/D.RGB32(255, 255, 255), 128), this.prompt);
             }
-            
-            var y=this.height-2*this.fontheight-4;
-            var l: number,i: number;
-            i=this.wsklv-1;
-            l=y/this.fontheight+1;
-            if (l>CCon.LINES) l=CCon.LINES;
-            if (l>this.wsklv) l=this.wsklv;
-            while (l--)
-            {
-                if (this.colshf>0)
-                {
+
+            var y = this.height - 2 * this.fontheight - 4;
+            var l: number, i: number;
+            i = this.wsklv - 1;
+            l = y / this.fontheight + 1;
+            if (l > CCon.LINES) l = CCon.LINES;
+            if (l > this.wsklv) l = this.wsklv;
+            while (l--) {
+                if (this.colshf > 0) {
                     this.DrawTextHighlighted(1 - (this.colshf - 1) * this.fontwidth, y, csys.Color[csys.CNormal], 220, this.lines[i % CCon.LINES]);
                 }
                 else
@@ -299,29 +294,25 @@ module ExprAE.Console {
                 i--;
                 y -= this.fontheight;
             }
-            if (this.colshf>0)
-            {
-                y=this.height-2*this.fontheight-4;
-                while (y>=0)
-                {
-                    this.Bar(0,y,this.fontwidth,y+this.fontheight-1,csys.Color[csys.CPattern]);
-                    this.DrawText(1,y,csys.Color[csys.CNormal],"<");
-                    y-=this.fontheight;
+            if (this.colshf > 0) {
+                y = this.height - 2 * this.fontheight - 4;
+                while (y >= 0) {
+                    this.Bar(0, y, this.fontwidth, y + this.fontheight - 1, csys.Color[csys.CPattern]);
+                    this.DrawText(1, y, csys.Color[csys.CNormal], "<");
+                    y -= this.fontheight;
                 }
             }
             //if (this.libwinon) this.libwin.Draw(); todo
         }
 
-        Put(s: string)
-        {
-            var l=0,l2=0;
-            var sl=s.length;
+        Put(s: string) {
+            var l = 0, l2 = 0;
+            var sl = s.length;
             var bufl: string;
-            while (l<sl)
-            {
-                while (l<sl&&(s[l]!='\n')) l++;
-                this.lines[this.wskl % CCon.LINES] = s.slice(l2,l);
-                l2=++l;
+            while (l < sl) {
+                while (l < sl && (s[l] != '\n')) l++;
+                this.lines[this.wskl % CCon.LINES] = s.slice(l2, l);
+                l2 = ++l;
                 this.wskl++;
             }
             this.wsklv = this.wskl;

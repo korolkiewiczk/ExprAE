@@ -156,7 +156,7 @@ module ExprAE.Expressions {
                 return (args[0] as Stdlib).expr_pi;
         }
 
-        expr_x: number;
+        expr_x: number = 0;
         private static __expr_x(...args: any[]): number {
             if (args.length == 2)
                 return (args[0] as Stdlib).expr_x = args[1];
@@ -164,7 +164,7 @@ module ExprAE.Expressions {
                 return (args[0] as Stdlib).expr_x;
         }
 
-        expr_y: number;
+        expr_y: number = 0;
         private static __expr_y(...args: any[]): number {
             if (args.length == 2)
                 return (args[0] as Stdlib).expr_y = args[1];
@@ -172,7 +172,7 @@ module ExprAE.Expressions {
                 return (args[0] as Stdlib).expr_y;
         }
 
-        expr_t: number;
+        expr_t: number = 0;
         private static __expr_t(...args: any[]): number {
             if (args.length == 2)
                 return (args[0] as Stdlib).expr_t = args[1];
@@ -180,7 +180,7 @@ module ExprAE.Expressions {
                 return (args[0] as Stdlib).expr_t;
         }
 
-        expr_k: number;
+        expr_k: number = 0;
         private static __expr_k(...args: any[]): number {
             if (args.length == 2)
                 return (args[0] as Stdlib).expr_k = args[1];
@@ -188,7 +188,7 @@ module ExprAE.Expressions {
                 return (args[0] as Stdlib).expr_k;
         }
 
-        expr_time: number;
+        expr_time: number = 0;
         private static __expr_time(...args: any[]): number {
             if (args.length == 2)
                 return (args[0] as Stdlib).expr_time = args[1];
@@ -196,7 +196,7 @@ module ExprAE.Expressions {
                 return (args[0] as Stdlib).expr_time;
         }
 
-        expr_str: string;
+        expr_str: string = "";
         private static __expr_str(...args: any[]): string {
             if (args.length == 2)
                 return (args[0] as Stdlib).expr_str = args[1];

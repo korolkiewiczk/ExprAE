@@ -1,7 +1,6 @@
 module ExprAE.Expressions {
     export class CExpr {
         private ONPSTACKBUFLEN = 16;
-        private NUMOFOP = 19;
         private ONP_NUM = 0;
         private ONP_NAME = 1;
         private ONP_NAMEREF = 2;
@@ -37,6 +36,8 @@ module ExprAE.Expressions {
 
         private faddr: ICallback;
 
+        private isCompiled: boolean;
+
         constructor(private library: CLib = null) {
             if (library) {
                 for (var i = 0; i < this.CExpr_operands.length - 1; i++) {
@@ -65,6 +66,8 @@ module ExprAE.Expressions {
         }
 
         set(expr: string): ErrorCodes {
+
+            this.isCompiled=false;
 
             this.onpl = 0;
             this.onp = [];
@@ -424,12 +427,15 @@ module ExprAE.Expressions {
 
             this.exprstr = exprbuf;
 
+            this.isCompiled=true;
             return ErrorCodes.NoErr;
         }
 
         do(): any {
             //pcexpr=CExpr::cexpr;
             //CExpr::cexpr=this;
+            if (!this.isCompiled)
+                return null;
             this.onpsl = -1;
             var n: NAME;
             this.strcount = 0;
@@ -589,7 +595,7 @@ module ExprAE.Expressions {
         }
 
         private opindex(s: string[]): number {
-            for (var i = 0; i < this.NUMOFOP; i++) {
+            for (var i = 0; i < this.CExpr_operands.length; i++) {
                 var j = 0;
                 while ((this.CExpr_operands[i].opname[j] == s[j]) && (s[j] != '\0')) j++;
                 if (s[j] == '\0') return i;
@@ -708,7 +714,10 @@ module ExprAE.Expressions {
         }
 
         private CExpr_op_set(ptr: POINTER, val: number): number {
-            return ptr.fptr(ptr.th, val);
+            if (typeof ptr.fptr === "function")
+                return ptr.fptr(ptr.th, val);
+            else
+                return 0;
         }
 
         private CExpr_op_chs(a: number): number {

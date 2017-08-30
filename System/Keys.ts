@@ -153,6 +153,8 @@ module ExprAE.System {
         K_VOLUME_MUTE = 181,
         K_VOLUME_DOWN = 182,
         K_VOLUME_UP = 183,
+        K_SEMICOLON2 = 186,
+        K_EQUAL = 187,
         K_COMMA = 188,
         K_MINUS = 189,
         K_PERIOD = 190,
@@ -191,11 +193,20 @@ module ExprAE.System {
 
         M_LEFT = 0,
         M_MID = 1,
-        M_RIGHT = 2
+        M_RIGHT = 2,
+
+        REGULAR=0xFF,
+        SHIFT=0xFF00,
+        CONTROL=0xFF0000,
     }
 
     export class KeyMap {
         static KEYMAPLEN=55;
+
+        static BACKSPACE=8;
+        static DELETE=127;
+        static SPACE=32;
+
         static data: any[] = new Array<any>(
             Keys.K_1, '1', '!', 
             Keys.K_2, '2', '@', 
@@ -208,8 +219,8 @@ module ExprAE.System {
             Keys.K_9, '9', '(', 
             Keys.K_0, '0', ')', 
             Keys.K_MINUS, '-', '_',     //todo keycode
-            Keys.K_PLUS, '=', '+',
-            Keys.K_BACK_SPACE, String.fromCharCode(8), String.fromCharCode(8),
+            Keys.K_EQUAL, '=', '+',
+            Keys.K_BACK_SPACE, String.fromCharCode(KeyMap.BACKSPACE), String.fromCharCode(KeyMap.BACKSPACE),
             Keys.K_TAB, '\t', '\t', 
             Keys.K_Q, 'q', 'Q', 
             Keys.K_W, 'w', 'W', 
@@ -233,8 +244,8 @@ module ExprAE.System {
             Keys.K_J, 'j', 'J', 
             Keys.K_K, 'k', 'K', 
             Keys.K_L, 'l', 'L',
-            Keys.K_SEMICOLON, ';', ':', 
-            Keys.K_QUOTE, 39, '"', 
+            Keys.K_SEMICOLON2, ';', ':', 
+            Keys.K_QUOTE, "'", '"', 
             Keys.K_BACK_QUOTE, '`', '~', 
             Keys.K_BACK_SLASH, '\\', '|',
             Keys.K_Z, 'z', 'Z', 
@@ -251,6 +262,6 @@ module ExprAE.System {
             Keys.K_SPACE, ' ', ' ', 
             Keys.K_SUBTRACT, '-', '-', 
             Keys.K_ADD, '+', '+', 
-            Keys.K_DELETE, String.fromCharCode(127), String.fromCharCode(127));
+            Keys.K_DELETE, String.fromCharCode(KeyMap.DELETE), String.fromCharCode(KeyMap.DELETE));
     }
 }

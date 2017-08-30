@@ -36,8 +36,13 @@ module ExprAE {
         }
 
         comp(th: any, s: string): string {
-            th.expr.set(s);
-            return th.expr.do();
+            var result = (th.expr as Expressions.CExpr).set(s);
+            if (result==Expressions.ErrorCodes.NoErr) {
+                return th.expr.do();
+            }
+            else {
+                return Expressions.ErrorCodes[result];
+            }
         }
     }
 }
