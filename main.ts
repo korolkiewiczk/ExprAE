@@ -10,7 +10,9 @@ module ExprAE {
 
             this.expr = new Expressions.CExpr(library);
 
-            var libwin: Console.CLibWin = null;
+            var libwin: Console.CLibWin = new Console.CLibWin(
+                System.CSys.ScrWidth,System.CSys.ScrHeight,System.CSys.getBuf(),
+                20,20,System.CSys.ScrWidth-20,System.CSys.ScrHeight*2/3,library);
             /*libwin=new CLibWin(System.CSys.ScrWidth,System.CSys.ScrHeight,buf,
                 20,20,System.CSys.ScrWidth-20,System.CSys.ScrHeight*2/3,library);*/
 

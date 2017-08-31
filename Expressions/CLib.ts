@@ -87,7 +87,110 @@ module ExprAE.Expressions {
             return nd.n;
         }
 
-        //todo NListFromTxt(char *_t,char *ret,char schar)
+        NListFromTxt(_t:string, schar: string): NListFromTxtResult
+        {
+            var w=0;
+            var t: number[]=[];
+            var postab: number[]=[];
+            var i=0,k=0,j=0;
+            var pomt: number[]=[];
+            var pomt2: number[]=[];
+            var tl=0;
+            var ret: string[]=[];
+            ret[0]='\0';
+            postab[0]=0;
+            
+            while(i<_t.length)
+            {
+                if(_t[i]==schar) postab[++k]=i+1; 
+                else t[i] = this.index(_t[i]);
+                if (t[i]==-1) return new NListFromTxtResult(w,ret.join(""));
+                i++;
+            }
+
+            _t=_t.toUpperCase();
+
+            postab[++k]=-1;
+            
+            var stack: number[][]=[];
+            var nstack: ND[]=[];
+            var sl=0;
+            var n: ND;
+        
+            stack[0]=[];
+            stack[0][0]=0;
+            stack[0][1]=0;
+            stack[0][2]=-1;
+            nstack[0] = this.root;
+            while (sl>=0)
+            {
+                if (!stack[sl])
+                    stack[sl]=[];
+
+                tl=stack[sl][2];
+                if (tl>=0)
+                {
+                    pomt[tl]=stack[sl][0];
+                }
+                j=stack[sl][1];
+                n=nstack[sl];
+                sl--;
+                if (postab[j+1]!=-1)
+                {
+                    for (i=postab[j]; i<postab[j+1]-1; i++)
+                    {
+                        if (n.l[t[i]])
+                        {
+                            sl++;
+                            if (!stack[sl])
+                                stack[sl]=[];
+
+                            stack[sl][0]=_t[i].charCodeAt(0);
+                            stack[sl][1]=j+1;
+                            stack[sl][2]=tl+1;
+                            nstack[sl]=n.l[t[i]];
+                        }
+                    }
+                }
+                else
+                {
+                    for (i=0; i<n.l.length; i++)
+                    {
+                        if (n.l[i])
+                        {
+                            sl++;
+                            if (!stack[sl])
+                                stack[sl]=[];
+
+                            stack[sl][0] = this.unindex(i).charCodeAt(0);
+                            stack[sl][1]=j;
+                            stack[sl][2]=tl+1;
+                            nstack[sl]=n.l[i];
+                        }
+                    }
+                    if (n.n)
+                    {
+                        pomt[tl+1]=schar.charCodeAt(0);
+                        pomt[tl+2]=0;
+                        pomt2=pomt2.concat(pomt);
+                        w++;
+                    }
+                }
+            }
+            i=0;
+            var j2=pomt2.length;
+            while (pomt2[i]!=0)
+            {
+                k=i;
+                while ((pomt2[k]!=0)&&(pomt2[k]!=schar.charCodeAt(0))) k++;
+                var d=k-i;
+                for (j=0; j<d; j++) ret[j2-d+j]=String.fromCharCode(pomt2[j+i]);
+                ret[j2]=schar;
+                j2-=d+1;
+                i=k+1;
+            }
+            return new NListFromTxtResult(w, ret.join(""));
+        }        
 
         getPar(p: number, n: number): number {
             return (((p) >> ((n) << 1)) & 3);
@@ -104,7 +207,7 @@ module ExprAE.Expressions {
             return itab;
         }
 
-        private index(c: string): number {
+        public index(c: string): number {
             if ((c >= 'A') && (c <= 'Z')) return c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
             if ((c >= 'a') && (c <= 'z')) return c.charCodeAt(0) - 'a'.charCodeAt(0) + 10;
             if ((c >= '0') && (c <= '9')) return c.charCodeAt(0) - '0'.charCodeAt(0);
@@ -165,5 +268,13 @@ module ExprAE.Expressions {
         ) {
             
         }
+    }
+
+    export class NListFromTxtResult {
+        constructor(
+            public w: number,
+            public ret: string) {
+
+            }
     }
 }

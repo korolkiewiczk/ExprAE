@@ -32,7 +32,7 @@ module ExprAE.Console {
         //FILE *fexecstack[MAXEXECFILES];
         private fexecsl: number = -1;
 
-        private libwinon: number;
+        private libwinon: number = 0;
 
         constructor(protected width: number,
             protected height: number,
@@ -129,11 +129,11 @@ module ExprAE.Console {
             if (csys.MouseKeyPressed(keys.M_LEFT)) k |= keys.K_ENTER;
             if (csys.MouseKeyPressed(keys.M_RIGHT)) k |= keys.K_ESCAPE;
             k &= keys.REGULAR;
-            if (k == keys.K_TAB) {
+            if (k == keys.K_F2) {
                 this.libwinon = 1 - this.libwinon;
                 if (this.libwinon) {
-                    //libwin->Clear();
-                    //libwin->Set("");
+                    this.libwin.Clear();
+                    this.libwin.Set("");
                 }
             }
             else
@@ -160,16 +160,16 @@ module ExprAE.Console {
                         }
                         else
                             if (this.libwinon) {
-                                /*libwin->KeyFunc(k);
+                                this.libwin.KeyFunc(k);
                                 var i=0;
-                                if (libwin->retbuf[0]!=0)
+                                if (this.libwin.retbuf.length>0)
                                 {
-                                    while (libwin->retbuf[i]!=0)
+                                    while (i<this.libwin.retbuf.length)
                                     {
-                                        Edit(libwin->retbuf[i++]);
+                                        this.Edit(this.libwin.retbuf[i++]);
                                     }
-                                    libwin->retbuf[0]=0;
-                                }*/
+                                    this.libwin.retbuf="";
+                                }
                             }
                             else
                                 if (k == keys.K_HOME) this.ecursor = 0;
@@ -302,7 +302,7 @@ module ExprAE.Console {
                     y -= this.fontheight;
                 }
             }
-            //if (this.libwinon) this.libwin.Draw(); todo
+            if (this.libwinon) this.libwin.Draw();
         }
 
         Put(s: string) {
@@ -316,7 +316,6 @@ module ExprAE.Console {
                 this.wskl++;
             }
             this.wsklv = this.wskl;
-            //csys.Log_Printf(s);
         }
     }
 }
