@@ -97,7 +97,6 @@ module ExprAE.Expressions {
             var pomt2: number[]=[];
             var tl=0;
             var ret: string[]=[];
-            ret[0]='\0';
             postab[0]=0;
             
             while(i<_t.length)
@@ -171,7 +170,7 @@ module ExprAE.Expressions {
                     if (n.n)
                     {
                         pomt[tl+1]=schar.charCodeAt(0);
-                        pomt[tl+2]=0;
+                        pomt=pomt.slice(0,tl+2);
                         pomt2=pomt2.concat(pomt);
                         w++;
                     }
@@ -179,10 +178,11 @@ module ExprAE.Expressions {
             }
             i=0;
             var j2=pomt2.length;
+            pomt2[j2--]=0;
             while (pomt2[i]!=0)
             {
                 k=i;
-                while ((pomt2[k]!=0)&&(pomt2[k]!=schar.charCodeAt(0))) k++;
+                while (pomt2[i]!=0 && (pomt2[k]!=schar.charCodeAt(0))) k++;
                 var d=k-i;
                 for (j=0; j<d; j++) ret[j2-d+j]=String.fromCharCode(pomt2[j+i]);
                 ret[j2]=schar;

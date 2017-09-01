@@ -1,18 +1,13 @@
 /// <reference path="../typings/jasmine/jasmine.d.ts" />
 /// <reference path="../../Expressions/CLib.ts" />
-module ExprAE.Tests {
-    describe("CLib", () => {
-        describe("AddElement", () => {
-            it("should add new element to library", () => {
-                var library = new Expressions.CLib();
-                library.addElement(new Expressions.ELEMENT("Te", () => { }, 0, 2, 2, 0));
-                expect(library["root"].l[library["index"]('T')].n).toBe(null);
-                expect(library["root"].l[library["index"]('T')].l[library["index"]('e')].n.parattr).toBe(2);
-            });
-        });
+/// <reference path="../../Console/CLibWin.ts" />
+/// <reference path="../../System/Keys.ts" />
 
-        describe("NListFromTxt", () => {
-            it("should return valid list of elements", () => {
+module ExprAE.Tests {
+
+    describe("CLibWin", () => {
+        describe("Search for simple string", () => {
+            it("should set valid edit line while editing", () => {
                 var library = new Expressions.CLib();
                 library.addElement(new Expressions.ELEMENT("Test", () => { }, 0, 2, 2, 0));
                 library.addElement(new Expressions.ELEMENT("Tester", () => { }, 0, 2, 2, 0));
@@ -21,9 +16,12 @@ module ExprAE.Tests {
                 library.addElement(new Expressions.ELEMENT("X", () => { }, 0, 2, 2, 0));
                 library.addElement(new Expressions.ELEMENT("y", () => { }, 0, 2, 2, 0));
 
-                var result=library.NListFromTxt("T|E|S|",'|');
-                expect(result.w).toBe(2);
-                expect(result.ret).toBe("TESTER|TEST|"); //todo
+                var libwin = new Console.CLibWin(640, 480, null, 10,10,400,400, library);
+
+                libwin.KeyFunc(System.Keys.K_T);
+                libwin.KeyFunc(System.Keys.K_E);
+
+                expect(libwin["tbuf"]).toBe("TESTER\nTEST\n");
             });
         });
     });

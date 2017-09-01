@@ -102,7 +102,7 @@ module ExprAE.Console {
             }
             else
             {
-                var c=0;
+                var c: string = "\0";
                 if ((k>keys.K_1)&&(k<=keys.K_0))  //***
                 {
                     this.ebuf+= CLibWin.Num2Char[k-keys.K_1-1];
@@ -110,28 +110,25 @@ module ExprAE.Console {
                 }
                 else
                 {
-                    for (var i=0; i<keyMap.data.length; i++)
+                    for (var i=0; i<keyMap.KEYMAPLEN; i++)
                     {
-                        if (keyMap.data[i][0]==(k&255))
+                        if (keyMap.data[i*3]==(k&255))
                         {
-                            c=keyMap.data[i][2];
+                            c=keyMap.data[i*3+2];
                             break;
                         }
                     }
                     var l=this.ebuf.length;
-                    if ((c==8)||(c==127)) 
+                    if ((c.charCodeAt(0)==8)||(c.charCodeAt(0)==127)) 
                     {
                         l-=2;
                         while((this.ebuf[l]!='|')&&(l>=0)) l--;
                         this.ebuf=this.ebuf.slice(0,l+1);
                     }
                     else
-                    if (this.lib.index(String.fromCharCode(c))!=-1)
+                    if (this.lib.index(c)!=-1)
                     {
-                        this.ebuf=this.ebuf.slice(0,l)+c+'|';
-                        /*ebuf[l]=c;
-                        ebuf[l+1]='|';
-                        ebuf[l+2]=0;*/
+                        this.ebuf=this.ebuf.slice(0,l+1)+c+'|';
                     }
                 }
                 this.Set(this.ebuf);
@@ -151,33 +148,9 @@ module ExprAE.Console {
         Set(t:string)
         {
             this.pos=this.lpos=0;
-            var pbuf:string="";
-            var ptxt:string="";
-            
-            var _t:string;
-            _t=t;
-            var res = this.lib.NListFromTxt(_t, '|');   //todo
+            var res = this.lib.NListFromTxt(t, '|');
+            this.tbuf=res.ret.replace(/\|/g,"\n");
             this.npos = res.w;
-            this.tbuf = res.ret;
-            var i=0,m=0,j=0;
-            while (i<pbuf.length)
-            {
-                if (pbuf[i]=='|') m=1;
-                if (m==0)
-                {
-                    ptxt+=pbuf[i];
-                    j++;
-                }
-                else
-                if (m==1)
-                {
-                    m=0;
-                    j=0;
-                    this.tbuf+= ptxt;
-                    this.tbuf += "\n";
-                }
-                i++;
-            }
         }
         
         private static pcposx:number;
@@ -185,8 +158,6 @@ module ExprAE.Console {
         Draw()
         {
             var cpos = this.pos - this.lpos;
-            var pom: string;
-            pom = this.tbuf;
             var j=0,k=0;
             var x = this.x1, y = this.y1;
             
@@ -198,9 +169,9 @@ module ExprAE.Console {
                 var d=0;
                 if (cposy < this.y1) d = -1;
                 if (cposy > this.y2 - CLibWin.CWCHARHEIGHT) d = 1;
-                if (d) this.pos += d;
+                if (d!=0) this.pos += d;
                 else
-                    this.pos = (cposy - this.y1) / CLibWin.CWCHARHEIGHT + this.lpos;
+                    this.pos = Math.round((cposy - this.y1) / CLibWin.CWCHARHEIGHT) + this.lpos;
                 CLibWin.pcposx=cposx;
                 CLibWin.pcposy=cposy;
                 if (this.pos < 0) this.pos = 0;
@@ -216,18 +187,12 @@ module ExprAE.Console {
             }
             this.Bar(this.x1, this.y1, this.x2, this.y2, System.CSys.Color[System.CSys.CPattern]);
             this.Bar(this.x1,this.y1+cpos*CLibWin.CWCHARHEIGHT,this.x2,this.y1+(cpos+1)*CLibWin.CWCHARHEIGHT,System.CSys.Color[System.CSys.CFavour]);
-            for (var i = 0; i < this.lpos; i++) 
-            {
-                while (pom[j]!='\n') j++;
-                k=j+1;
-                j++;
-            }
+
             var cnpos = (this.npos > this.lines) ? this.lines : this.npos;
-            var pomlines=pom.split("\n");
+            var pomlines=this.tbuf.split("\n");
             for (var i=0; i<cnpos; i++)
             {
-                this.DrawText(x,y,System.CSys.Color[System.CSys.CHelp],pomlines[i]);
-                k=j+1;
+                this.DrawText(x,y,System.CSys.Color[System.CSys.CHelp],pomlines[i+this.lpos]);
                 y+=CLibWin.CWCHARHEIGHT;
             }
         }
