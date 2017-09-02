@@ -5,7 +5,7 @@ module ExprAE.Graph {
     import keys = ExprAE.System.Keys;
     import sys = ExprAE.System.CSys;
 
-    export class CGraph extends Drawing.CWin {
+    export class CGraphTester extends Drawing.CWin {
 
         posx = 0;
         posy = 0;

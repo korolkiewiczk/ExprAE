@@ -166,12 +166,24 @@ module ExprAE.System {
 
                 var shift = 0, ctrl = 0;
                 if (CSys.KeyPressed(Keys.K_SHIFT)) shift = 256;
-                if (CSys.KeyPressed(Keys.K_CONTROL)) ctrl = 65536;
+                if (CSys.GetKey(Keys.K_CONTROL)) ctrl = 65536;
                 if (ctrl == 0) {
                     for (var i = 0; i < 256; i++) {
                         if (CSys.KeyPressed(i)) CSys.activeWin().KeyFunc(i | shift);
                     }
                     //todo
+                    if (CSys.KeyPressed(Keys.K_F4)) 
+                    {
+                        CSys.windows[CSys.activewin].ChangeActiveState(0);
+                        CSys.SetActiveWindow(Windows.Win_Con);
+                        CSys.windows[CSys.activewin].ChangeActiveState(1);
+                    }
+                    if (CSys.KeyPressed(Keys.K_F7)) 
+                    {
+                        CSys.windows[CSys.activewin].ChangeActiveState(0);
+                        CSys.SetActiveWindow(Windows.Win_GraphTester);
+                        CSys.windows[CSys.activewin].ChangeActiveState(1);
+                    }
                 } else {
                     //todo
                 }
@@ -203,7 +215,7 @@ module ExprAE.System {
             return CSys.windows[CSys.activewin];
         }
 
-        static SetWindow(w: Drawing.CWin, num: number): void {
+        static SetWindow(w: Drawing.CWin, num: Windows): void {
             CSys.windows[num] = w;
         }
 
@@ -320,6 +332,7 @@ module ExprAE.System {
     export enum Windows {
         Win_Con,
         Win_Graph,
+        Win_GraphTester,
         Win_Sound,
         Win_Help,
         Win_Winlib

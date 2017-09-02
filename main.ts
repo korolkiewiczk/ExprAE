@@ -17,7 +17,7 @@ module ExprAE {
                 20,20,System.CSys.ScrWidth-20,System.CSys.ScrHeight*2/3,library);*/
 
             var con = new Console.CCon(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf(), new Expressions.POINTER(this, this.comp), libwin);
-            var graph = new Graph.CGraph(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf());
+            var graph = new Graph.CGraphTester(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf());
             /*sound=new CSound(System.CSys.ScrWidth,System.CSys.ScrHeight,buf);
             CGraph::currentgraph=graph;
             CSound::currentsound=sound;
@@ -27,7 +27,7 @@ module ExprAE {
             UserFunc_Init(library);
             */
             System.CSys.SetWindow(con, System.Windows.Win_Con);
-            System.CSys.SetWindow(graph, System.Windows.Win_Graph);
+            System.CSys.SetWindow(graph, System.Windows.Win_GraphTester);
             /*System.CSys.SetWindow(help,System.CSys.Win_Help);
             System.CSys.SetWindow(sound,System.CSys.Win_Sound);
             System.CSys.SetWindow(libwin,System.CSys.Win_Winlib);*/
