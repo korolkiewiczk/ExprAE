@@ -264,7 +264,81 @@ module ExprAE.Drawing {
         }
 
         DrawTextHighlighted(x: number, y: number, color: number, fade: number, s: string) {
-            this.DrawText(x, y, color, s);
+            if (!s) return;
+            var pal: number[][] = [];
+            var ch: number;
+            if (this.fontheight < 16) ch = 8; else ch = 16;
+            var d = ((CWin.TEXT_FADE2 - CWin.TEXT_FADE1) << CWin.FIXED_SHIFT) / ch;
+            var d2 = (CWin.TEXT_FADEL << CWin.FIXED_SHIFT) / ch;
+            var f = CWin.TEXT_FADE1 << CWin.FIXED_SHIFT;
+            for (var k= 0; k <= System.CSys.Color.length; k++)
+            {
+                pal[k]=[];
+                var d=((CWin.TEXT_FADE2-CWin.TEXT_FADE1)<<CWin.FIXED_SHIFT)/ch;
+                var d2=(CWin.TEXT_FADEL<<CWin.FIXED_SHIFT)/ch;
+                var f=CWin.TEXT_FADE1<<CWin.FIXED_SHIFT;
+                var col: number;
+                if (k<System.CSys.Color.length)
+                    col=this.FadeColor(System.CSys.Color[k],fade);
+                else
+                    col=this.FadeColor(color,fade);
+                for (var j = 0; j < ch; j++) {
+                    var cf = f;
+                    for (var i = 0; i < 8; i++) {
+                        pal[k][j * 8 + i] = this.FadeColor(color, cf >> CWin.FIXED_SHIFT);
+                        cf += d2;
+                        if (cf > (255 << CWin.FIXED_SHIFT)) cf = (255 << CWin.FIXED_SHIFT);
+                    }
+                    f += d;
+                }
+            }
+            var palno=System.CSys.Color.length;
+            var fcol=0;
+            var num=0;
+            var txt=0;
+            var bsl=0;
+            for (var i = 0; i < s.length; i++) {
+                var c=s[i];
+                if (fcol==0)
+                    {
+                        if (c=='\\') bsl=1-bsl;
+                        else
+                        if ((c=='"')||(c=='\'')) 
+                        {
+                            if (bsl==0)
+                            txt=1-txt;
+                            bsl=0;
+                            palno=System.CSys.CTxt;
+                        }
+                        else
+                        if (txt==0)
+                        {
+                        if (c=='$') num=1;
+                        else
+                        if ((c>='0')&&(c<='9')) palno=System.CSys.CNum;
+                        else
+                        if (((c>='A')&&(c<='Z'))||((c>='a')&&(c<='z'))) palno=System.CSys.Color.length;
+                        else
+                        {
+                            palno=System.CSys.COp;
+                            num=0;
+                        }
+                        if (num) palno=System.CSys.CNum;
+                        }
+                        else bsl=0;
+                    }
+                    if (c.charCodeAt(0)<=System.CSys.Color.length) 
+                    {
+                        palno=c.charCodeAt(0)-1;
+                        fcol=1;
+                        continue;
+                    }
+                if (this.fontheight < 16)
+                    this.DrawChar8X8(x, y, pal[palno], s.charCodeAt(i));
+                else
+                    this.DrawChar8X16(x, y, pal[palno], s.charCodeAt(i));
+                x += this.fontwidth;
+            }
         }
 
         DrawText3X5(x: number, y: number, color: number, s: string) {
@@ -825,7 +899,7 @@ module ExprAE.Drawing {
         while(i--)
         {
             if (z <*zwsk) {
-*wsk=CSys::FadeColor(tex.Peek(u, v), c);
+*wsk=System.CSys.FadeColor(tex.Peek(u, v), c);
 *zwsk=z;
             }
             wsk++;
@@ -919,7 +993,7 @@ module ExprAE.Drawing {
         #else
         while (i--) {
             if (z <*zwsk) {
-*wsk=CSys::FadeColor(tex.Peek(u, v), c);
+*wsk=System.CSys.FadeColor(tex.Peek(u, v), c);
 *zwsk=z;
             }
             wsk++;

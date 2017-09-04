@@ -43,7 +43,7 @@ module ExprAE {
                 return th.expr.do();
             }
             else {
-                return Expressions.ErrorCodes[result];
+                return "\04"+Expressions.ErrorCodes[result];
             }
         }
     }
