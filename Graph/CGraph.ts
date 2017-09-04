@@ -165,6 +165,430 @@ module ExprAE.Graph {
         DMode: number;
         GraphState: number;
 
+        KeyFunc(k: number): void
+        {
+            if (k!=256+keys.K_SHIFT)
+            if (this.reqredraw<=1)
+            this.reqredraw=1;
+            var m=1,s=1,dir=1;
+            if (k>>8!=0) {m=4; s=1.2; dir=-1;}
+            k&=0xff;
+            
+            var changepos3ddelta=m;
+            if (this.changepos3dmode==0) changepos3ddelta*=this.D;
+            else changepos3ddelta*=this.R*(1/256);
+            if (k==keys.K_LEFT)
+            {
+                this.ChangePos(-CGraph.POSDELTA*m,Axis.X);
+            }
+            else
+            if (k==keys.K_RIGHT)
+            {
+                this.ChangePos(CGraph.POSDELTA*m,Axis.X);
+            }
+            else
+            if (k==keys.K_UP)
+            {
+                this.ChangePos(CGraph.POSDELTA*m,Axis.Y);
+            }
+            else
+            if (k==keys.K_DOWN)
+            {
+                this.ChangePos(-CGraph.POSDELTA*m,Axis.Y);
+            }
+            else
+            if (k==keys.K_HOME) 
+            {
+                this.defaults();
+        /*#ifdef OPENGL
+                gl_defaults();
+        #endif*/
+            }
+            else
+            if (k==keys.K_PAGE_UP)
+            {
+                if (!this.Is3DMode())
+                {
+                    this.ChangeScale(CGraph.SCALEDELTA*s,Axis.X);
+                    this.ChangeScale(CGraph.SCALEDELTA*s,Axis.Y);
+                }
+                else
+                this.ChangePos(CGraph.POSDELTA*m,Axis.Z);
+            }
+            else
+            if (k==keys.K_PAGE_DOWN)
+            {
+                if (!this.Is3DMode())
+                {
+                    this.ChangeScale(1/CGraph.SCALEDELTA/s,Axis.X);
+                    this.ChangeScale(1/CGraph.SCALEDELTA/s,Axis.Y);
+                }
+                else
+                this.ChangePos(-CGraph.POSDELTA*m,Axis.Z);
+            }
+            else
+            if (k==keys.K_DELETE)
+            {
+                this.DelExpr(csys.DColor);
+                this.reqredraw=2;
+            }
+            else
+            if ((k==keys.K_TAB)&&(this.hold==0)) this.NextExpr();
+            else
+            if (k==keys.K_MINUS)
+            {
+                this.nt-=m*50;
+                if (this.nt<50) this.nt=50;
+            }
+            else
+            if (k==keys.K_EQUAL)
+            {
+                this.nt+=m*50;
+            }
+            else
+            if (k==keys.K_OPEN_BRACKET)
+            {
+                this.t1-=Math.pow(10,-this.geps+2)*m;
+            }
+            else
+            if (k==keys.K_CLOSE_BRACKET)
+            {
+                this.t1+=Math.pow(10,-this.geps+2)*m;
+            }
+            else
+            if (k==keys.K_SEMICOLON)
+            {
+                this.t2-=Math.pow(10,-this.geps+2)*m;
+            }
+            else
+            if (k==keys.K_AMPERSAND)    //todo oryginally apostrophe
+            {
+                this.t2 += Math.pow(10, -this.geps + 2) * m;
+            }
+        /*#ifdef CG
+            if (k==keys.K_TILDE)
+            {
+                if (dir<0)
+                {
+                    if (useshaders>=0)
+                    useshaders=1-useshaders;
+                }
+                else
+                {
+                    cgs.currentprogram++;
+                    if (cgs.currentprogram>=CGPROGRAM_MAX) cgs.currentprogram=0;
+                }
+            }
+            else
+            if (k==keys.K_EXT0)
+            {
+                cgs.currentprogram=CGPROGRAM_DEFAULT;
+            }
+            else
+            if (k==keys.K_EXT1)
+            {
+                cgs.currentprogram=CGPROGRAM_BM;
+            }
+            else
+            if (k==keys.K_EXT2)
+            {
+                cgs.currentprogram=CGPROGRAM_ENV;
+            }
+            else
+            if (k==keys.K_EXT3)
+            {
+                cgs.currentprogram=CGPROGRAM_BMENV;
+            }
+            else
+            if (k==keys.K_EXT4)
+            {
+                cgs.effect=CGEFFECT_DEFAULT;
+                loadcgprograms();
+            }
+            else
+            if (k==keys.K_EXT5)
+            {
+                cgs.effect=CGEFFECT_NEGATIVE;
+                loadcgprograms();
+            }
+            else
+            if (k==keys.K_EXT6)
+            {
+                cgs.effect=CGEFFECT_SEPIA;
+                loadcgprograms();
+            }
+            else
+            if (k==keys.K_EXT7)
+            {
+                cgs.effect=CGEFFECT_8COLORS;
+                loadcgprograms();
+            }
+            else
+            if (k==keys.K_EXT8)
+            {
+                cgs.effect=CGEFFECT_16COLORS;
+                loadcgprograms();
+            }
+        #endif*/
+            else
+            if (k==keys.K_Q)
+            {
+                this.geps+=dir;
+                if (this.geps<0) this.geps=0;
+                else
+                if (this.geps>6) this.geps=6;
+            }
+            else
+            if (k==keys.K_E)
+            {
+                //todo envmap
+                /*if (envmapon>=0)
+                envmapon=1-envmapon;*/
+            }
+            if (k==keys.K_R)
+            {
+                if (this.gamemodeon==0)
+                this.repmode=1-this.repmode;
+            }
+            else
+            if (k==keys.K_Z)
+            {
+                this.titles=1-this.titles;
+            }
+            else
+            if (k==keys.K_C)
+            {
+                this.gridon = 1 - this.gridon;
+            }
+            else
+            if (k==keys.K_G)
+            {
+                this.twosidelighting=1-this.twosidelighting;
+        /*#ifdef OPENGL
+                gl_update();
+        #endif*/
+            }
+            else
+            if ((k==keys.K_H)&&(this.Is3DMode()))
+            {
+                if (this.hold) this.hold = 0; else this.hold = -1;
+            }
+            else
+            if (k==keys.K_J)
+            {
+                this.modlvec=1-this.modlvec;
+            }
+            else
+            if (k==keys.K_K)
+            {
+                this.holdlight=1-this.holdlight;
+                if (this.hold) this.hold = -1;
+            }
+            else
+            if (k==keys.K_L)
+            {
+                if (dir==1)
+                this.lightdist*=CGraph.SCALEDELTA;
+                else
+                this.lightdist/=CGraph.SCALEDELTA;
+                if (this.lightdist<this.D) this.lightdist=this.D;
+                if (this.hold) this.hold = -1;
+            }
+            else
+            if (k==keys.K_X)
+            {
+                this.axison=1-this.axison;
+            }
+            else
+            if ((k==keys.K_N)&&(this.hold==0)&&(this.Is3DMode()))
+            {
+                if (dir==1)
+                this.D/=2;
+                else
+                this.D*=2;
+                if (this.R<4*this.D) this.D/=2;
+                if (this.D<CGraph.DEFAULTD/256) this.D=CGraph.DEFAULTD/256;
+                this.reqredraw=2;
+            }
+            else
+            if ((k==keys.K_M)&&(this.hold==0)&&(this.Is3DMode()))
+            {
+                this.R+=this.D*dir;
+                if (this.R<4*this.D) this.R=4*this.D;
+                this.reqredraw=2;
+            }
+            else
+            if (k==keys.K_V)
+            {
+                this.vangle+=dir*(Math.PI/180.0);
+                if (this.vangle<(Math.PI/180.0)*5) this.vangle=(Math.PI/180.0)*5;
+                if (this.vangle>(Math.PI/180.0)*170) this.vangle=(Math.PI/180.0)*170;
+                this.setzdist();
+                this.reqredraw=2;
+        /*#ifdef OPENGL
+                gl_update();
+        #endif*/  
+            }
+            else
+            if (k==keys.K_B)
+            {
+                var prm: number;
+                if (this.gamemodeon) 
+                {
+                    this.gamemodeon=0;
+                    this.repmode=prm;
+                }
+                else
+                {
+                    this.gamemodeon=1;
+                    this.gms.time=csys.GetTime();
+                    prm=this.repmode;
+                    this.repmode=1;
+                }
+            }
+            else
+            if (k==keys.K_SLASH)
+            {
+                //todo
+                /*if (this.physicsmodel==PMODEL_SIMPLE) this.physicsmodel=PMODEL_ACCURATE;
+                else
+                this.physicsmodel=PMODEL_SIMPLE;*/
+            }
+            else
+            if (k==keys.K_BACK_SLASH)
+            {
+                this.fpsmode=1-this.fpsmode;
+                if (this.fpsmode==1)
+                {
+                    this.frames=0;
+                    this.timer0=csys.GetTime();
+                }
+            }
+            else
+            if (k==keys.K_SPACE)
+            {
+                if (this.gamemodeon) this.gms.moveplayer|=2;
+            }
+            else
+            if ((k==keys.K_0)&&(this.dfuncstruct[csys.DColor].status!=0))
+            {
+                //todo
+                /*var ey=expr_y;
+                expr_y=this.FJ(this.height-this.cursory,Axis.Y);
+                this.cursorx=this.FP(Findx0(&this.dexprlist[csys.DColor],this.FJ(this.cursorx,Axis.X),this.FJ(this.width,Axis.X)
+                ,1/this.s[Axis.X],0.5*Math.pow(10,-this.geps)),Axis.X);
+                csys.CursorPosSet(this.cursorx,this.cursory);
+                expr_y=ey;*/
+            }
+            else
+            if (k==keys.K_W)
+            {
+                this.ChangePos3D(changepos3ddelta,this.A[Axis.X],this.A[Axis.Z]);
+            }
+            else
+            if (k==keys.K_S)
+            {
+                this.ChangePos3D(-changepos3ddelta,this.A[Axis.X],this.A[Axis.Z]);
+            }
+            else
+            if (k==keys.K_A)
+            {
+                this.ChangePos3D(changepos3ddelta,0,this.A[Axis.Z]+Math.PI/2);
+            }
+            else
+            if (k==keys.K_D)
+            {
+                this.ChangePos3D(changepos3ddelta,0,this.A[Axis.Z]-Math.PI/2);
+            }
+            else
+            if (k==keys.K_F)
+            {
+                this.fitscr=1-this.fitscr;
+                if (this.fitscr)
+                this.s[Axis.Y]/=this.width/this.height;
+                else
+                this.s[Axis.Y]*=this.width/this.height;
+                this.updatepos();
+            }
+            else
+            if (k==keys.K_T)
+            {
+                if (this.dmethod==DrawMethod.MTEX)
+                this.dmethod=DrawMethod.MFILL; else this.dmethod=DrawMethod.MTEX;
+        /*#ifdef OPENGL
+                gl_update();
+        #endif*/
+                this.reqredraw=2;
+                if (this.hold) this.hold = -1;
+            }
+            else
+            if (k==keys.K_U)
+            {
+                if (this.dmethod>DrawMethod.MLINE)
+                this.dmethod=DrawMethod.MLINE; else this.dmethod=DrawMethod.MFILL;
+        /*#ifdef OPENGL
+                gl_update();
+        #endif*/
+                this.reqredraw=2;
+                if (this.hold) this.hold = -1;
+            }
+            else
+            if (k==keys.K_I)
+            {
+                this.lighting=1-this.lighting;
+        /*#ifdef OPENGL
+                gl_update();
+        #endif*/
+                this.reqredraw=2;
+                if (this.hold) this.hold = -1;
+            }
+            if (k==keys.K_P)
+            {
+                this.changepos3dmode=1-this.changepos3dmode;
+            }
+        //sterowanie opengl 
+        /*#ifdef OPENGL
+            else
+            if (k==keys.K_O)
+            {
+                gl_used=1-gl_used;
+                if (gl_used)
+                gl_update();
+                this.reqredraw=2;
+                if (this.hold) hold=-1;
+            }
+            else
+            if (k==keys.K_Y)
+            {
+                gl_cull=1-gl_cull;
+                gl_update();
+                this.reqredraw=2;
+            }
+        #endif*/ 
+            
+            //tryby
+            //todo
+            //for (var i: number=keys.K_1; i<DrawMode.MMAX+keys.K_1; i++) if (k==i) csys.SetDMode(i-keys.K_1);
+            
+            //mysz
+            var mk=csys.MouseKey();
+            if (mk)
+            {
+                if (this.Is3DMode())
+                    this.ChangePos3D(changepos3ddelta / 2 * ((mk == 2) ? -1 : 1), this.A[Axis.X], this.A[Axis.Z]);
+                else
+                {
+                    this.ChangePos(CGraph.POSDELTA * m * (2 * (mk == 1 ? 1 : 0) - 1) * (this.cursorx - this.width_div_2) / 100, Axis.X);
+                    this.ChangePos(CGraph.POSDELTA*m*(2*(mk==1?1:0)-1)*(-this.cursory+this.height_div_2)/100,Axis.Y);
+                }
+            }
+        
+        /*#ifdef MENU 
+            //obsluz menu
+            setmenustate();
+        #endif*/
+        }
+
         updatepos(): void
         {
             this.cj[Axis.X]=this.j[Axis.X]-this.p[Axis.X]/2/this.s[Axis.X];
@@ -174,6 +598,8 @@ module ExprAE.Graph {
             this.cp[Axis.Y]=this.p[Axis.Y]/2-this.s[Axis.Y]*this.j[Axis.Y];
             this.cp[Axis.Z]=this.p[Axis.Z]/2-this.s[Axis.Z]*this.j[Axis.Z];
         }
+
+        setzdist(): void { this.p[Axis.Z] = this.width_div_2 / Math.tan(this.vangle / 2); }
             
         defaults(): void
         {
@@ -546,6 +972,17 @@ module ExprAE.Graph {
             }
         }
 
+        ChangeActiveState(state: number): void
+        {
+            if (state == 0) this.enddrawfunc();
+            else
+            this.reqredraw=3;
+        /*#ifdef MENU
+            setmenuactivestate(state);
+        #endif*/
+        }
+        
+
         genpalettes(): void
         {
             for (var i=0; i<CGraph.MAXFUNCCOUNT; i++) {
@@ -631,6 +1068,12 @@ module ExprAE.Graph {
                 this.reqredraw=1;
                 //if (DMode==DrawMode.K2DF1) expr_y=this.FJ(height-this.cursory,Axis.Y);
             }
+        }
+
+        ChangePos(d: number,axis: number): void
+        {
+            this.j[axis]+=d/this.s[axis];
+            this.updatepos();
         }
 
         ChangePos3D(d: number,anglex: number,anglez: number): void
