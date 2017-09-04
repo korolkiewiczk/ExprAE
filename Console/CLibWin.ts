@@ -29,7 +29,7 @@ module ExprAE.Console {
 		{
             super(w,h,b);
 
-            this.lines=(y2-y1)/CLibWin.CWCHARHEIGHT; 
+            this.lines=Math.floor((y2-y1)/CLibWin.CWCHARHEIGHT);
             this.pos=this.npos=this.lpos=0; 
             this.ebuf="";
             this.x10=x1; 
@@ -50,7 +50,7 @@ module ExprAE.Console {
             this.y1=(this.y10*dh);
             this.y2=(this.y20*dh);
             this.buf=b;
-            this.lines=(this.y2-this.y1)/CLibWin.CWCHARHEIGHT; 
+            this.lines=Math.floor((this.y2-this.y1)/CLibWin.CWCHARHEIGHT); 
             this.pos/*=npos*/=this.lpos=0;
             this.Set(this.ebuf);
         }
@@ -103,7 +103,7 @@ module ExprAE.Console {
             else
             {
                 var c: string = "\0";
-                if ((k>keys.K_1)&&(k<=keys.K_0))  //***
+                if ((k>keys.K_1)&&(k<=keys.K_9))  //***
                 {
                     this.ebuf+= CLibWin.Num2Char[k-keys.K_1-1];
                     this.ebuf += "|";

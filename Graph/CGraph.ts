@@ -278,7 +278,8 @@ module ExprAE.Graph {
         {
             var cx: number;
             var cy: number;
-            csys.cursorPos(cx,cy);
+            cx = csys.getMouseX();
+            cy = csys.getMouseY();
             if ((cx!=this.cursorx)||(cy!=this.cursory))
             {
                 if (this.Is3DMode())
