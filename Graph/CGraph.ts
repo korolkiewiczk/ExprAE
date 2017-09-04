@@ -33,7 +33,7 @@ module ExprAE.Graph {
             D.RGB32(255,255,0),
             D.RGB32(255,0,255),
             D.RGB32(0,255,255),
-            D.RGB32(255,128,0),
+            D.RGB32(255,128,0)
         );
 
         private Palette: number[][] = [];
