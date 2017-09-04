@@ -22,7 +22,7 @@ module ExprAE.Expressions {
         private RETSTRLEN = 64;
         private MAXSTRINGS = 16;
 
-        private exprstr: string[];
+        private exprstr: string;
         private strdata: string[];
         private retstr: string[];
         private hashtab: number[];
@@ -74,8 +74,7 @@ module ExprAE.Expressions {
             this.onpstack = [];
             this.hashtab = [];
 
-            this.exprstr = [];
-            this.exprstr[0] = '\0';
+            this.exprstr = '';
 
             this.strdata = [];
             this.strdata[0] = '\0';
@@ -93,7 +92,6 @@ module ExprAE.Expressions {
             }
 
             var bf: string[] = [];
-            var exprbuf: string[] = [];
             var stack: any[][] = [];
             var sl = -1;
             var pom = 0;
@@ -124,7 +122,6 @@ module ExprAE.Expressions {
             var i: number;
             var c: string;
             this.strcount = 0;
-            this.exprstr[0] = '\0';
 
             var isextracode = 0; //dla trybu do_code
             var exprPos = 0;
@@ -425,9 +422,8 @@ module ExprAE.Expressions {
                 if (this.onpl >= this.MAXONPBUFLEN) return ErrorCodes.BufOverflow;
             }
 
-            this.exprstr = exprbuf;
-
             this.isCompiled=true;
+            this.exprstr=expr;
             return ErrorCodes.NoErr;
         }
 
@@ -539,6 +535,10 @@ module ExprAE.Expressions {
                 throw "Invalid stack";
             else
                 return this.onpstack[0][1];
+        }
+
+        getExprStr(): string {
+            return this.exprstr;
         }
 
         private atoi(arr: string[], start: number = 0): number {
