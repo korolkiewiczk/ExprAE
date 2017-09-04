@@ -286,6 +286,14 @@ module ExprAE.System {
             return CSys.mouseY;
         }
 
+        static cursorPos(x: number, y: number): void {
+            //todo
+        }
+
+        static cursorPosSet(x: number, y: number): void {
+            //todo
+        }
+
         static AddVar(name: string, addr: ICB, flags: number) {
             var e = new Expressions.ELEMENT(name, addr, 0, 0, 0, flags);
             CSys.varlib.addElement(e);
