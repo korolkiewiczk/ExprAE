@@ -1,6 +1,7 @@
 module ExprAE {
     export class Main {
         private expr: Expressions.CExpr;
+        private graph: Graph.CGraph;
 
         main(): void {
             System.CSys.Init();
@@ -17,7 +18,9 @@ module ExprAE {
                 20,20,System.CSys.ScrWidth-20,System.CSys.ScrHeight*2/3,library);*/
 
             var con = new Console.CCon(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf(), new Expressions.POINTER(this, this.comp), libwin);
-            var graph = new Graph.CGraphTester(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf());
+            var graphTester = new Graph.CGraphTester(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf());
+
+            this.graph = new Graph.CGraph(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf(), stdlib)
             /*sound=new CSound(System.CSys.ScrWidth,System.CSys.ScrHeight,buf);
             CGraph::currentgraph=graph;
             CSound::currentsound=sound;
@@ -27,7 +30,8 @@ module ExprAE {
             UserFunc_Init(library);
             */
             System.CSys.SetWindow(con, System.Windows.Win_Con);
-            System.CSys.SetWindow(graph, System.Windows.Win_GraphTester);
+            System.CSys.SetWindow(this.graph, System.Windows.Win_Graph);
+            System.CSys.SetWindow(graphTester, System.Windows.Win_GraphTester);
             /*System.CSys.SetWindow(help,System.CSys.Win_Help);
             System.CSys.SetWindow(sound,System.CSys.Win_Sound);
             System.CSys.SetWindow(libwin,System.CSys.Win_Winlib);*/
@@ -40,6 +44,7 @@ module ExprAE {
         comp(th: any, s: string): string {
             var result = (th.expr as Expressions.CExpr).set(s);
             if (result==Expressions.ErrorCodes.NoErr) {
+                th.graph.SetExpr((th.expr as Expressions.CExpr).getExprStr(), th.expr, System.CSys.DColor, System.CSys.DColor);
                 return th.expr.do();
             }
             else {

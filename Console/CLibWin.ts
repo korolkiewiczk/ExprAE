@@ -41,15 +41,14 @@ module ExprAE.Console {
 			this.retbuf="";
         }
         
-        Change(b: Uint32Array, w?: number, h?: number) {
-            var dw = w / this.w0, dh = h / this.h0;
-            this.width=w;
-            this.height=h;
+        Change(buf: Uint32Array, width?: number, height?: number) {
+            var dw = width / this.w0, dh = height / this.h0;
+            super.Change(buf, width, height);
+            
             this.x1=this.x10*dw;
             this.x2=(this.x20*dw);
             this.y1=(this.y10*dh);
             this.y2=(this.y20*dh);
-            this.buf=b;
             this.lines=Math.floor((this.y2-this.y1)/CLibWin.CWCHARHEIGHT); 
             this.pos/*=npos*/=this.lpos=0;
             this.Set(this.ebuf);

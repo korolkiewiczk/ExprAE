@@ -24,6 +24,8 @@ module ExprAE.Graph {
         //static GRAPHTAB_SIZE(a) = ((a)*(a)+(2*a));
         static CUBEMAPTEXID = 64;
 
+        static NOFUNCTEXT = "No function defined!";
+
         static Color: number[] = new Array(
         
             D.RGB32(255,255,255),
@@ -44,69 +46,69 @@ module ExprAE.Graph {
         private j: number[] = [];
         private p: number[] = [];
         
-        private reqredraw: number;
+        private reqredraw: number = 0;
         
-        private repmode: number;
-        private titles: number;
-        private axison: number;
-        private gridon: number;
-        private geps: number; //dokladnosc wynikow w postaci 10^(-geps)
-        private fitscr: number; //czy ma dopasowac wykresy do ekranu
+        private repmode: number = 0;
+        private titles: number = 0;
+        private axison: number = 0;
+        private gridon: number = 0;
+        private geps: number = 0; //dokladnosc wynikow w postaci 10^(-geps)
+        private fitscr: number = 0; //czy ma dopasowac wykresy do ekranu
         
-        private fps: number;        //liczba klatek na sekunde
-        private timer: number;      //miernik czasu rysowania
-        private frames: number;     //ilosc wygenerowanych klatek
-        private timer0: number;     //czas poczatkowy dla liczenia sredniej liczby fps
-        private fpsmode: number;    //tryb pokazywania liczby fps'ow
+        private fps: number = 0;        //liczba klatek na sekunde
+        private timer: number = 0;      //miernik czasu rysowania
+        private frames: number = 0;     //ilosc wygenerowanych klatek
+        private timer0: number = 0;     //czas poczatkowy dla liczenia sredniej liczby fps
+        private fpsmode: number = 0;    //tryb pokazywania liczby fps'ow
         
-        private cursorx: number;
-        private cursory: number;
+        private cursorx: number = 0;
+        private cursory: number = 0;
         
         /*zmienne dla funkcji parametrycznej okreslajace przedzial
         zmiennosci zmiennej t (od t1 do t2 ze zmiana dt)*/
-        private t1: number;
-        private t2: number;
-        private nt: number;
+        private t1: number = 0;
+        private t2: number = 0;
+        private nt: number = 0;
         
         //dane dla 3D
-        private vangle: number;       //kat widocznosci
+        private vangle: number = 0;       //kat widocznosci
         private A: number[] = []; //katy, np. a[AxisZ] oznacza katy obrotu wokol osi OZ
-        private R: number;    //promien widocznowsci
-        private D: number;    //odleglosci miedzy punktami siatki
-        private N: number;      //2*R/D
+        private R: number = 0;    //promien widocznowsci
+        private D: number = 0;    //odleglosci miedzy punktami siatki
+        private N: number = 0;      //2*R/D
         
-        private width_div_2: number;
-        private height_div_2: number;
-        private sinax: number;
-        private cosax: number;
-        private sinay: number;
-        private cosay: number;
-        private sinaz: number;
-        private cosaz: number; //obliczone wczesniej sinusy i cosinusy
+        private width_div_2: number = 0;
+        private height_div_2: number = 0;
+        private sinax: number = 0;
+        private cosax: number = 0;
+        private sinay: number = 0;
+        private cosay: number = 0;
+        private sinaz: number = 0;
+        private cosaz: number = 0; //obliczone wczesniej sinusy i cosinusy
         
-        private lightdist: number; //odleglosc dla ktorej nie widac juz obiektu
+        private lightdist: number = 0; //odleglosc dla ktorej nie widac juz obiektu
         
-        private changepos3dmode: number;           //szybkosc zmainy pozycji w trybie 3d
+        private changepos3dmode: number = 0;           //szybkosc zmainy pozycji w trybie 3d
                                                                                                                                     //0-rowne D, 1-1/256*R
         
         //wlacz lub wylacz zmiane natezenia koloru w zaleznosci od odleglosci
         //jezeli wyl to natezenie zalezy dla kazdego polozenia od lightdist(255-najjasniejsze)
-        private holdlight: number;
+        private holdlight: number = 0;
         
         //jesli wlaczone to modyfikowany jest wektor swiatla
-        private modlvec: number;
+        private modlvec: number = 0;
         
         //punkt kamery
-        private xs: number;
-        private ys: number;
-        private zs: number;
+        private xs: number = 0;
+        private ys: number = 0;
+        private zs: number = 0;
         //punkt kamery zatrzymany
-        private hxs: number;
-        private hys: number;   //srodek punktu rysowania
-        private cx1: number;
-        private cy1: number;
-        private cx2: number;
-        private cy2: number;
+        private hxs: number = 0;
+        private hys: number = 0;   //srodek punktu rysowania
+        private cx1: number = 0;
+        private cy1: number = 0;
+        private cx2: number = 0;
+        private cy2: number = 0;
         
         //TABLICE DANYCH WYKRESU
         private valtab: number[] = []; //tablica z obliczonymi wartosciami funkcji, przydzielana dynamicznie
@@ -119,51 +121,213 @@ module ExprAE.Graph {
         
         //status wykonywanych operacji 0-projectbuf,2-normaltab,4-colortab,6-rysowanie.
         //nieparzyste-w trakcie
-        private dstate: number;
+        private dstate: number = 0;
         
-        private hold: number;        //czy wstrzymac obliczanie valtab-w tym trybie rysowana jest tylko 1 funkcja
+        private hold: number = 0;        //czy wstrzymac obliczanie valtab-w tym trybie rysowana jest tylko 1 funkcja
         
         //sposoby rysowania w 3D
         private dmethod: DrawMethod;
         
         //czy oswietlenie
-        lighting: number;
+        lighting: number = 0;
         
         //czy oswietlenie rozne dla przedniej i tylnej powierzchni
-        twosidelighting: number;
+        twosidelighting: number = 0;
         
         //wektor oswietlenia
         light_vec: number[] = [];
 
         //listy wyrazen i nazw
-        private dexprlist: Expressions.CExpr[] = [];
-        private dfuncstruct: FUNCSTRUCT[] = [];
+        private dexprlist: Expressions.CExpr[];
+        private dfuncstruct: FUNCSTRUCT[];
         private dstack: number[] = [];
-        private dstackl: number;
+        private dstackl: number = 0;
         
         //tekstrury dla wykresow
         tex: Drawing.CTex[] = [];
         envmap: Drawing.CTex[] = [];
     
         //wartosci obliczone w celu przyspieszenia obliczen
-        private _255_lightdist: number;
+        private _255_lightdist: number = 0;
         //wyrazenie dla funckcji circlefunc
         private circfunc_expr: Expressions.CExpr;
-        private circfunc_dir: number;
-        private circfunc_palwsk: number;
-        private circfunc_disty: number;
-        private circfunc_D2: number; //D*D
-        private circfunc_D4: number; //D*D*D*D
-        private circfunc_1_2_D: number; //D/2
-        private circfunc_constcol: number;
+        private circfunc_dir: number = 0;
+        private circfunc_palwsk: number = 0;
+        private circfunc_disty: number = 0;
+        private circfunc_D2: number = 0; //D*D
+        private circfunc_D4: number = 0; //D*D*D*D
+        private circfunc_1_2_D: number = 0; //D/2
+        private circfunc_constcol: number = 0;
         private circfunc_tex: Drawing.CTex;
 
         private gms: GAMEMODESTRUCT;
-        private gamemodeon: number;
-        private physicsmodel: number;
+        private gamemodeon: number = 0;
+        private physicsmodel: number = 0;
 
-        DMode: number;
-        GraphState: number;
+        private envmapon: number = 0;
+
+        DMode: number = 0;
+        GraphState: number = 0;
+
+        constructor(width: number, height: number, buf: Uint32Array, 
+            private stdlib: Expressions.Stdlib) {
+            super(width,height,buf);
+
+            this.p[Axis.X]=this.width;
+            this.p[Axis.Y]=this.height;
+            this.width_div_2 = this.width >> 1;
+            this.height_div_2=this.height>>1;
+            this.vangle=CGraph.DEFAULTVANLGE;
+            this.setzdist();
+            this.N=0;
+            this.valtab=[];
+            this.fitscr=0;
+            this.changepos3dmode=0;
+            this.gms=new GAMEMODESTRUCT();
+
+            this.defaults();
+            
+            this.dexprlist = [];
+            this.dfuncstruct = Array.apply(null, Array(CGraph.MAXFUNCCOUNT)).map(function() {return new FUNCSTRUCT(0,0)});
+            
+            //dexprlist[CGraph.MAXFUNCCOUNT]=cexpr(cexpr.GetLib());
+            //this.dexprlist[CGraph.MAXFUNCCOUNT+1]=cexpr(cexpr.GetLib());
+            this.valtab=[];
+            this.projecttab=[];
+            this.normaltab=[];
+            this.colortab=[];
+            this.texcoordtab=[];
+            this.zbuf=new Uint32Array(width*height);
+        /*#ifdef OPENGL
+            gl_colortab=0;
+            gl_vertextab=0;
+            gl_indextab=0;
+        
+            gl_light_ambient[0]=0.0f;
+            gl_light_ambient[1]=0.0f;
+            gl_light_ambient[2]=0.0f;
+            gl_light_ambient[3]=1;
+            gl_light_diffuse[0]=1;
+            gl_light_diffuse[1]=1;
+            gl_light_diffuse[2]=1;
+            gl_light_diffuse[3]=1;
+            gl_light_specular[0]=0.5;
+            gl_light_specular[1]=0.5;
+            gl_light_specular[2]=0.5;
+            gl_light_specular[3]=1;
+            gl_light_emission[0]=0.0f;
+            gl_light_emission[1]=0.0f;
+            gl_light_emission[2]=0.0f;
+            gl_light_emission[3]=1;
+            gl_shininess=120.f;
+            gl_used=1;
+            csys.AddVar("gl_light_ambient",&gl_light_ambient,VAR_number);
+            csys.AddVar("gl_light_diffuse",&gl_light_diffuse,VAR_number);
+            csys.AddVar("gl_light_specular",&gl_light_specular,VAR_number);
+            csys.AddVar("gl_shininess",&gl_shininess,VAR_number);
+            
+        /*#ifdef CG
+            initshaders();
+        #endif
+        #endif*/
+        
+            this.reqredraw=1;
+            this.repmode=0;
+            this.titles=1;
+            this.dmethod=DrawMethod.MLINE;
+            this.lighting=0;
+            this.gridon = 0;
+            this.axison=1;
+            this.dstackl=0;
+            this.geps=3;
+            this.fpsmode=0;
+            this.light_vec[3]=0;
+            this.lightdist=CGraph.DEFAULTR*4;
+
+            //todo textures
+            //for (i: number=0; i<CGraph.MAXFUNCCOUNT; i++) this.tex[i].Load(0);
+            //for (i: number=0; i<6; i++) {this.envmap[i].SetAsCubeMapTex(i,CGraph.CUBEMAPTEXID); this.envmap[i].Load(0);}
+            
+            //dla trybu gry standardowe ustawienia
+            this.gms.grav=9.81;
+            this.gms.friction=0.25;
+            this.gms.player_height=1.8;
+            this.gms.player_mass=70*1000;
+            this.gms.player_maxvel=8;
+            this.gms.player_acc=15;
+            this.gms.player_jumpvel=5;
+            this.physicsmodel=PhysicsModel.ACCURATE; //model dokladny
+            
+            //todo variables
+            /*csys.AddVar("player_maxvel",&this.gms.player_maxvel,VAR_number);
+            csys.AddVar("player_height",&this.gms.player_height,VAR_number);
+            csys.AddVar("player_acc",&this.gms.player_acc,VAR_number);
+            csys.AddVar("player_jumpvel",&this.gms.player_jumpvel,VAR_number);
+            csys.AddVar("gravity",&this.gms.grav,VAR_number);
+            csys.AddVar("friction",&this.gms.friction,VAR_number);
+            csys.ExecCfg("game");*/
+        
+            //zmienne trybu wykresu
+            /*csys.AddVar("graphcolor",&Color,VAR_RGB);
+            csys.AddVar("lightvec",&this.light_vec,VAR_number);
+            envmapfile[0]=0;
+            csys.AddVar("this.envmap",envmapfile,VAR_STR);
+            
+            csys.AddVar("pos",&this.j,VAR_number);
+            csys.AddVar("angle",&this.A,VAR_number);
+            
+            csys.ExecCfg("graph");
+            csys.DelVar("graphcolor");*/
+        /*#ifdef MENU
+            initmenu();
+        #endif*/
+                
+        /*#ifdef OPENGL
+            gl_defaults();
+        #endif*/
+        
+            this.genpalettes();
+            
+            this.holdlight=0;
+            this.envmapon = 0;
+
+            //todo envmap
+            /*if (envmapfile[0]!=0)
+            {
+                if (loadenvmap(envmapfile)) 
+                {
+                    envmapon=1;
+                    this.lightdist=255;
+                    this.holdlight=1;
+                }
+            }*/
+        }
+
+        Change(buf: Uint32Array, width?: number,height?: number): void
+        {
+            super.Change(buf,width,height);
+            
+            this.zbuf=new Uint32Array(width*height);
+            this.width_div_2 = this.width >> 1;
+            this.height_div_2=this.height>>1;
+            this.p[Axis.X]=this.width;
+            this.p[Axis.Y]=this.height;
+            this.setzdist();
+            this.s[Axis.X]=this.p[Axis.X]/CGraph.DEFAULT_JWIDTH;
+            if (this.fitscr)
+            this.s[Axis.Y]=this.p[Axis.Y]/CGraph.DEFAULT_JWIDTH;
+            else
+            this.s[Axis.Y]=this.p[Axis.Y]/CGraph.DEFAULT_JWIDTH*this.width/this.height;
+            this.s[Axis.Z]=this.p[Axis.Z]/CGraph.DEFAULT_JWIDTH;
+            this.reqredraw=3;
+            this.updatepos();
+        /*#ifdef OPENGL
+            gl_update();
+        /*#ifdef CG
+            initshaders();
+        #endif
+        #endif*/
+        }
 
         KeyFunc(k: number): void
         {
@@ -261,7 +425,7 @@ module ExprAE.Graph {
                 this.t2-=Math.pow(10,-this.geps+2)*m;
             }
             else
-            if (k==keys.K_AMPERSAND)    //todo oryginally apostrophe
+            if (k==keys.K_QUOTE)
             {
                 this.t2 += Math.pow(10, -this.geps + 2) * m;
             }
@@ -341,9 +505,8 @@ module ExprAE.Graph {
             else
             if (k==keys.K_E)
             {
-                //todo envmap
-                /*if (envmapon>=0)
-                envmapon=1-envmapon;*/
+                if (this.envmapon >= 0)
+                    this.envmapon = 1 - this.envmapon;
             }
             if (k==keys.K_R)
             {
@@ -432,7 +595,7 @@ module ExprAE.Graph {
             else
             if (k==keys.K_B)
             {
-                var prm: number;
+                var prm: number = 0;    //todo static
                 if (this.gamemodeon) 
                 {
                     this.gamemodeon=0;
@@ -449,10 +612,9 @@ module ExprAE.Graph {
             else
             if (k==keys.K_SLASH)
             {
-                //todo
-                /*if (this.physicsmodel==PMODEL_SIMPLE) this.physicsmodel=PMODEL_ACCURATE;
+                if (this.physicsmodel==PhysicsModel.SIMPLE) this.physicsmodel=PhysicsModel.ACCURATE;
                 else
-                this.physicsmodel=PMODEL_SIMPLE;*/
+                this.physicsmodel=PhysicsModel.SIMPLE;
             }
             else
             if (k==keys.K_BACK_SLASH)
@@ -472,13 +634,11 @@ module ExprAE.Graph {
             else
             if ((k==keys.K_0)&&(this.dfuncstruct[csys.DColor].status!=0))
             {
-                //todo
-                /*var ey=expr_y;
-                expr_y=this.FJ(this.height-this.cursory,Axis.Y);
-                this.cursorx=this.FP(Findx0(&this.dexprlist[csys.DColor],this.FJ(this.cursorx,Axis.X),this.FJ(this.width,Axis.X)
-                ,1/this.s[Axis.X],0.5*Math.pow(10,-this.geps)),Axis.X);
-                csys.CursorPosSet(this.cursorx,this.cursory);
-                expr_y=ey;*/
+                var ey=this.stdlib.expr_y;
+                this.stdlib.expr_y=this.FJ(this.height-this.cursory,Axis.Y);
+                this.cursorx=this.FP(this.Findx0(this.dexprlist[csys.DColor],this.FJ(this.cursorx,Axis.X),this.FJ(this.width,Axis.X) ,1/this.s[Axis.X],0.5*Math.pow(10,-this.geps)),Axis.X);
+                csys.cursorPosSet(this.cursorx,this.cursory);
+                this.stdlib.expr_y=ey;
             }
             else
             if (k==keys.K_W)
@@ -589,6 +749,87 @@ module ExprAE.Graph {
         #endif*/
         }
 
+        Process(): void
+        {
+            this.timer=csys.GetTime();
+            this.handlemouse();
+            if (this.dstackl==-2)
+            {
+                this.dstackl=0;
+            }
+            else
+            if (this.reqredraw)
+            {
+                if (this.Is3DMode())
+                {
+                    if (this.dstackl!=-1)
+                    {
+                        if (this.reqredraw>1) this.dstackl=-2;
+                    }
+                    else this.dstackl=0;
+                }
+                else
+                {
+                    if (this.dstackl!=-1)
+                    {
+                        if ((this.repmode==0)||(this.reqredraw>1)) this.dstackl=-2;
+                    }
+                    else this.dstackl=0;
+                }
+                this.reqredraw=0;
+            }
+            
+            if (this.dstackl==-2)
+            {
+                this.enddrawfunc();
+                return;
+            }
+            
+            if (this.dstackl==0)
+            {
+                var i: number;
+                if (this.dfuncstruct[csys.DColor].status!=0)
+                {
+                    this.dstack[this.dstackl++] = csys.DColor;
+                    this.dfuncstruct[csys.DColor].status=1;
+                }
+                for (i=0; i<CGraph.MAXFUNCCOUNT; i++)
+                    if ((this.dfuncstruct[i].status!=0)&&(csys.DColor!=i))
+                    {
+                        this.dstack[this.dstackl++] = i;
+                        this.dfuncstruct[i].status=1;
+                    }
+                if (this.dstackl>0)
+                    this.begindrawfunc();
+                else
+                {
+                    this.Clear();
+                    this.DrawText(this.width_div_2 - CGraph.NOFUNCTEXT.length * this.fontwidth / 2, this.height_div_2 - this.fontheight / 2,
+                    csys.Color[csys.CHelp],CGraph.NOFUNCTEXT);
+                }
+            }
+            
+            if (this.dstackl>0)
+            {
+                while (this.dstackl)
+                {
+                    if (this.dfuncstruct[this.dstack[this.dstackl - 1]].status == 1)
+                    {
+                        this.dstate=0;
+                    }
+                    if (!this.drawfunc(this.dexprlist[this.dstack[this.dstackl - 1]], this.dfuncstruct[this.dstack[this.dstackl - 1]])) return;
+
+                    //todo
+                    //if (this.gamemodeon) updateplayer();
+                    this.dstackl--;
+                }
+                this.enddrawfunc();
+                if (!this.repmode) this.dstackl=-1;
+            }
+            this.gms.moveplayer=0;
+            if (this.hold==-1) this.hold=csys.DColor+1;
+        }
+
         updatepos(): void
         {
             this.cj[Axis.X]=this.j[Axis.X]-this.p[Axis.X]/2/this.s[Axis.X];
@@ -626,7 +867,7 @@ module ExprAE.Graph {
             this.hold=0;
             this.twosidelighting=0;
             this.gamemodeon=0;
-            this.gms.player_vel=new VEC();
+            this.gms.player_vel=new VEC(0,0,0);
             this.gms.player_accv=new VEC2(0,0);
             this.D=CGraph.DEFAULTD;
             this.cursorx=csys.getMouseX();
@@ -634,9 +875,30 @@ module ExprAE.Graph {
             this.updatepos();
         }
 
+
+        rotate(x: number,y: number,z: number): VEC
+        {
+            //OZ
+            var xr=x*this.cosaz+y*this.sinaz;
+            var yr=-x*this.sinaz+y*this.cosaz;
+            //OX
+            y=yr;
+            var yr=y*this.cosax+z*this.sinax;
+            var zr=-y*this.sinax+z*this.cosax;
+
+            return new VEC(xr,yr,zr);
+            
+            //brak obslugi obrotu wokow osi OY dla przyspeszenia obliczen
+            /*//OY
+            x=xr;
+            z=zr;
+            xr=x*cosay+z*this.sinay;
+            zr=z*cosay-x*this.sinay;*/
+        }
+
         project(x: number,y: number,z: number): VEC2
         {
-            if (z<CGraph.MINPROJECTZ) return VEC2.empty();
+            if (z<CGraph.MINPROJECTZ) return VEC2.invalid();
             var xp = Math.round(x * this.p[Axis.Z] / z) + this.width_div_2;
             var yp=-Math.round(y*this.p[Axis.Z]/z)+this.height_div_2;
 
@@ -661,12 +923,36 @@ module ExprAE.Graph {
         allocbuffers(): void
         {
            //todo
-           this.zbuf=new Uint32Array(this.width*this.height);
+        }
+
+        drawfunc(expr: cexpr,f: FUNCSTRUCT): number
+        {
+            if (csys.GetTime()-this.timer>CGraph.MAXDRAWINGTIME) return 0;
+            
+            if (this.DMode == DrawMode.K2DF1)
+            {
+                this.drawfunc_K2DF1(expr,f);
+            }
+            
+            else
+            if (this.DMode == DrawMode.K2DXY)
+            {
+                if (!this.drawfunc_K2DXY(expr,f)) return 0;
+            }
+            
+            else
+            if (this.DMode == DrawMode.K2DF2)
+            {
+                if (!this.drawfunc_K2DF2(expr,f)) return 0;
+            }
+            
+            //todo 3d part
+            return 1;
         }
 
         begindrawfunc(): void
         {
-            //expr_time=csys.GetTime(); todo
+            this.stdlib.expr_time=csys.GetTime();
             csys.PresentWait=0;
             this.GraphState = (GraphStateEnum.FillMode * (this.dmethod != DrawMethod.MLINE? 1:0)) |
                 (GraphStateEnum.EnableTexture*(this.dmethod==DrawMethod.MTEX?1:0))|
@@ -762,6 +1048,7 @@ module ExprAE.Graph {
         #else
             Clear();
         #endif*/
+            this.Clear();
             if (this.axison&&(!this.Is3DMode())) this.drawaxis();
             /*cexpr.MultiExec=cexpr.MultiExec_Begin;
             this.dexprlist[CGraph.MAXFUNCCOUNT].Do();
@@ -797,8 +1084,8 @@ module ExprAE.Graph {
             this.drawinfo();
             if (this.fpsmode==0)
             {
-                //if (csys.GetTime()-expr_time>0)   //todo
-                //this.fps=1/(csys.GetTime()-expr_time);
+                if (csys.GetTime()-this.stdlib.expr_time>0)
+                this.fps=1/(csys.GetTime()-this.stdlib.expr_time);
             }
             else
             {
@@ -807,6 +1094,195 @@ module ExprAE.Graph {
             this.frames++;
             csys.PresentWait=0;
             //cexpr.MultiExec=cexpr.MultiExec_Once;
+        }
+
+        drawfunc_K2DF1(expr: cexpr,f: FUNCSTRUCT): number
+        {
+            var color=CGraph.Color[f.color];
+            var i: number;
+            var x1: number;
+            var y1: number;
+            var x2: number;
+            var y2: number;
+            f.status=2;
+            
+            x1=this.FJ(0,Axis.X);
+            for (i=1; i<this.width; i++)
+            {
+                x2=this.FJ(i,Axis.X);
+                this.stdlib.expr_x=x1;
+                y1=this.height-this.FP(expr.do(),Axis.Y)+0.5;
+                this.stdlib.expr_x=x2;
+                y2=this.height-this.FP(expr.do(),Axis.Y)+0.5;
+                if (!(D.IS_UD(y1)&&D.IS_UD(y2)))
+                {
+                    if (D.IS_UD(y1)) y1=this.height-this.FP(0,Axis.Y);
+                    else
+                    if (D.IS_INFM(y1)) y1=-1000000;
+                    else
+                    if (D.IS_INFP(y1)) y1=1000000;
+                    if (D.IS_UD(y2)) y2=this.height-this.FP(0,Axis.Y);
+                    else
+                    if (D.IS_INFM(y2)) y2=-1000000;
+                    else
+                    if (D.IS_INFP(y2)) y2=1000000;
+                    if ((Math.abs(y1-y2)<1000)||((Math.abs(y1-y2)<10000)&&(y1*y2>0)))
+                    {
+                        this.VLine(i-1,y1,((y1+y2)/2),color);
+                        this.VLine(i,((y1+y2)/2),y2,color);
+                    }
+                }
+                x1=x2;
+            }
+            return 1;
+        }
+
+        drawfunc_K2DXY(expr: cexpr,f: FUNCSTRUCT): number
+        {
+            var palwsk=this.Palette[f.color];
+            var x1: number;
+            var y1: number;
+            var x2: number;
+            var y2: number;
+            if (f.status==1)
+            {
+                f.status=2;
+                this.stdlib.expr_t=this.t1;
+            }
+            var dt=(this.t2-this.t1)/(this.nt-1);
+            if (Math.abs(dt)<=0.000001) return 1;
+            expr.do();
+            x1=this.stdlib.expr_x;
+            y1=this.stdlib.expr_y;
+            if (D.IS_UD(x1)) x1=0;
+            else
+            if (D.IS_INFM(x1)) x1=-10000;
+            else
+            if (D.IS_INFP(x1)) x1=10000;
+                
+            if (D.IS_UD(y1)) y1=0;
+            else
+            if (D.IS_INFM(y1)) y1=-10000;
+            else
+            if (D.IS_INFP(y1)) y1=10000;
+            this.stdlib.expr_t+=dt;
+            
+            var i=0;
+            
+            while (this.stdlib.expr_t<=this.t2)
+            {
+                var w=expr.do();
+                var color: number;
+                if (w!=0)
+                {
+                    color=palwsk[Math.floor(w*255)&255];
+                
+                    x2=this.stdlib.expr_x;
+                    y2=this.stdlib.expr_y;
+                    
+                    if (D.IS_UD(x2)) x2=0;
+                    else
+                    if (D.IS_INFM(x2)) x2=-10000;
+                    else
+                    if (D.IS_INFP(x2)) x2=10000;
+                    
+                    if (D.IS_UD(y2)) y2=0;
+                    else
+                    if (D.IS_INFM(y2)) y2=-10000;
+                    else
+                    if (D.IS_INFP(y2)) y2=10000;
+                    
+                    this.Line(Math.round(this.FP(x1,Axis.X)),Math.round(this.height-this.FP(y1,Axis.Y)),
+                                        Math.round(this.FP(x2,Axis.X)),Math.round(this.height-this.FP(y2,Axis.Y)),color);
+                }
+                x1=x2;
+                y1=y2;
+                this.stdlib.expr_t+=dt;
+                i++;
+                if (i>64)
+                {
+                    if (csys.GetTime()-this.timer>CGraph.MAXDRAWINGTIME) 
+                    {
+                        return 0;
+                    }
+                    i=0;
+                }
+            }
+            this.stdlib.expr_t = this.t2;
+            var w=expr.do();
+            var color: number;
+            if (w!=0)
+            {
+                color=palwsk[Math.floor(w*255)&255];
+            }
+            else return 1;
+            x2=this.stdlib.expr_x;
+            y2=this.stdlib.expr_y;
+                
+            if (D.IS_UD(x2)) x2=0;
+            else
+            if (D.IS_INFM(x2)) x2=-10000;
+            else
+            if (D.IS_INFP(x2)) x2=10000;
+                
+            if (D.IS_UD(y2)) y2=0;
+            else
+            if (D.IS_INFM(y2)) y2=-10000;
+            else
+            if (D.IS_INFP(y2)) y2=10000;
+                
+            this.Line(Math.round(this.FP(x1,Axis.X)),Math.round(this.height-this.FP(y1,Axis.Y)),
+                                Math.round(this.FP(x2,Axis.X)),Math.round(this.height-this.FP(y2,Axis.Y)),color);
+            return 1;
+        }
+
+        private drawfunc_K2DF2_j: number;
+        private drawfunc_K2DF2_k: number;
+        private drawfunc_K2DF2_bf: number;
+        drawfunc_K2DF2(expr: cexpr,f: FUNCSTRUCT): number
+        {
+            var i: number;
+            var dbf: number;
+            var palwsk = this.Palette[f.color];
+
+            if (f.status==1)
+            {
+                this.drawfunc_K2DF2_bf=0;
+                this.drawfunc_K2DF2_j=0;
+                this.drawfunc_K2DF2_k=0;
+                f.status=2;
+            }
+            
+            var d=this.height/CGraph.DLINES;
+            var dx=1/this.s[Axis.X];
+            var exprx0=this.FJ(0,Axis.X);
+            for (; this.drawfunc_K2DF2_j<d; this.drawfunc_K2DF2_j++)
+            {
+                for(; this.drawfunc_K2DF2_k<CGraph.DLINES; this.drawfunc_K2DF2_k++)
+                {
+                    if (csys.GetTime()-this.timer>CGraph.MAXDRAWINGTIME) 
+                    {
+                        return 0;
+                    }
+                    dbf = this.drawfunc_K2DF2_bf + this.drawfunc_K2DF2_k * d * this.width;
+                    this.stdlib.expr_y=this.FJ(-(this.drawfunc_K2DF2_j+this.drawfunc_K2DF2_k*d)+this.height,Axis.Y);
+                    this.stdlib.expr_x=exprx0;
+                    i=this.width;
+                    while(i--)
+                    {
+                        var w=expr.do();
+                        if (w!=0)
+                        {
+                            this.buf[dbf]=palwsk[Math.floor(w*255)&255];
+                        }
+                        dbf++;
+                        this.stdlib.expr_x+=dx;
+                    }
+                }
+                this.drawfunc_K2DF2_bf += this.width;
+                this.drawfunc_K2DF2_k=0;
+            }
+            return 1;
         }
 
         drawsun(): void {
@@ -824,61 +1300,55 @@ module ExprAE.Graph {
             var d=this.axisdelta(Axis.X);
             var x1: number;
             var x2: number;
-            if (d!=0)
+            if (Math.floor(d)!=0)
             {
-                x1=(this.FJ(0,Axis.X)/d)*d;
-                x2=this.FJ(this.width,Axis.X);
+                x1=Math.floor(this.FJ(0,Axis.X))/Math.floor(d)*Math.floor(d);
+                x2=Math.floor(this.FJ(this.width,Axis.X));
             }
             else
             {
-                x1=((1/d)*(this.FJ(0,Axis.X)))/(1/d);
+                x1=Math.floor(((1/d)*(this.FJ(0,Axis.X)))/(1/d));
                 x2=this.FJ(this.width,Axis.X);
             }
-            var x: number;
-            var y=this.height-this.FP(0,Axis.Y);
+            var x: number = 0;
+            var y=this.height-Math.floor(this.FP(0,Axis.Y));
             while (x1<=x2)
             {
                 if (x1!=0)
                 {
-                    x=this.FP(x1,Axis.X);
-                    if ((x>=0)&&(y>=0)&&(x<this.width)&&(y<this.height))
+                    x=Math.floor(this.FP(x1,Axis.X));
                     this.PutPixel(x,y,csys.Color[csys.CNum]);
                     if (this.gridon) this.VLine(x, 0, this.height, csys.Color[csys.CFaded]);
-                    //sprnumberf(bf0,"%%0.%df",this.geps);
-                    //sprnumberf(bf,bf0,x1);
-                    bf=x1.toPrecision(this.geps);
-                    //i=csys.DiscardZeros(bf);  //ref bf
-                    this.DrawText3X5(x-i*2-1,y+2,csys.Color[csys.CNum],bf);
+                    bf=x1.toPrecision(this.geps).replace(/[0\.]+$/,'');
+                    this.DrawText3X5(x/*-i*2-1*/,y+2,csys.Color[csys.CNum],bf);
                 }
                 x1+=d;
             }
+            
             //pisz wartosci - os y
             d=this.axisdelta(Axis.Y);
             var y1: number;
             var y2: number;
-            if (d!=0)
+            if (Math.floor(d)!=0)
             {
-                y1=(this.FJ(0,Axis.Y)/d)*d;
-                y2=this.FJ(this.height,Axis.Y);
+                y1=Math.floor(this.FJ(0,Axis.Y))/Math.floor(d)*Math.floor(d);
+                y2=Math.floor(this.FJ(this.height,Axis.Y));
             }
             else
             {
-                y1=((1/d)*(this.FJ(0,Axis.Y)))/(1/d);
+                y1=Math.floor(((1/d)*(this.FJ(0,Axis.Y)))/(1/d));
                 y2=this.FJ(this.height,Axis.Y);
             }
-            x=this.FP(0,Axis.X);
+            x=Math.floor(this.FP(0,Axis.X));
             while (y1<=y2)
             {
                 if (y1!=0)
                 {
-                    y=this.height-this.FP(y1,Axis.Y);
+                    y=this.height-Math.floor(this.FP(y1,Axis.Y));
                     if ((x>=0)&&(y>=0)&&(x<this.width)&&(y<this.height))
                     this.PutPixel(x,y,csys.Color[csys.CNum]);
                     if (this.gridon) this.HLine(0, y, this.width, csys.Color[csys.CFaded]);
-                    //sprnumberf(bf0,"%%0.%df",this.geps);
-                    //sprnumberf(bf,bf0,y1);
-                    bf=y1.toPrecision(this.geps);
-                    //i=csys.DiscardZeros(bf);
+                    bf=y1.toPrecision(this.geps).replace(/[0\.]+$/,'');
                     this.DrawText3X5(x+2,y-2,csys.Color[csys.CNum],bf);
                 }
                 y1+=d;
@@ -937,7 +1407,7 @@ module ExprAE.Graph {
                 //wartosci funkcji dla danej pozycji kursora
                 if (this.DMode == DrawMode.K2DF1)
                 {
-                    //expr_x=x1; todo
+                    this.stdlib.expr_x=x1
                     //sprnumberf(bf0,"F(%%0.%df)=%%0.%df",this.geps,geps);
                     bf="F("+x1.toPrecision(this.geps)+")="+this.dexprlist[csys.DColor].do().toPrecision(this.geps);
                     //sprnumberf(bf,bf0,x1,this.dexprlist[csys.DColor].Do());
@@ -952,8 +1422,8 @@ module ExprAE.Graph {
                 else
                         if (this.DMode == DrawMode.K2DF2)
                 {
-                    //expr_x=x1;    //todo
-                    //expr_y=y1;
+                    this.stdlib.expr_x=x1;
+                    this.stdlib.expr_y=y1;
                     //sprnumberf(bf0,"F(%%0.%df,%%0.%df)=%%0.%df",this.geps,geps,this.geps);
                     bf="F("+x1.toPrecision(this.geps)+","+y1.toPrecision(this.geps)+")="+this.dexprlist[csys.DColor].do().toPrecision(this.geps);
                     //sprnumberf(bf,bf0,x1,y1,this.dexprlist[csys.DColor].Do());
@@ -1066,7 +1536,7 @@ module ExprAE.Graph {
                 this.cursory=cy;
                 if (this.reqredraw<1)
                 this.reqredraw=1;
-                //if (DMode==DrawMode.K2DF1) expr_y=this.FJ(height-this.cursory,Axis.Y);
+                if (this.DMode == DrawMode.K2DF1) this.stdlib.expr_y = this.FJ(this.height - this.cursory, Axis.Y);
             }
         }
 
@@ -1131,12 +1601,47 @@ module ExprAE.Graph {
             }
             csys.DColor=0;
         }
+
+        Findx0(expr: cexpr,a: number,b: number,d: number,eps: number): number
+        {
+            var x1=a;
+            var x2=a+d;
+            var i=10000;
+            while (x1<=b)
+            {
+                this.stdlib.expr_x=x1;
+                var y1=expr.do();
+                this.stdlib.expr_x=x2;
+                var y2=expr.do();
+                if (Math.abs(y1)<=eps) return x1;
+                if (y1*y2<0)
+                //szukaj metoda polowienia przedzialow miejsce zerowe
+                {
+                    var s: number=(y1>0)? 1:-1;
+                    var y: number;
+                    do
+                    {
+                        this.stdlib.expr_x=0.5*(x1+x2);
+                        y=expr.do();
+                        if (y*s>0) x1=this.stdlib.expr_x; else x2=this.stdlib.expr_x;
+                        i--;
+                    } while ((Math.abs(y)>eps)&&(i>0));
+                    return this.stdlib.expr_x;
+                }
+                x1=x2;
+                x2+=d;
+            }
+            return 0;
+        }
     }
 
     export class FUNCSTRUCT
     {
-        color: number;
-        status: number; //0-brak, 1-do rysowania, 2-rysowana
+        constructor(
+            public color: number,
+            public status: number) { //0-brak, 1-do rysowania, 2-rysowana
+
+            } 
     }
     
     //struktura przechowuje wsp. rzutowanego wiercholka
@@ -1149,18 +1654,23 @@ module ExprAE.Graph {
     //przechowuje wektor
     export class VEC
     {
-        a: number;
-        b: number;
-        c: number;
+        constructor(
+            public a: number,
+            public b: number,
+            public c: number) {
+
+            }
     }
     
     export class VEC2
     {
         constructor(
-        public u: number,
-        public v: number) {}
+            public u: number,
+            public v: number) {
 
-        static empty(): VEC2 {
+            }
+
+        static invalid(): VEC2 {
             return new VEC2(-1000000000,-1000000000);
         }
     }
@@ -1219,10 +1729,16 @@ module ExprAE.Graph {
 
     enum GraphStateEnum
     {
-     FillMode=1,
-     EnableTexture=2,
-     EnableLight=4,
-     Enable3DMode=8,
-     EnableOpenGL=16
+        FillMode=1,
+        EnableTexture=2,
+        EnableLight=4,
+        Enable3DMode=8,
+        EnableOpenGL=16
+    }
+
+    enum PhysicsModel
+    {
+        SIMPLE,
+        ACCURATE
     }
 }

@@ -7,5 +7,17 @@ module ExprAE {
         static SetBuf32(buf: Uint32Array, pitch: number, x: number, y: number, c: number) {
             buf[y * pitch + x] = c;
         }
+
+        static IS_UD(a: number): boolean {
+            return a==undefined;
+        }
+
+        static IS_INFM(a: number): boolean {
+            return a==Number.NEGATIVE_INFINITY;
+        }
+
+        static IS_INFP(a: number): boolean {
+            return a==Number.POSITIVE_INFINITY;
+        }
     }
 }

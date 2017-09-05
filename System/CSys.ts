@@ -181,6 +181,12 @@ module ExprAE.System {
                     if (CSys.KeyPressed(Keys.K_F7)) 
                     {
                         CSys.windows[CSys.activewin].ChangeActiveState(0);
+                        CSys.SetActiveWindow(Windows.Win_Graph);
+                        CSys.windows[CSys.activewin].ChangeActiveState(1);
+                    }
+                    if (CSys.KeyPressed(Keys.K_F8)) 
+                    {
+                        CSys.windows[CSys.activewin].ChangeActiveState(0);
                         CSys.SetActiveWindow(Windows.Win_GraphTester);
                         CSys.windows[CSys.activewin].ChangeActiveState(1);
                     }
@@ -286,12 +292,8 @@ module ExprAE.System {
             return CSys.mouseY;
         }
 
-        static cursorPos(x: number, y: number): void {
-            //todo
-        }
-
         static cursorPosSet(x: number, y: number): void {
-            //todo
+            //cannot be implemented in browser environment
         }
 
         static AddVar(name: string, addr: ICB, flags: number) {
