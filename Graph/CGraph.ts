@@ -341,6 +341,15 @@ module ExprAE.Graph {
             var changepos3ddelta=m;
             if (this.changepos3dmode==0) changepos3ddelta*=this.D;
             else changepos3ddelta*=this.R*(1/256);
+
+            for (var i: number=0; i<DrawMode.MMAX; i++) 
+            if (i+keys.K_1==k) 
+            {
+                this.DMode=i;
+                this.reqredraw=3;
+                break;
+            }
+
             if (k==keys.K_LEFT)
             {
                 this.ChangePos(-CGraph.POSDELTA*m,Axis.X);
@@ -1302,7 +1311,7 @@ module ExprAE.Graph {
             var x2: number;
             if (Math.floor(d)!=0)
             {
-                x1=Math.floor(this.FJ(0,Axis.X))/Math.floor(d)*Math.floor(d);
+                x1=Math.floor(this.FJ(0,Axis.X)/Math.floor(d))*Math.floor(d);
                 x2=Math.floor(this.FJ(this.width,Axis.X));
             }
             else
@@ -1319,7 +1328,7 @@ module ExprAE.Graph {
                     x=Math.floor(this.FP(x1,Axis.X));
                     this.PutPixel(x,y,csys.Color[csys.CNum]);
                     if (this.gridon) this.VLine(x, 0, this.height, csys.Color[csys.CFaded]);
-                    bf=x1.toPrecision(this.geps).replace(/[0\.]+$/,'');
+                    bf=x1.toPrecision(this.geps).replace(/(\d+)(\.)(\d+)(0+)$/,'$1$2$3'); //todo improve
                     this.DrawText3X5(x/*-i*2-1*/,y+2,csys.Color[csys.CNum],bf);
                 }
                 x1+=d;
@@ -1331,7 +1340,7 @@ module ExprAE.Graph {
             var y2: number;
             if (Math.floor(d)!=0)
             {
-                y1=Math.floor(this.FJ(0,Axis.Y))/Math.floor(d)*Math.floor(d);
+                y1=Math.floor(this.FJ(0,Axis.Y)/Math.floor(d))*Math.floor(d);
                 y2=Math.floor(this.FJ(this.height,Axis.Y));
             }
             else
@@ -1348,7 +1357,7 @@ module ExprAE.Graph {
                     if ((x>=0)&&(y>=0)&&(x<this.width)&&(y<this.height))
                     this.PutPixel(x,y,csys.Color[csys.CNum]);
                     if (this.gridon) this.HLine(0, y, this.width, csys.Color[csys.CFaded]);
-                    bf=y1.toPrecision(this.geps).replace(/[0\.]+$/,'');
+                    bf=y1.toPrecision(this.geps).replace(/(\d+)(\.)(\d+)(0+)$/,'$1$2$3');
                     this.DrawText3X5(x+2,y-2,csys.Color[csys.CNum],bf);
                 }
                 y1+=d;
