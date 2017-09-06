@@ -44,8 +44,8 @@ module ExprAE {
         comp(th: any, s: string): string {
             var result = (th.expr as Expressions.CExpr).set(s);
             if (result==Expressions.ErrorCodes.NoErr) {
-                th.graph.SetExpr((th.expr as Expressions.CExpr).getExprStr(), th.expr, System.CSys.DColor, System.CSys.DColor);
-                return th.expr.do();
+                th.graph.SetExpr(s, th.expr, System.CSys.DColor, System.CSys.DColor);
+                return s+"="+th.expr.do();
             }
             else {
                 return "\04"+Expressions.ErrorCodes[result];

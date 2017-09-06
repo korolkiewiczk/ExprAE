@@ -125,6 +125,13 @@ module ExprAE.System {
         private static initEvents() {
             document.onkeydown = function (event: KeyboardEvent) {
                 event = event || window.event as KeyboardEvent;
+                if(event.keyCode == Keys.K_BACK_SPACE 
+                    || event.keyCode == Keys.K_F5
+                    || event.keyCode == Keys.K_F6
+                    || event.keyCode == Keys.K_F7
+                    || event.keyCode == Keys.K_TAB) {
+                    event.preventDefault();
+                }
                 CSys.keytab[event.keyCode as Keys] = 1;
             }
 
@@ -178,13 +185,13 @@ module ExprAE.System {
                         CSys.SetActiveWindow(Windows.Win_Con);
                         CSys.windows[CSys.activewin].ChangeActiveState(1);
                     }
-                    if (CSys.KeyPressed(Keys.K_F7)) 
+                    if (CSys.KeyPressed(Keys.K_F5)) 
                     {
                         CSys.windows[CSys.activewin].ChangeActiveState(0);
                         CSys.SetActiveWindow(Windows.Win_Graph);
                         CSys.windows[CSys.activewin].ChangeActiveState(1);
                     }
-                    if (CSys.KeyPressed(Keys.K_F8)) 
+                    if (CSys.KeyPressed(Keys.K_F6)) 
                     {
                         CSys.windows[CSys.activewin].ChangeActiveState(0);
                         CSys.SetActiveWindow(Windows.Win_GraphTester);

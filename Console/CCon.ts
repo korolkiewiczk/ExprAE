@@ -129,7 +129,7 @@ module ExprAE.Console {
             if (csys.MouseKeyPressed(keys.M_LEFT)) k |= keys.K_ENTER;
             if (csys.MouseKeyPressed(keys.M_RIGHT)) k |= keys.K_ESCAPE;
             k &= keys.REGULAR;
-            if (k == keys.K_F2) {
+            if (k == keys.K_TAB) {
                 this.libwinon = 1 - this.libwinon;
                 if (this.libwinon) {
                     this.libwin.Clear();
