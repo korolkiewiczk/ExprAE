@@ -268,15 +268,12 @@ module ExprAE.Drawing {
             var pal: number[][] = [];
             var ch: number;
             if (this.fontheight < 16) ch = 8; else ch = 16;
-            var d = ((CWin.TEXT_FADE2 - CWin.TEXT_FADE1) << CWin.FIXED_SHIFT) / ch;
-            var d2 = (CWin.TEXT_FADEL << CWin.FIXED_SHIFT) / ch;
-            var f = CWin.TEXT_FADE1 << CWin.FIXED_SHIFT;
             for (var k= 0; k <= System.CSys.Color.length; k++)
             {
                 pal[k]=[];
-                var d=((CWin.TEXT_FADE2-CWin.TEXT_FADE1)<<CWin.FIXED_SHIFT)/ch;
-                var d2=(CWin.TEXT_FADEL<<CWin.FIXED_SHIFT)/ch;
-                var f=CWin.TEXT_FADE1<<CWin.FIXED_SHIFT;
+                var d=(CWin.TEXT_FADE2-CWin.TEXT_FADE1)/ch;
+                var d2=CWin.TEXT_FADEL/ch;
+                var f=CWin.TEXT_FADE1;
                 var col: number;
                 if (k<System.CSys.Color.length)
                     col=this.FadeColor(System.CSys.Color[k],fade);
@@ -285,9 +282,9 @@ module ExprAE.Drawing {
                 for (var j = 0; j < ch; j++) {
                     var cf = f;
                     for (var i = 0; i < 8; i++) {
-                        pal[k][j * 8 + i] = this.FadeColor(color, cf >> CWin.FIXED_SHIFT);
+                        pal[k][j * 8 + i] = this.FadeColor(col, cf);
                         cf += d2;
-                        if (cf > (255 << CWin.FIXED_SHIFT)) cf = (255 << CWin.FIXED_SHIFT);
+                        if (cf > 255) cf = 255;
                     }
                     f += d;
                 }
