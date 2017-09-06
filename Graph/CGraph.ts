@@ -72,7 +72,7 @@ module ExprAE.Graph {
         
         //dane dla 3D
         private vangle: number = 0;       //kat widocznosci
-        private A: number[] = []; //katy, np. a[AxisZ] oznacza katy obrotu wokol osi OZ
+        private A: number[] = new Array(0,0,0); //katy, np. a[AxisZ] oznacza katy obrotu wokol osi OZ
         private R: number = 0;    //promien widocznowsci
         private D: number = 0;    //odleglosci miedzy punktami siatki
         private N: number = 0;      //2*R/D
@@ -146,13 +146,18 @@ module ExprAE.Graph {
         //tekstrury dla wykresow
         tex: Drawing.CTex[] = [];
         envmap: Drawing.CTex[] = [];
+
+        //tablica wskaznikow
+	    private tptr: Iterator[] = [];
+        //tablica wskaznikow zrodlowych
+        private t0ptr: Iterator[] = [];
     
         //wartosci obliczone w celu przyspieszenia obliczen
         private _255_lightdist: number = 0;
         //wyrazenie dla funckcji circlefunc
         private circfunc_expr: Expressions.CExpr;
         private circfunc_dir: number = 0;
-        private circfunc_palwsk: number = 0;
+        private circfunc_palwsk: number[];
         private circfunc_disty: number = 0;
         private circfunc_D2: number = 0; //D*D
         private circfunc_D4: number = 0; //D*D*D*D
@@ -929,9 +934,58 @@ module ExprAE.Graph {
             return a.a*b.a+a.b*b.b+a.c*b.c;
         }
 
+        static GRAPHTAB_SIZE(size: number): number{
+            return size*size+2*size;
+        }
         allocbuffers(): void
         {
-           //todo
+            var nalloc=0;
+            
+                    
+                //inicjacja wszystkich buforow
+            var Npom = (((this.cx2 - this.cx1 > this.cy1 - this.cy2) ? this.cx2 - this.cx1 : this.cy1 - this.cy2) / this.D);
+                if ((Npom!=this.N)||(nalloc))
+                {
+                    //todo check memory
+                            
+                    this.N=Npom;
+                    var size=CGraph.GRAPHTAB_SIZE(this.N);
+            
+            /*#ifdef OPENGL
+                    if (!gl_used)
+            #endif*/
+                    {
+                        this.valtab=new Array<number>(size);
+                       
+                        this.projecttab=new Array<IPOINT>(size);
+                    }
+                            
+                    if (this.lighting)
+                    {
+                        this.normaltab=new Array<VEC>(size);
+                    }
+                    
+                    this.colortab=new Array<number>(size);
+                                        
+                    if (this.dmethod==DrawMethod.MTEX)
+                    {
+                        this.texcoordtab=new Array<VEC2>(size);
+                    }
+            
+            /*#ifdef OPENGL   
+                    if (gl_used)
+                    {    
+                        gl_colortab=(IVEC4*)csys.AllocMem(size*sizeof(IVEC4));
+                        memset(gl_colortab,0,(size)*sizeof(IVEC4));
+                        
+                        gl_vertextab=(VEC*)csys.AllocMem(size*sizeof(VEC));
+                        memset(gl_vertextab,0,(size)*sizeof(VEC));
+                    
+                        gl_indextab=(number*)csys.AllocMem(8*size*sizeof);
+                        memset(gl_indextab,0,8*size*sizeof);
+                    }
+            #endif*/
+                }
         }
 
         drawfunc(expr: cexpr,f: FUNCSTRUCT): number
@@ -955,6 +1009,83 @@ module ExprAE.Graph {
                 if (!this.drawfunc_K2DF2(expr,f)) return 0;
             }
             
+            else
+                if (this.DMode == DrawMode.K3DF2)
+                { 
+                    //etap 1 - wyliczenie tablicy this.valtab dla danego okregu O((sx,sy),this.R)
+                    if (this.hold>0) if (f.color!=this.hold-1) return 1;
+                    if ((this.hold<1)&&(this.dstate==0))
+                    {
+            /*#ifdef OPENGL
+                        if (gl_used)
+                        {
+                            if (gl_compvertextab(expr,f)==0) return 0;
+                        }
+                        else
+            #endif*/
+                        if (this.compvaltab(expr, f) == 0) return 0;
+                    }
+                    else f.status=2;
+            
+                    //etap 2 - rysowanie funkcji
+            /*#ifdef OPENGL
+                    if (gl_used)
+                    {
+                        if (this.dmethod==DrawMethod.MLINE)
+                        {
+                            if (!drawfunc_K3DF2_gl_grid(f)) return 0;
+                        }
+                        else
+                        if (this.dmethod==DrawMethod.MFILL)
+                        {
+                            if (this.lighting)
+                            {
+                                if (!drawfunc_K3DF2_gl_fill_light(f)) return 0;
+                            }
+                            else
+                            {
+                                if (!drawfunc_K3DF2_gl_fill(f)) return 0;
+                            }
+                        }
+                        else
+                        if (this.dmethod==DrawMethod.MTEX)
+                        {
+                            if (!drawfunc_K3DF2_gl_fill_tex(f)) return 0;
+                        }
+                    }
+                    else
+            #endif*/
+                    {
+                        if (this.dmethod==DrawMethod.MLINE)
+                        {
+                            if (!this.drawfunc_K3DF2_soft_grid(f)) return 0;
+                        }
+                        else
+                        if (this.dmethod==DrawMethod.MFILL)
+                        {
+                            if (this.lighting)
+                            {
+                                //if (!this.drawfunc_K3DF2_soft_fill_light(f)) return 0;
+                            }
+                            else
+                            {
+                                //if (!this.drawfunc_K3DF2_soft_fill(f)) return 0;
+                            }
+                        }
+                        else
+                        if (this.dmethod==DrawMethod.MTEX)
+                        {
+                            if (this.lighting)
+                            {
+                                //if (!this.drawfunc_K3DF2_soft_fill_tex_light(f)) return 0;
+                            }
+                            else
+                            {
+                                //if (!this.drawfunc_K3DF2_soft_fill_tex(f)) return 0;
+                            }
+                        }
+                    }
+                }
             //todo 3d part
             return 1;
         }
@@ -1294,6 +1425,289 @@ module ExprAE.Graph {
             return 1;
         }
 
+        private circlefunc_y: number;
+        private circlefunc_rp: number;
+        private circlefunc_t: number;
+        //ogolna funkcja wykonujaca operacje z reffunc w okregu
+        circlefunc(expr: cexpr,f: FUNCSTRUCT,state: number, rr: number, tabf: number,ladd: number, reffunc: Expressions.ICallback): number
+        {
+            var R2=rr*rr;
+            
+            //poczatkowa inicjacja danych
+            this._255_lightdist=255/this.lightdist;
+            this.circfunc_expr=expr;
+            this.circfunc_D2=this.D*this.D;
+            this.circfunc_D4 = this.circfunc_D2 * this.circfunc_D2;
+            this.circfunc_1_2_D = this.D / 2;
+            if (f)
+            {
+                this.circfunc_tex=this.tex[f.color];
+            }
+            
+            var rtab: number[] = [];
+            var nt: number=0;
+            if (tabf&G3DFlags.FVWSK) rtab[nt++]=G3DPtrs.vwsk;
+            if (tabf&G3DFlags.FPWSK) rtab[nt++]=G3DPtrs.pwsk;
+            if (tabf&G3DFlags.FNWSK) rtab[nt++]=G3DPtrs.nwsk;
+            if (tabf&G3DFlags.FCWSK) rtab[nt++]=G3DPtrs.cwsk;
+            if (tabf&G3DFlags.FTWSK)  rtab[nt++]=G3DPtrs.twsk;
+        /*#ifdef OPENGL
+            if (tabf&FGLG3DFlags._CWSK) rtab[nt++]=gl_cwsk;
+            if (tabf&FGLG3DFlags._VWSK) rtab[nt++]=gl_vwsk;
+        #endif*/
+
+            this.t0ptr[G3DPtrs.vwsk]=new Iterator(this.valtab,this.N);
+            this.t0ptr[G3DPtrs.pwsk]=new Iterator(this.projecttab,this.N);
+            this.t0ptr[G3DPtrs.nwsk]=new Iterator(this.normaltab,this.N);
+            this.t0ptr[G3DPtrs.cwsk]=new Iterator(this.colortab,this.N);
+            this.t0ptr[G3DPtrs.twsk]=new Iterator(this.texcoordtab,this.N);
+        /*#ifdef OPENGL
+            this.t0ptr[gl_cwsk]=(void*)(gl_colortab+this.N);
+            this.t0ptr[gl_vwsk]=(void*)(gl_vertextab+this.N);
+        #endif*/
+            
+            if (f) this.circfunc_palwsk=this.Palette[f.color];
+            
+            if (state==0)
+            {
+                this.circlefunc_y=Math.ceil((this.hys+rr)/this.D)*this.D;
+                this.circlefunc_rp=rr-this.D*CGraph.DMUL;
+                this.circlefunc_t=0;
+            }
+            
+            for (; this.circlefunc_t<2; this.circlefunc_t++)
+            {
+                this.circfunc_dir=2*this.circlefunc_t-1;
+                while ((this.circlefunc_t==0)? (this.circlefunc_y>=this.hys):(this.circlefunc_y<=this.hys))
+                {
+                    if (csys.GetTime()-this.timer>CGraph.MAXDRAWINGTIME) 
+                    {
+                        return 0;
+                    }
+                    var x1: number;
+                    var x2: number;
+                    var sq: number;
+                    var sqnumber: number;
+                    var tab: number;
+                    
+                    sq=Math.sqrt(R2-this.circlefunc_rp*this.circlefunc_rp);
+                    x1=Math.floor((-sq+this.hxs)/this.D)*this.D;
+                    x2=Math.ceil((sq+this.hxs)/this.D)*this.D;
+                    tab=-this.N*Math.ceil((this.circlefunc_y-this.cy1)/this.D)+Math.floor((x1-this.cx1)/this.D);
+                    
+                    this.circfunc_disty=Math.floor(CGraph.ZBUFMUL*(this.circlefunc_y-this.ys));
+                    this.circfunc_disty *= this.circfunc_disty;
+                    
+                    for (var j: number=0; j<nt; j++)
+                    {
+                        this.tptr[rtab[j]]=new Iterator(this.t0ptr[rtab[j]].ptr,tab);
+                    }
+                    sqnumber=((x2-x1)/this.D)+ladd;
+                    for (var i=0; i<sqnumber; i++)
+                    {
+                        reffunc(x1,this.circlefunc_y);
+                        x1+=this.D;
+                        for (var j: number=0; j<nt; j++)
+                        {
+                            this.tptr[rtab[j]].next();
+                        }
+                    }
+                    this.circlefunc_y+=this.D*this.circfunc_dir;
+                    this.circlefunc_rp-=this.D;
+                }
+                this.circlefunc_rp=rr-this.D*CGraph.DMUL;
+                this.circlefunc_y=Math.floor((this.hys-rr)/this.D)*this.D+(1-ladd)*this.D;
+            }
+            return 1;
+        }
+
+        compvaltabref(x: number,y: number): void
+        {
+            this.stdlib.expr_x=x;
+            this.stdlib.expr_y=y;
+            var z=this.circfunc_expr.do();
+            if (D.IS_UD(z)) z=0;
+            else
+            if (D.IS_INFM(z)) z=-10000;
+            else
+            if (D.IS_INFP(z)) z=10000;
+            this.tptr[G3DPtrs.vwsk].set(z);
+        }
+
+        //przeprowadz obliczenia dla ogladanego wykresu w 3D
+        compvaltab(expr: cexpr,f: FUNCSTRUCT): number
+        {
+            var status: number;
+            if (f.status==1)
+            {
+                f.status=2;
+                status=0;
+            } else status=1;
+
+            if (!this.circlefunc(expr,null,status,this.R,G3DFlags.FVWSK,1,this.compvaltabref.bind(this))) return 0;
+            return 1;
+        }
+
+        compprojecttabref(x: number,y: number): void
+        {
+            var z=this.tptr[G3DPtrs.vwsk].peek()-this.zs;
+            var xr: number;
+            var yr: number;
+            var zr: number;
+
+            var rotated=this.rotate(x-this.xs,y-this.ys,z);
+            var xr=rotated.a,yr=rotated.b,zr=rotated.c;
+            var v=this.project(xr,zr,yr);
+            var xp=v.u;
+            var yp=v.v;
+            this.tptr[G3DPtrs.pwsk].set(new IPOINT(xp,yp));
+        }
+
+        compprojecttab(): void
+        {
+            var status=1;
+            
+            if (this.dstate==DS.PROJECT)
+            {
+                this.dstate++;
+                status=0;
+            }
+            if (this.circlefunc(null,null,status,this.R,G3DFlags.FVWSK|G3DFlags.FPWSK,1,this.compprojecttabref.bind(this))) this.dstate++;
+        }
+
+        //...
+
+        compcoltabref(x: number,y: number): void
+        {
+            var z=this.tptr[G3DPtrs.vwsk].peek()-this.zs;
+            x-=this.xs;   
+            y-=this.ys;
+            var d=Math.sqrt(x*x+y*y+z*z);
+            if (d>this.lightdist) this.tptr[G3DPtrs.cwsk].set(0);
+            else
+            this.tptr[G3DPtrs.cwsk].set(Math.floor(255-d*this._255_lightdist));
+        }
+        
+        //oblicz wartosci jasnosci kolorow dla rysowania trojkatow
+        compcoltab(color: number): void
+        {
+            if (this.holdlight)
+            {
+                if (this.hold>0) {this.dstate+=2; return;}
+                var c=Math.round(this.lightdist);
+                if (c>255)c=255;
+                this.colortab=[];
+                this.dstate+=2;
+                return;
+            }
+            var status: number;
+            if (this.dstate==DS.COL)
+            {
+                status=0;
+                this.dstate++;
+            } else status=1;
+            if(this.circlefunc(null,null,status,this.R,G3DFlags.FVWSK|G3DFlags.FCWSK,1,this.compcoltabref.bind(this))) this.dstate++;
+        }
+
+        //todo other comps & refs
+
+        private drawfunc_K3DF2_soft_grid_rp: number; //
+        drawfunc_K3DF2_soft_grid(f: FUNCSTRUCT): number
+        {
+            if (this.dstate<DS.PROJECT+2)
+            {
+                this.compprojecttab();
+                if (this.dstate!=DS.PROJECT+2) return 0;
+                this.dstate+=2;
+            }
+            if (this.dstate<DS.COL+2)
+            {
+                this.compcoltab(f.color);
+                if (this.dstate!=DS.COL+2) return 0;
+            }
+            
+            if (this.dstate<DS.TEX+2)
+            {
+                this.dstate+=2;
+            }
+            
+            var palwsk=this.Palette[f.color];
+            var dx=this.D*this.cosaz,dy=this.D*this.sinaz;
+            var DL: number;
+            var R2: number;
+            //faza 1 - rysowanie przodu
+            R2=(this.R-this.D)*(this.R-this.D);
+            DL=this.R-this.D*CGraph.DMUL-this.D+0.001;
+            
+            if (this.dstate==DS.DRAW)
+            {
+                this.drawfunc_K3DF2_soft_grid_rp = this.R - this.D * CGraph.DMUL - this.D;
+                this.dstate++;
+            }
+            var _1_D=1/this.D;
+            while (Math.abs(this.drawfunc_K3DF2_soft_grid_rp) <= DL)
+            {
+                if (csys.GetTime()-this.timer>CGraph.MAXDRAWINGTIME) 
+                {
+                    return 0;
+                }
+                var x1: number;
+                var y1: number;
+                var x2: number;
+                var y2: number;
+                var sq: number;
+                var sqnumber: number;
+                sq=Math.sqrt(R2-this.drawfunc_K3DF2_soft_grid_rp*this.drawfunc_K3DF2_soft_grid_rp);
+                x1 = -sq * this.cosaz - this.drawfunc_K3DF2_soft_grid_rp * this.sinaz + this.hxs;
+                y1 = -sq * this.sinaz + this.drawfunc_K3DF2_soft_grid_rp * this.cosaz + this.hys;
+                x2 = sq * this.cosaz - this.drawfunc_K3DF2_soft_grid_rp * this.sinaz + this.hxs;
+                y2 = sq * this.sinaz + this.drawfunc_K3DF2_soft_grid_rp * this.cosaz + this.hys;
+                sqnumber=Math.sqrt((x2-x1) * (x2-x1) + (y2-y1) * (y2-y1))*_1_D;
+                for(var i=0; i<sqnumber; i++)
+                {
+                    var tab=-this.N*Math.ceil((y1-this.cy1)*_1_D)+Math.floor((x1-this.cx1)*_1_D)+this.N;
+                    var xp1: number;
+                    var yp1: number;
+                    var xp2: number;
+                    var yp2: number;
+                    var xp3: number;
+                    var yp3: number;
+                    var xp4: number;
+                    var yp4: number;
+                    var col: number;
+                    
+                    
+                    var p1=this.projecttab[tab];
+                    var p2=this.projecttab[tab+1];
+                    var p3=this.projecttab[tab+this.N+1];
+                    var p4=this.projecttab[tab+this.N];
+                    if (!(p1==undefined || p2==undefined || p3==undefined || p4==undefined)) {
+                        xp1=p1.x;
+                        xp2=p2.x;
+                        xp3=p3.x;
+                        xp4=p4.x;
+                        if (!(xp1==undefined || xp2==undefined || xp3==undefined || xp4==undefined)) {
+                            yp1=p1.y;
+                            yp2=p2.y;
+                            yp3=p3.y;
+                            yp4=p4.y;
+                            col=palwsk[this.colortab[tab]];
+                            
+                            this.Line(xp1,yp1,xp2,yp2,col);
+                            this.Line(xp2,yp2,xp3,yp3,col);
+                            this.Line(xp3,yp3,xp4,yp4,col);
+                            this.Line(xp4,yp4,xp1,yp1,col);
+                        }
+                    }
+        
+                    x1+=dx;
+                    y1+=dy;
+                }
+                this.drawfunc_K3DF2_soft_grid_rp-=this.D;
+            }
+            return 1;
+        }
+
         drawsun(): void {
             //todo only opengl
         }
@@ -1538,14 +1952,20 @@ module ExprAE.Graph {
                     this.A[Axis.Z]+=(this.cursorx-cx)/100;
                     this.A[Axis.X]+=(this.cursory-cy)/100;
                     csys.cursorPosSet(this.width_div_2, this.height_div_2);
-                    cx = this.width_div_2;
-                    cy=this.height_div_2;
+                    cx = csys.getMouseX();
+                    cy = csys.getMouseY();
+                    // cx = this.width_div_2;
+                    // cy = this.height_div_2;
                 }
                 this.cursorx=cx;
                 this.cursory=cy;
                 if (this.reqredraw<1)
                 this.reqredraw=1;
                 if (this.DMode == DrawMode.K2DF1) this.stdlib.expr_y = this.FJ(this.height - this.cursory, Axis.Y);
+            }
+
+            if (!this.Is3DMode()) {
+                csys.cursorPosSet(-1,0);
             }
         }
 
@@ -1656,8 +2076,11 @@ module ExprAE.Graph {
     //struktura przechowuje wsp. rzutowanego wiercholka
     export class IPOINT
     {
-        x: number;
-        y: number;
+        constructor(
+            public x: number,
+            public y: number) {
+
+            }
     }
     
     //przechowuje wektor
@@ -1680,7 +2103,7 @@ module ExprAE.Graph {
             }
 
         static invalid(): VEC2 {
-            return new VEC2(-1000000000,-1000000000);
+            return new VEC2(undefined,undefined);
         }
     }
     
@@ -1749,5 +2172,43 @@ module ExprAE.Graph {
     {
         SIMPLE,
         ACCURATE
+    }
+
+    enum G3DPtrs
+    {
+        vwsk        =0,
+        pwsk        =1,
+        nwsk        =2,
+        cwsk        =3,
+        twsk        =4
+    }
+    
+    enum G3DFlags
+    {
+        FVWSK       =1,
+        FPWSK       =2,
+        FNWSK       =4,
+        FCWSK       =8,
+        FTWSK       =16
+    };
+
+    class Iterator {
+        constructor(
+            public ptr: any,
+            public i: number) {
+
+            }
+
+        next(): any {
+            return this.ptr[this.i++];
+        }
+
+        peek(): any {
+            return this.ptr[this.i];
+        }
+
+        set(val: any) {
+            this.ptr[this.i]=val;
+        }
     }
 }

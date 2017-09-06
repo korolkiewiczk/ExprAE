@@ -152,6 +152,9 @@ module ExprAE.System {
             document.onmousemove = function (event: MouseEvent) {
                 CSys.mouseX = event.offsetX;
                 CSys.mouseY = event.offsetY;
+
+                CSys.lockMouseX+=event.movementX;
+                CSys.lockMouseY+=event.movementY;
             }
 
             document.onwheel = function (event: WheelEvent) {
@@ -303,15 +306,31 @@ module ExprAE.System {
         }
 
         static getMouseX(): number {
-            return CSys.mouseX;
+            return CSys.isMouseLocked? CSys.lockMouseX : CSys.mouseX;
         }
 
         static getMouseY(): number {
-            return CSys.mouseY;
+            return CSys.isMouseLocked? CSys.lockMouseY : CSys.mouseY;
         }
 
+        private static lockMouseX: number;
+        private static lockMouseY: number;
+        private static isMouseLocked: boolean=false;
         static cursorPosSet(x: number, y: number): void {
-            //cannot be implemented in browser environment
+            //cannot be implemented in browser environment. This is workaround which uses requestPointerLock
+
+            CSys.lockMouseX=CSys.mouseX;
+            CSys.lockMouseY=CSys.mouseY;
+
+            if (x<0 && CSys.isMouseLocked) {
+                document.exitPointerLock();
+                CSys.isMouseLocked=false;
+            }
+            else if (x>=0 && !CSys.isMouseLocked){
+                
+                CSys.getDrawingCanvas().requestPointerLock();
+                CSys.isMouseLocked=true;
+            }
         }
 
         static AddVar(name: string, addr: ICB, flags: number) {
