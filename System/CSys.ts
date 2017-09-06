@@ -126,6 +126,7 @@ module ExprAE.System {
             document.onkeydown = function (event: KeyboardEvent) {
                 event = event || window.event as KeyboardEvent;
                 if(event.keyCode == Keys.K_BACK_SPACE 
+                    || event.keyCode == Keys.K_F1
                     || event.keyCode == Keys.K_F5
                     || event.keyCode == Keys.K_F6
                     || event.keyCode == Keys.K_F7
@@ -178,7 +179,17 @@ module ExprAE.System {
                     for (var i = 0; i < 256; i++) {
                         if (CSys.KeyPressed(i)) CSys.activeWin().KeyFunc(i | shift);
                     }
+                    if (CSys.MouseKey()) 
+                    {
+                        CSys.windows[CSys.activewin].KeyFunc(shift);
+                        if (CSys.activewin==Windows.Win_Con) {
+                            CSys.mousekeystate=[];
+                        }
+                    }
                     //todo
+                    if (CSys.KeyPressed(Keys.K_F1)) {
+                        window.open('help.html', '_blank');
+                    }
                     if (CSys.KeyPressed(Keys.K_F4)) 
                     {
                         CSys.windows[CSys.activewin].ChangeActiveState(0);
