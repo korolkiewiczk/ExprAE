@@ -160,6 +160,12 @@ module ExprAE.System {
             document.onwheel = function (event: WheelEvent) {
                 CSys.mouseWhellDelta = -event.deltaY;
             }
+
+            document.onclick = function (event: Event) {
+                event.preventDefault();
+            }
+
+            document.addEventListener('contextmenu', event => event.preventDefault());
         }
 
         static Run(): void {
@@ -195,21 +201,15 @@ module ExprAE.System {
                     }
                     if (CSys.KeyPressed(Keys.K_F4)) 
                     {
-                        CSys.windows[CSys.activewin].ChangeActiveState(0);
                         CSys.SetActiveWindow(Windows.Win_Con);
-                        CSys.windows[CSys.activewin].ChangeActiveState(1);
                     }
                     if (CSys.KeyPressed(Keys.K_F5)) 
                     {
-                        CSys.windows[CSys.activewin].ChangeActiveState(0);
                         CSys.SetActiveWindow(Windows.Win_Graph);
-                        CSys.windows[CSys.activewin].ChangeActiveState(1);
                     }
                     if (CSys.KeyPressed(Keys.K_F6)) 
                     {
-                        CSys.windows[CSys.activewin].ChangeActiveState(0);
                         CSys.SetActiveWindow(Windows.Win_GraphTester);
-                        CSys.windows[CSys.activewin].ChangeActiveState(1);
                     }
                 } else {
                     //todo
@@ -247,7 +247,10 @@ module ExprAE.System {
         }
 
         static SetActiveWindow(num: Windows): void {
+            CSys.windows[CSys.activewin].ChangeActiveState(0);
             CSys.activewin = num;
+            CSys.windows[CSys.activewin].ChangeActiveState(1);
+            CSys.unlockMouse();
         }
 
         static KeyPressed(code: Keys): boolean {
@@ -323,14 +326,18 @@ module ExprAE.System {
             CSys.lockMouseY=CSys.mouseY;
 
             if (x<0 && CSys.isMouseLocked) {
-                document.exitPointerLock();
-                CSys.isMouseLocked=false;
+               CSys.unlockMouse();
             }
             else if (x>=0 && !CSys.isMouseLocked){
                 
                 CSys.getDrawingCanvas().requestPointerLock();
                 CSys.isMouseLocked=true;
             }
+        }
+
+        static unlockMouse(): void {
+            document.exitPointerLock();
+            CSys.isMouseLocked=false;
         }
 
         static AddVar(name: string, addr: ICB, flags: number) {
