@@ -136,7 +136,7 @@ module ExprAE.Drawing {
             }
             var s = a / 2;
             var dwsk1 = dx1 + dy1 * this.width, dwsk2 = dx2 + dy2 * this.width;
-            var wsk = Math.floor(y1) * this.width + Math.floor(x1);
+            var wsk = (y1 | 0) * this.width + (x1 | 0);
 
             for (var i = 0; i <= a; i++) {
                 this.buf[wsk] = col;
@@ -157,8 +157,8 @@ module ExprAE.Drawing {
             if (x1 < 0) x1 = 0;
             if (x2 >= this.width) x2 = this.width - 1;
             if (x2 - x1 + 1 <= 0) return;
-            var pos0 = Math.floor(x1) + Math.floor(y) * this.width;
-            this.buf.fill(col, pos0, pos0 + Math.floor(x2) - Math.floor(x1) + 1);
+            var pos0 = (x1 | 0) + (y | 0) * this.width;
+            this.buf.fill(col, pos0, pos0 + (x2 | 0) - (x1 | 0) + 1);
         }
 
         VLine(x: number, y1: number, y2: number, col: number) {
@@ -166,9 +166,9 @@ module ExprAE.Drawing {
             if (y1 > y2) { var pom = y1; y1 = y2; y2 = pom; }
             if (y1 < 0) y1 = 0;
             if (y2 >= this.height) y2 = this.height - 1;
-            var i = Math.floor(y2) - Math.floor(y1) + 1;
+            var i = (y2 | 0) - (y1 | 0) + 1;
             if (i <= 0) return;
-            var bf = Math.floor(x) + Math.floor(y1) * this.width;
+            var bf = (x | 0) + (y1 | 0) * this.width;
             while (i-- > 0) {
                 this.buf[bf] = col;
                 bf += this.width;
@@ -183,10 +183,10 @@ module ExprAE.Drawing {
             if (x1 < 0) x1 = 0;
             if (x2 >= this.width) x2 = this.width - 1;
             if (x2 - x1 + 1 <= 0) return;
-            var i = Math.floor(y2) - Math.floor(y1) + 1;
+            var i = (y2 | 0) - (y1 | 0) + 1;
             if (i <= 0) return;
-            var d = Math.floor(x2) - Math.floor(x1) + 1;
-            var b = Math.floor(x1) + Math.floor(y1) * this.width;
+            var d = (x2 | 0) - (x1 | 0) + 1;
+            var b = (x1 | 0) + (y1 | 0) * this.width;
             while (i-- > 0) {
                 this.buf.fill(col, b, b + d);
                 b += this.width;
@@ -203,8 +203,8 @@ module ExprAE.Drawing {
             if (x > this.width - 8) w -= x - (this.width - 8);
             if (y < 0) { sh = -y; y = 0; }
             if (y > this.height - 8) h -= y - (this.height - 8);
-            var d = Math.floor(w - sw);
-            var wsk = Math.floor(y) * this.width + Math.floor(x);
+            var d = (w - sw) | 0;
+            var wsk = (y | 0) * this.width + (x | 0);
             for (var j = sh; j < h; j++) {
                 var line = BiosFont.data[c * 8 + j];
                 for (var i = sw; i < w; i++) {
@@ -226,7 +226,7 @@ module ExprAE.Drawing {
             if (y < 0) { sh = -y; y = 0; }
             if (y > this.height - 16) h -= y - (this.height - 16);
             var d = w - sw;
-            var wsk = Math.floor(y) * this.width + Math.floor(x);
+            var wsk = (y | 0) * this.width + (x | 0);
             for (var j = sh; j < h; j++) {
                 var line = BiosFont8x16.data[c * 16 + j];
                 for (var i = sw; i < w; i++) {
@@ -342,8 +342,8 @@ module ExprAE.Drawing {
             if (y + 5 > this.height) return;
             if (y < 0) return;
             var cont = 0;
-            x=Math.floor(x);
-            var wsk = Math.floor(y) * this.width + x;
+            x=(x | 0);
+            var wsk = (y | 0) * this.width + x;
             for (var k = 0; k < s.length; k++) {
                 if (x >= this.width - 4) return;
                 if (x < 0) { x += 4; wsk += 4; continue; }
@@ -529,15 +529,15 @@ module ExprAE.Drawing {
                         if (_xA < left) { disp = left - _xA; _xA = left; }
                         if (_xB > right) _xB = right;
                         i = _xB - _xA + 1;
-                        wsk = Math.floor(_xA) + Math.floor(y) * this.width;
-                        zwsk = Math.floor(_xA) + Math.floor(y) * this.width;
+                        wsk = (_xA | 0) + (y | 0) * this.width;
+                        zwsk = (_xA | 0) + (y | 0) * this.width;
 
                         var dc: number = ((cB - cA)) / (xB - xA + (1));
                         var c: number = cA + disp * dc;
 
                         while (i-- > 0) {
                             if (z < zbuf[zwsk]) {
-                                this.buf[wsk] = pal[Math.floor(c)];
+                                this.buf[wsk] = pal[(c | 0)];
                                 zbuf[zwsk] = z;
                             }
                             wsk++;
@@ -589,15 +589,15 @@ module ExprAE.Drawing {
                     if (_xA < left) { disp = left - _xA; _xA = left; }
                     if (_xB > right) _xB = right;
                     i = _xB - _xA + 1;
-                    wsk = Math.floor(_xA) + Math.floor(y) * this.width;
-                    zwsk = Math.floor(_xA) + Math.floor(y) * this.width;
+                    wsk = (_xA | 0) + (y | 0) * this.width;
+                    zwsk = (_xA | 0) + (y | 0) * this.width;
 
                     var dc: number = ((cB - cA)) / (xB - xA + (1));
                     var c: number = cA + disp * dc;
 
                     while (i-- > 0) {
                         if (z < zbuf[zwsk]) {
-                            this.buf[wsk] = pal[Math.floor(c)];
+                            this.buf[wsk] = pal[(c | 0)];
                             zbuf[zwsk] = z;
                         }
                         wsk++;

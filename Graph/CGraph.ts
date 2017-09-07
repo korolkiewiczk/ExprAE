@@ -1316,7 +1316,7 @@ module ExprAE.Graph {
                 var color: number;
                 if (w!=0)
                 {
-                    color=palwsk[Math.floor(w*255)&255];
+                    color=palwsk[w*255 & 255];
                 
                     x2=this.stdlib.expr_x;
                     y2=this.stdlib.expr_y;
@@ -1354,7 +1354,7 @@ module ExprAE.Graph {
             var color: number;
             if (w!=0)
             {
-                color=palwsk[Math.floor(w*255)&255];
+                color=palwsk[(w*255)&255];
             }
             else return 1;
             x2=this.stdlib.expr_x;
@@ -1414,7 +1414,7 @@ module ExprAE.Graph {
                         var w=expr.do();
                         if (w!=0)
                         {
-                            this.buf[dbf]=palwsk[Math.floor(w*255)&255];
+                            this.buf[dbf]=palwsk[w*255 & 255];
                         }
                         dbf++;
                         this.stdlib.expr_x+=dx;
@@ -1623,7 +1623,7 @@ module ExprAE.Graph {
             var d=Math.sqrt(x*x+y*y+z*z);
             if (d>this.lightdist) this.tptr[G3DPtrs.cwsk].set(0);
             else
-            this.tptr[G3DPtrs.cwsk].set(Math.floor(255-d*this._255_lightdist));
+            this.tptr[G3DPtrs.cwsk].set((255-d*this._255_lightdist)&255);
         }
         
         //oblicz wartosci jasnosci kolorow dla rysowania trojkatow
@@ -1656,7 +1656,7 @@ module ExprAE.Graph {
             if (d>this.lightdist) this.tptr[G3DPtrs.cwsk].set(0xff000000);
             else
             {
-                var c=Math.floor(this.dotproduct(this.tptr[G3DPtrs.nwsk].peek(),VEC.fromArray(this.light_vec))*(255-d*this._255_lightdist));
+                var c=(this.dotproduct(this.tptr[G3DPtrs.nwsk].peek(),VEC.fromArray(this.light_vec))*(255-d*this._255_lightdist)) & 255;
                 if (c<0) c=0;
                 this.tptr[G3DPtrs.cwsk].set(c);
             }
@@ -1664,7 +1664,7 @@ module ExprAE.Graph {
         
         compcoltabnormalcconstref(x: number,y: number): void
         {
-            var c=Math.floor(this.dotproduct(this.tptr[G3DPtrs.nwsk].peek(),VEC.fromArray(this.light_vec))*this.circfunc_constcol);
+            var c=(this.dotproduct(this.tptr[G3DPtrs.nwsk].peek(),VEC.fromArray(this.light_vec))*this.circfunc_constcol) & 255;
             if (c<0) c=0;
             this.tptr[G3DPtrs.cwsk].set(c);
         }
@@ -1834,8 +1834,8 @@ module ExprAE.Graph {
             yp2=p2.y;
             yp3=p3.y;
             yp4=p4.y;
-            var xi=Math.floor(CGraph.ZBUFMUL*(x-this.xs));
-            var zi=Math.floor(CGraph.ZBUFMUL*(this.tptr[G3DPtrs.vwsk].peek()-this.zs));
+            var xi=(CGraph.ZBUFMUL*(x-this.xs)) | 0;
+            var zi=(CGraph.ZBUFMUL*(this.tptr[G3DPtrs.vwsk].peek()-this.zs)) | 0;
             var d=xi*xi+this.circfunc_disty+zi*zi;
             this.GTriangle_z(xp1,yp1,xp2,yp2,xp3,yp3,colwsk.peek(),colwsk.peek(1),colwsk.peek(this.N+1),this.circfunc_palwsk,d,this.zbuf);
             this.GTriangle_z(xp1,yp1,xp3,yp3,xp4,yp4,colwsk.peek(),colwsk.peek(this.N+1),colwsk.peek(this.N),this.circfunc_palwsk,d,this.zbuf);
