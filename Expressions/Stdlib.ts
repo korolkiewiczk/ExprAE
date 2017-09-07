@@ -138,70 +138,85 @@ module ExprAE.Expressions {
             return a+b;
         }
 
+        private expr_setxy(fx: number,fy: number): number
+        {
+            this.expr_x=fx;
+            this.expr_y=fy;
+            return 1;
+        }
+        
+        //ustaw x=fx i y=fy dla f. parametrycznej wd. funkcji biegunowej r=f(a)
+        private expr_setxypol(f: number): number
+        {
+            this.expr_x=Math.cos(this.expr_t)*f;
+            this.expr_y=Math.sin(this.expr_t)*f;
+            return 1;
+        }
+
         //todo other functions
 
         expr_e: number = Math.E;
-        private static __expr_e(...args: any[]): number {
-            if (args.length == 2)
-                return (args[0] as Stdlib).expr_e = args[1];
+        private __expr_e(...args: any[]): number {
+            if (args.length == 1)
+                return this.expr_e = args[0];
             else
-                return (args[0] as Stdlib).expr_e;
+                return this.expr_e;
         }
 
         expr_pi: number = Math.PI;
-        private static __expr_pi(...args: any[]): number {
-            if (args.length == 2)
-                return (args[0] as Stdlib).expr_pi = args[1];
+        private __expr_pi(...args: any[]): number {
+            if (args.length == 1)
+                return this.expr_pi = args[0];
             else
-                return (args[0] as Stdlib).expr_pi;
+                return this.expr_pi;
         }
 
         expr_x: number = 0;
-        private static __expr_x(...args: any[]): number {
-            if (args.length == 2)
-                return (args[0] as Stdlib).expr_x = args[1];
+        private __expr_x(...args: any[]): number {
+            if (args.length == 1)
+                return this.expr_x = args[0];
             else
-                return (args[0] as Stdlib).expr_x;
+                return this.expr_x;
         }
 
         expr_y: number = 0;
-        private static __expr_y(...args: any[]): number {
-            if (args.length == 2)
-                return (args[0] as Stdlib).expr_y = args[1];
+        private __expr_y(...args: any[]): number {
+            if (args.length == 1)
+                return this.expr_y = args[0];
             else
-                return (args[0] as Stdlib).expr_y;
+                return this.expr_y;
         }
 
         expr_t: number = 0;
-        private static __expr_t(...args: any[]): number {
-            if (args.length == 2)
-                return (args[0] as Stdlib).expr_t = args[1];
+        private __expr_t(...args: any[]): number {
+            if (args.length == 1)
+                return this.expr_t = args[0];
             else
-                return (args[0] as Stdlib).expr_t;
+                return this.expr_t;
         }
 
         expr_k: number = 0;
-        private static __expr_k(...args: any[]): number {
-            if (args.length == 2)
-                return (args[0] as Stdlib).expr_k = args[1];
+        private __expr_k(...args: any[]): number {
+            if (args.length == 1)
+                return this.expr_k = args[0];
             else
-                return (args[0] as Stdlib).expr_k;
+                return this.expr_k;
         }
 
         expr_time: number = 0;
-        private static __expr_time(...args: any[]): number {
-            if (args.length == 2)
-                return (args[0] as Stdlib).expr_time = args[1];
+        private __expr_time(...args: any[]): number {
+            if (args.length == 1)
+                return this.expr_time = args[0];
             else
-                return (args[0] as Stdlib).expr_time;
+                return this.expr_time;
         }
 
         expr_str: string = "";
-        private static __expr_str(...args: any[]): string {
-            if (args.length == 2)
-                return (args[0] as Stdlib).expr_str = args[1];
+        private __expr_str(...args: any[]): string {
+            if (args.length == 1)
+                return this.expr_str = args[0];
             else
-                return (args[0] as Stdlib).expr_str;
+                return this.expr_str;
         }
 
         init(lib:CLib): CLib {
@@ -265,17 +280,17 @@ module ExprAE.Expressions {
             new ELEMENT("VARGET", Stdlib.expr_varget,CLib.VAL_FLOAT,2,CLib.VAL_STR|CLib.VAL_INT*4,0),
             new ELEMENT("VARSET", Stdlib.expr_varset,CLib.VAL_FLOAT,3,CLib.VAL_STR|CLib.VAL_STR*4|CLib.VAL_INT*16,0),
             new ELEMENT("VARSETF", Stdlib.expr_varsetf,CLib.VAL_FLOAT,3,CLib.VAL_STR|CLib.VAL_INT*16,0),
-            new ELEMENT("LOADLIB", Stdlib.expr_loadlib,CLib.VAL_INT,1,CLib.VAL_STR,0),
-            new ELEMENT("PAR", Stdlib.expr_setxy,CLib.VAL_FLOAT,2,0,0),
-            new ELEMENT("POL", Stdlib.expr_setxypol,CLib.VAL_FLOAT,1,0,0),*/
-            new ELEMENT("X", Stdlib.__expr_x, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
-            new ELEMENT("Y", Stdlib.__expr_y, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
-            new ELEMENT("T", Stdlib.__expr_t, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
-            new ELEMENT("K", Stdlib.__expr_k, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
-            new ELEMENT("PI", Stdlib.__expr_pi, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
-            new ELEMENT("E", Stdlib.__expr_e, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
-            new ELEMENT("TIME", Stdlib.__expr_time, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
-            new ELEMENT("STR", Stdlib.__expr_str, CLib.VAL_STR, CLib.VAR, 0, 0, this)
+            new ELEMENT("LOADLIB", Stdlib.expr_loadlib,CLib.VAL_INT,1,CLib.VAL_STR,0),*/
+            new ELEMENT("PAR", this.expr_setxy,CLib.VAL_FLOAT,2,0,0, this),
+            new ELEMENT("POL", this.expr_setxypol,CLib.VAL_FLOAT,1,0,0, this),
+            new ELEMENT("X", this.__expr_x, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
+            new ELEMENT("Y", this.__expr_y, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
+            new ELEMENT("T", this.__expr_t, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
+            new ELEMENT("K", this.__expr_k, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
+            new ELEMENT("PI", this.__expr_pi, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
+            new ELEMENT("E", this.__expr_e, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
+            new ELEMENT("TIME", this.__expr_time, CLib.VAL_FLOAT, CLib.VAR, 0, 0, this),
+            new ELEMENT("STR", this.__expr_str, CLib.VAL_STR, CLib.VAR, 0, 0, this)
         );
     }
 }

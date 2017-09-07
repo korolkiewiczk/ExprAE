@@ -1,3 +1,3 @@
-module ExprAE.Expressions {
+module ExprAE {
     export interface ICallback { (...args: any[]): any }
 }

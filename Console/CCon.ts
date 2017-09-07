@@ -37,7 +37,7 @@ module ExprAE.Console {
         constructor(protected width: number,
             protected height: number,
             protected buf: Uint32Array,
-            private reffunc: Expressions.POINTER,
+            private reffunc: ICallback,
             private libwin: CLibWin) {
             super(width, height, buf);
             //todo
@@ -87,7 +87,7 @@ module ExprAE.Console {
             var edited = this.edit[this.wske % CCon.EDIT]
             if (!edited) return;
             //currentcon=this;
-            var bf = this.reffunc.fptr(this.reffunc.th, edited)+"";
+            var bf = this.reffunc(edited)+"";
 
             if (!bf) {
                 this.lines[this.wskl % CCon.LINES], this.edit[this.wske % CCon.EDIT]

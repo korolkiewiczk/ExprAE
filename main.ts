@@ -17,7 +17,7 @@ module ExprAE {
             /*libwin=new CLibWin(System.CSys.ScrWidth,System.CSys.ScrHeight,buf,
                 20,20,System.CSys.ScrWidth-20,System.CSys.ScrHeight*2/3,library);*/
 
-            var con = new Console.CCon(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf(), new Expressions.POINTER(this, this.comp), libwin);
+            var con = new Console.CCon(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf(), this.comp.bind(this), libwin);
             var graphTester = new Graph.CGraphTester(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf());
 
             this.graph = new Graph.CGraph(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf(), stdlib)
@@ -41,7 +41,8 @@ module ExprAE {
             System.CSys.Run();
         }
 
-        comp(th: any, s: string): string {
+        comp(s: string): string {
+            var th = this;
             var result = (th.expr as Expressions.CExpr).set(s);
             if (result==Expressions.ErrorCodes.NoErr) {
                 th.graph.SetExpr(s, th.expr, System.CSys.DColor, System.CSys.DColor);

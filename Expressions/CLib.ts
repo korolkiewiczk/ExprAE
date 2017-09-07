@@ -31,7 +31,7 @@ module ExprAE.Expressions {
                 nd = nd.l[j];
             }
             if (nd.n == null)
-                nd.n = new NAME(e.th, e.fptr);
+                nd.n = new NAME(e.fptr.bind(e.th));
 
             i = e.parcount;
             if (i == CLib.VAR)
@@ -231,7 +231,6 @@ module ExprAE.Expressions {
 
     export class NAME {
         constructor(
-            public th: any, //"this" for variables
             public fptr: ICallback,   //func or var
             public parattr: number = 0,
             public partypes: number = 0,
@@ -258,15 +257,6 @@ module ExprAE.Expressions {
             public partypes: number,
             public tag: number,
             public th: any = null) {
-        }
-    }
-
-    export class POINTER {
-        constructor(
-            public th: any,
-            public fptr: ICallback
-        ) {
-            
         }
     }
 

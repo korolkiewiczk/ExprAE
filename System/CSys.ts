@@ -1,5 +1,3 @@
-import ICB = ExprAE.Expressions.ICallback;
-
 module ExprAE.System {
     export class CSys {
 
@@ -340,7 +338,7 @@ module ExprAE.System {
             CSys.isMouseLocked=false;
         }
 
-        static AddVar(name: string, addr: ICB, flags: number) {
+        static AddVar(name: string, addr: ICallback, flags: number) {
             var e = new Expressions.ELEMENT(name, addr, 0, 0, 0, flags);
             CSys.varlib.addElement(e);
         }

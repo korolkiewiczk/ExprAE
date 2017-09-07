@@ -3,9 +3,11 @@
 /// <reference path="../../Expressions/ErrorCodes.ts" />
 /// <reference path="../../Expressions/CLib.ts" />
 /// <reference path="../../Expressions/Stdlib.ts" />
-import Stdlib = ExprAE.Expressions.Stdlib;
 
 module ExprAE.Tests {
+
+    import Stdlib = ExprAE.Expressions.Stdlib;
+
     describe("CExpr", () => {
 
         describe("set", () => {
@@ -112,9 +114,8 @@ module ExprAE.Tests {
 
                 stdlib.expr_x=10;
                 expect(expression.set('@x')).toBe(Expressions.ErrorCodes.NoErr);
-                var result4=expression.do() as Expressions.POINTER;
-                expect(result4.th).toBe(stdlib);
-                expect(result4.fptr(result4.th)).toBe(10);
+                var result4=expression.do() as ExprAE.ICallback;
+                expect(result4()).toBe(10);
             });
         });
 
@@ -139,6 +140,21 @@ module ExprAE.Tests {
                 expect(stdlib.expr_x).toBe(10);
             });
         });
+
+        describe("do with setting using PAR/POL", () => {
+            it("should return valid expression result and valid params set", () => {
+                var stdlib = new Stdlib();
+                debugger;
+                var expression = new Expressions.CExpr(stdlib.init(new Expressions.CLib()));
+
+                expect(expression.set('PAR(1,2)')).toBe(Expressions.ErrorCodes.NoErr);
+                debugger;
+                expect(expression.do()).toBe(1);
+                expect(stdlib.expr_x).toBe(1);
+                expect(stdlib.expr_y).toBe(2);
+            });
+        });
+
         //***do TESTS***
 
 

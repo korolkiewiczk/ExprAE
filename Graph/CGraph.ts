@@ -1430,7 +1430,7 @@ module ExprAE.Graph {
         private circlefunc_rp: number;
         private circlefunc_t: number;
         //ogolna funkcja wykonujaca operacje z reffunc w okregu
-        circlefunc(expr: cexpr,f: FUNCSTRUCT,state: number, rr: number, tabf: number,ladd: number, reffunc: Expressions.ICallback): number
+        circlefunc(expr: cexpr,f: FUNCSTRUCT,state: number, rr: number, tabf: number,ladd: number, reffunc: ICallback): number
         {
             var R2=rr*rr;
             

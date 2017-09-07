@@ -453,17 +453,17 @@ module ExprAE.Expressions {
                             switch ((npa >> 8) & 255) {
                                 case CLib.VAL_FLOAT:
                                     this.onpstack[this.onpsl][0] = CLib.VAL_FLOAT;
-                                    this.onpstack[this.onpsl][1] = n.fptr(n.th); //todo
+                                    this.onpstack[this.onpsl][1] = n.fptr(); //todo
                                     //*(float*)((int)onpstack+onpsl*8+4)=*(float*)(n->fptr);
                                     break;
                                 case CLib.VAL_INT:
                                     this.onpstack[this.onpsl][0] = CLib.VAL_FLOAT;
-                                    this.onpstack[this.onpsl][1] = n.fptr(n.th); //todo
+                                    this.onpstack[this.onpsl][1] = n.fptr(); //todo
                                     //*(float*)((int)onpstack+onpsl*8+4)=(float)*(unsigned int*)(n->fptr);
                                     break;
                                 case CLib.VAL_STR: //VAL_STR=VAL_PTR
                                     this.onpstack[this.onpsl][0] = CLib.VAL_STR;
-                                    this.onpstack[this.onpsl][1] = n.fptr(n.th);
+                                    this.onpstack[this.onpsl][1] = n.fptr();
                                     //onpstack[onpsl][1]=*(unsigned int*)(n->fptr);
                                     break;
                                 default: return 0;
@@ -524,7 +524,7 @@ module ExprAE.Expressions {
                         n = this.onp[i][1];
                         this.i(this.onpstack, this.onpsl + 1);
                         this.onpstack[++this.onpsl][0] = CLib.VAL_PTR;
-                        this.onpstack[this.onpsl][1] = new POINTER(n.th, n.fptr);
+                        this.onpstack[this.onpsl][1] = n.fptr;
                         //this.onpstack[onpsl][1]=(unsigned int)(n->fptr);
                         break;
                 }
@@ -713,9 +713,9 @@ module ExprAE.Expressions {
             return a / b;
         }
 
-        private CExpr_op_set(ptr: POINTER, val: number): number {
-            if (typeof ptr.fptr === "function")
-                return ptr.fptr(ptr.th, val);
+        private CExpr_op_set(ptr: ICallback, val: number): number {
+            if (typeof ptr === "function")
+                return ptr(val);
             else
                 return 0;
         }
