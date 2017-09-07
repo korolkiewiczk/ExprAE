@@ -157,7 +157,7 @@ module ExprAE.Graph {
         //wyrazenie dla funckcji circlefunc
         private circfunc_expr: Expressions.CExpr;
         private circfunc_dir: number = 0;
-        private circfunc_palwsk: number[];
+        private circfunc_palwsk: Uint32Array;
         private circfunc_disty: number = 0;
         private circfunc_D2: number = 0; //D*D
         private circfunc_D4: number = 0; //D*D*D*D
@@ -512,7 +512,7 @@ module ExprAE.Graph {
             if (k==keys.K_Q)
             {
                 this.geps+=dir;
-                if (this.geps<0) this.geps=0;
+                if (this.geps<1) this.geps=1;
                 else
                 if (this.geps>6) this.geps=6;
             }
@@ -931,6 +931,7 @@ module ExprAE.Graph {
         
         dotproduct(a: VEC,b: VEC): number
         {
+            if (!a || !b) return 0;
             return a.a*b.a+a.b*b.b+a.c*b.c;
         }
 
@@ -1065,11 +1066,11 @@ module ExprAE.Graph {
                         {
                             if (this.lighting)
                             {
-                                //if (!this.drawfunc_K3DF2_soft_fill_light(f)) return 0;
+                                if (!this.drawfunc_K3DF2_soft_fill_light(f)) return 0;
                             }
                             else
                             {
-                                //if (!this.drawfunc_K3DF2_soft_fill(f)) return 0;
+                                if (!this.drawfunc_K3DF2_soft_fill(f)) return 0;
                             }
                         }
                         else
@@ -1466,7 +1467,7 @@ module ExprAE.Graph {
             this.t0ptr[gl_vwsk]=(void*)(gl_vertextab+this.N);
         #endif*/
             
-            if (f) this.circfunc_palwsk=this.Palette[f.color];
+            if (f) this.circfunc_palwsk=new Uint32Array(this.Palette[f.color]);
             
             if (state==0)
             {
@@ -1575,7 +1576,44 @@ module ExprAE.Graph {
             if (this.circlefunc(null,null,status,this.R,G3DFlags.FVWSK|G3DFlags.FPWSK,1,this.compprojecttabref.bind(this))) this.dstate++;
         }
 
-        //...
+        compnormaltabref(x: number,y: number): void
+        {
+            var normwsk=this.tptr[G3DPtrs.nwsk];
+            var z1: number;
+            var z2: number;
+            var z3: number;
+            var z4: number;
+            z1=this.tptr[G3DPtrs.vwsk].peek(-this.N);
+            z2=this.tptr[G3DPtrs.vwsk].peek(1);
+            z3=this.tptr[G3DPtrs.vwsk].peek(this.N);
+            z4=this.tptr[G3DPtrs.vwsk].peek(-1);
+                    
+            var a = this.circfunc_1_2_D*(z4-z2);
+            var c =this.circfunc_1_2_D*(z1-z3);
+                    
+            var d=1/Math.sqrt(a*a+this.circfunc_D4+c*c);
+            normwsk.set(new VEC(a*d, this.circfunc_D2*d, c*d));
+        }
+        
+        compnormaltab(): void
+        {
+            if (this.hold>0) {this.dstate+=2; return;}
+            var status: number;
+            if (this.dstate==DS.NORMAL)
+            {
+                status=0;
+                this.dstate++;
+            } else status=1;
+            
+        /*#ifdef OPENGL
+            if (gl_used)
+            {
+                if (this.circlefunc(0,0,status,this.R-D,FGLG3DFlags._VWSK|G3DFlags.FNWSK,1,&gl_compnormaltabref)) this.dstate++;
+            }
+            else
+        #endif*/
+            if (this.circlefunc(null,null,status,this.R-this.D,G3DFlags.FVWSK|G3DFlags.FNWSK,1,this.compnormaltabref.bind(this))) this.dstate++;
+        }
 
         compcoltabref(x: number,y: number): void
         {
@@ -1607,6 +1645,68 @@ module ExprAE.Graph {
                 this.dstate++;
             } else status=1;
             if(this.circlefunc(null,null,status,this.R,G3DFlags.FVWSK|G3DFlags.FCWSK,1,this.compcoltabref.bind(this))) this.dstate++;
+        }
+
+        compcoltabnormalref(x: number,y: number): void
+        {
+            var z=this.tptr[G3DPtrs.vwsk].peek()-this.zs;
+            x-=this.xs;   
+            y-=this.ys;
+            var d=Math.sqrt(x*x+y*y+z*z);
+            if (d>this.lightdist) this.tptr[G3DPtrs.cwsk].set(0xff000000);
+            else
+            {
+                var c=Math.floor(this.dotproduct(this.tptr[G3DPtrs.nwsk].peek(),VEC.fromArray(this.light_vec))*(255-d*this._255_lightdist));
+                if (c<0) c=0;
+                this.tptr[G3DPtrs.cwsk].set(c);
+            }
+        }
+        
+        compcoltabnormalcconstref(x: number,y: number): void
+        {
+            var c=Math.floor(this.dotproduct(this.tptr[G3DPtrs.nwsk].peek(),VEC.fromArray(this.light_vec))*this.circfunc_constcol);
+            if (c<0) c=0;
+            this.tptr[G3DPtrs.cwsk].set(c);
+        }
+        
+        //oblicz wartosci jasnosci kolorow dla rysowania trojkatow
+        private compcoltabnormal_lightvec: VEC;
+        compcoltabnormal(color: number): void
+        {
+            var status: number;
+            
+            var d=1/Math.sqrt(this.light_vec[0]*this.light_vec[0]+this.light_vec[1]*this.light_vec[1]+this.light_vec[2]*this.light_vec[2]);
+            this.compcoltabnormal_lightvec=VEC.fromArray(this.light_vec);
+            this.light_vec[0]*=d;
+            this.light_vec[1]*=d;
+            this.light_vec[2]*=d;
+                
+            if (this.dstate==DS.COL)
+            {
+                status=0;
+                this.dstate++;
+            } else status=1;
+            if (this.holdlight)
+            {
+                if (this.hold>0) {
+                    this.light_vec[0]=this.compcoltabnormal_lightvec.a;
+                    this.light_vec[1]=this.compcoltabnormal_lightvec.b;
+                    this.light_vec[2]=this.compcoltabnormal_lightvec.c;
+                    this.dstate++; 
+                    return;
+                }
+                this.circfunc_constcol=this.lightdist;
+                if (this.circfunc_constcol>255) this.circfunc_constcol=255;
+                if(this.circlefunc(null,null,status,this.R,G3DFlags.FVWSK|G3DFlags.FNWSK|G3DFlags.FCWSK,1,this.compcoltabnormalcconstref.bind(this))) this.dstate++;
+                this.light_vec[0]=this.compcoltabnormal_lightvec.a;
+                this.light_vec[1]=this.compcoltabnormal_lightvec.b;
+                this.light_vec[2]=this.compcoltabnormal_lightvec.c;
+                return;
+            }
+            if(this.circlefunc(null,null,status,this.R,G3DFlags.FVWSK|G3DFlags.FNWSK|G3DFlags.FCWSK,1,this.compcoltabnormalref.bind(this))) this.dstate++;
+            this.light_vec[0]=this.compcoltabnormal_lightvec.a;
+            this.light_vec[1]=this.compcoltabnormal_lightvec.b;
+            this.light_vec[2]=this.compcoltabnormal_lightvec.c;
         }
 
         //todo other comps & refs
@@ -1705,6 +1805,101 @@ module ExprAE.Graph {
                 }
                 this.drawfunc_K3DF2_soft_grid_rp-=this.D;
             }
+            return 1;
+        }
+
+        drawfunc_K3DF2_soft_fillref(x: number,y: number): void
+        {
+            var prwsk=this.tptr[G3DPtrs.pwsk];
+            var colwsk=this.tptr[G3DPtrs.cwsk];
+            var xp1: number;
+            var yp1: number;
+            var xp2: number;
+            var yp2: number;
+            var xp3: number;
+            var yp3: number;
+            var xp4: number;
+            var yp4: number;
+            var p1=prwsk.peek() as IPOINT;
+            var p2=prwsk.peek(1) as IPOINT;
+            var p3=prwsk.peek(this.N+1) as IPOINT;
+            var p4=prwsk.peek(this.N) as IPOINT;
+            if (p1==undefined || p2==undefined || p3==undefined || p4==undefined) return;
+            xp1=p1.x;
+            xp2=p2.x;
+            xp3=p3.x;
+            xp4=p4.x;
+            if (xp1==undefined || xp2==undefined || xp3==undefined || xp4==undefined) return;
+            yp1=p1.y;
+            yp2=p2.y;
+            yp3=p3.y;
+            yp4=p4.y;
+            var xi=Math.floor(CGraph.ZBUFMUL*(x-this.xs));
+            var zi=Math.floor(CGraph.ZBUFMUL*(this.tptr[G3DPtrs.vwsk].peek()-this.zs));
+            var d=xi*xi+this.circfunc_disty+zi*zi;
+            this.GTriangle_z(xp1,yp1,xp2,yp2,xp3,yp3,colwsk.peek(),colwsk.peek(1),colwsk.peek(this.N+1),this.circfunc_palwsk,d,this.zbuf);
+            this.GTriangle_z(xp1,yp1,xp3,yp3,xp4,yp4,colwsk.peek(),colwsk.peek(this.N+1),colwsk.peek(this.N),this.circfunc_palwsk,d,this.zbuf);
+        }
+        
+        drawfunc_K3DF2_soft_fill(f: FUNCSTRUCT): number
+        {
+            if (this.dstate<DS.PROJECT+2)
+            {
+                this.compprojecttab();
+                if (this.dstate!=DS.PROJECT+2) return 0;
+                this.dstate+=2;
+            }
+            if (this.dstate<DS.COL+2)
+            {
+                this.compcoltab(f.color);
+                if (this.dstate!=DS.COL+2) return 0;
+            }
+            if (this.dstate<DS.TEX+2)
+            {
+                this.dstate+=2;
+            }
+            
+            var status: number;
+            if (this.dstate==DS.DRAW)
+            {
+                status=0;
+                this.dstate++;
+            } else status=1;
+            if (!this.circlefunc(null,f,status,this.R-this.D,G3DFlags.FVWSK|G3DFlags.FPWSK|G3DFlags.FCWSK,0,
+            this.drawfunc_K3DF2_soft_fillref.bind(this))) return 0;
+            return 1;
+        }
+        
+        drawfunc_K3DF2_soft_fill_light(f: FUNCSTRUCT): number
+        {
+            if (this.dstate<DS.PROJECT+2)
+            {
+                this.compprojecttab();
+                if (this.dstate!=DS.PROJECT+2) return 0;
+            }
+            if (this.dstate<DS.NORMAL+2)
+            {
+                this.compnormaltab();
+                if (this.dstate!=DS.NORMAL+2) return 0;
+            }
+            if (this.dstate<DS.COL+2)
+            {
+                this.compcoltabnormal(f.color);
+                if (this.dstate!=DS.COL+2) return 0;
+            }
+            if (this.dstate<DS.TEX+2)
+            {
+                this.dstate+=2;
+            }
+            
+            var status: number;
+            if (this.dstate==DS.DRAW)
+            {
+                status=0;
+                this.dstate++;
+            } else status=1;
+            if (!this.circlefunc(null,f,status,this.R-this.D,G3DFlags.FVWSK|G3DFlags.FPWSK|G3DFlags.FCWSK,0,
+            this.drawfunc_K3DF2_soft_fillref.bind(this))) return 0;
             return 1;
         }
 
@@ -2092,6 +2287,10 @@ module ExprAE.Graph {
             public c: number) {
 
             }
+        
+        static fromArray(array:number[]): VEC {
+            return new VEC(array[0],array[1],array[2])
+        }
     }
     
     export class VEC2
@@ -2203,8 +2402,8 @@ module ExprAE.Graph {
             return this.ptr[this.i++];
         }
 
-        peek(): any {
-            return this.ptr[this.i];
+        peek(diff: number = 0): any {
+            return this.ptr[this.i+diff];
         }
 
         set(val: any) {
