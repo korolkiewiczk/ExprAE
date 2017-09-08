@@ -334,6 +334,7 @@ module ExprAE.Graph {
         #endif*/
         }
 
+        private KeyFunc_prm: number = 0;    //todo static
         KeyFunc(k: number): void
         {
             if (k!=256+keys.K_SHIFT)
@@ -609,17 +610,16 @@ module ExprAE.Graph {
             else
             if (k==keys.K_B)
             {
-                var prm: number = 0;    //todo static
                 if (this.gamemodeon) 
                 {
                     this.gamemodeon=0;
-                    this.repmode=prm;
+                    this.repmode=this.KeyFunc_prm;
                 }
                 else
                 {
                     this.gamemodeon=1;
                     this.gms.time=csys.GetTime();
-                    prm=this.repmode;
+                    this.KeyFunc_prm=this.repmode;
                     this.repmode=1;
                 }
             }
@@ -833,8 +833,7 @@ module ExprAE.Graph {
                     }
                     if (!this.drawfunc(this.dexprlist[this.dstack[this.dstackl - 1]], this.dfuncstruct[this.dstack[this.dstackl - 1]])) return;
 
-                    //todo
-                    //if (this.gamemodeon) updateplayer();
+                    if (this.gamemodeon) this.updateplayer();
                     this.dstackl--;
                 }
                 this.enddrawfunc();
@@ -2226,6 +2225,267 @@ module ExprAE.Graph {
             csys.DColor=0;
         }
 
+        getsurfz(x: number,y: number): VEC
+        {
+            var x0=Math.floor(x/this.D)*this.D,y0=Math.ceil(y/this.D)*this.D;
+            var tab=-this.N*Math.ceil((y0-this.cy1)/this.D)+Math.floor((x0-this.cx1)/this.D)+this.N;
+            if ((tab<0)||(tab>=this.N*this.N)) return new VEC(0,0,0);
+            
+            var trno: number;
+            
+            //do ktorego trojkata nalezy punkt
+            trno=((x0*(y0-this.D)+x*y0+(x0+this.D)*y-x*(y0-this.D)-x0*y-(x0+this.D)*y0)>0)? 1:2;
+            var x1: number;
+            var y1: number;
+            var z1: number;
+            var x2: number;
+            var y2: number;
+            var z2: number;
+            var x3: number;
+            var y3: number;
+            var z3: number;
+            
+        /*#ifdef OPENGL
+            if (gl_used)
+            {
+                if (trno==1)
+                {
+                    x2=x0;
+                    y2=y0;
+                    z2=((VEC*)(gl_vertextab+tab)).b;
+                    x1=x0+this.D;
+                    y1=y0;
+                    z1=((VEC*)(gl_vertextab+tab+1)).b;
+                    x3=x0+this.D;
+                    y3=y0-this.D;
+                    z3=((VEC*)(gl_vertextab+tab+this.N+1)).b;
+                }
+                else
+                {
+                    x1=x0;
+                    y1=y0-this.D;
+                    z1=((VEC*)(gl_vertextab+tab+this.N)).b;
+                    x2=x0+this.D;
+                    y2=y0-this.D;
+                    z2=((VEC*)(gl_vertextab+tab+this.N+1)).b;
+                    x3=x0;
+                    y3=y0;
+                    z3=((VEC*)(gl_vertextab+tab)).b;
+                }
+            }
+            else
+        #endif*/
+            {
+                if (trno==1)
+                {
+                    x2=x0;
+                    y2=y0;
+                    z2=this.valtab[tab];
+                    x1=x0+this.D;
+                    y1=y0;
+                    z1=this.valtab[tab+1];
+                    x3=x0+this.D;
+                    y3=y0-this.D;
+                    z3=this.valtab[tab+this.N+1];
+                }
+                else
+                {
+                    x1=x0;
+                    y1=y0-this.D;
+                    z1=this.valtab[tab+this.N];
+                    x2=x0+this.D;
+                    y2=y0-this.D;
+                    z2=this.valtab[tab+this.N+1];
+                    x3=x0;
+                    y3=y0;
+                    z3=this.valtab[tab];
+                }
+            }
+            var z12=z1+(x-x1)*(z1-z2)/(x1-x2);
+            var z13=z1+(y-y1)*(z1-z3)/(y1-y3);
+            var y23=(x-x2)*(y2-y3)/(x2-x3)+y2;
+            var x23=(y-y2)*(x2-x3)/(y2-y3)+x2;
+            var z23y=(y23-y2)*(z2-z3)/(y2-y3)+z2;
+            var z23x=(x23-x2)*(z2-z3)/(x2-x3)+z2;
+            if (y1==y23) y23+=0.001;
+            var z123=(y-y1)*(z12-z23y)/(y1-y23)+z12;
+            
+            //okresc katy
+            if (x1==x23) x23+=0.001;
+            var anglex=Math.atan((z23x-z13)/(x1-x23));
+            if (y1==y23) y23+=0.001;
+            var angley=Math.atan((z23y-z12)/(y1-y23));
+            
+            return new VEC(anglex, angley,z123);
+        }
+        
+        updateplayer(): void
+        {
+            //ustal zmiane czasu
+            var currtime=csys.GetTime();
+            var deltatime=currtime-this.gms.time;
+            //DEBUG_Prnumberf("%f\n",deltatime);
+            this.gms.time=currtime;
+            var jump=this.gms.moveplayer&2;
+            
+            //modyfikuj wektor predkosci
+            var vx: number;
+            var vy: number;
+            var dv0=Math.sqrt(this.gms.player_vel.a*this.gms.player_vel.a+this.gms.player_vel.b*this.gms.player_vel.b);
+            vx=this.gms.player_vel.a+this.gms.player_accv.u*deltatime;
+            vy=this.gms.player_vel.b+this.gms.player_accv.v*deltatime;
+            var dv=Math.sqrt(vx*vx+vy*vy);
+            /*if (dv>this.gms.player_maxvel)
+            {
+                this.gms.player_vel.a*=this.gms.player_maxvel/dv;
+                this.gms.player_vel.b*=this.gms.player_maxvel/dv;
+            }*/
+            
+            if ((dv<this.gms.player_maxvel)||(dv0>dv))
+            {
+                this.gms.player_vel.a=vx;
+                this.gms.player_vel.b=vy;
+            }
+            
+            if (this.physicsmodel==PhysicsModel.SIMPLE)
+            {
+                if (dv>0)
+                {
+                    this.gms.player_accv.u=-this.gms.player_vel.a/dv*this.gms.player_acc;
+                    this.gms.player_accv.v=-this.gms.player_vel.b/dv*this.gms.player_acc;
+                }
+                if ((this.gms.moveplayer==0)&&(dv<this.gms.player_maxvel*0.05))
+                {
+                    this.gms.player_vel.a=0;
+                    this.gms.player_vel.b=0;
+                    this.gms.player_accv.u=0;
+                    this.gms.player_accv.v=0;
+                }
+            }
+            else
+            {
+                this.gms.player_accv.u=0;
+                this.gms.player_accv.v=0;
+            }
+            
+            this.gms.player_vel.c-=this.gms.grav*deltatime;
+            
+            //przesun sie o wektor predkosci
+            this.j[Axis.X]+=this.gms.player_vel.a*deltatime;
+            this.j[Axis.Y]+=this.gms.player_vel.b*deltatime;
+            this.j[Axis.Z]+=this.gms.player_vel.c*deltatime;
+            this.updatepos();
+            
+            //sprawdz kolizje
+            var x=this.j[Axis.X],y=this.j[Axis.Y],z=this.j[Axis.Z]-this.gms.player_height;
+            if ((x<this.cx1)||(x>this.cx2)||(y>this.cy1)||(y<this.cy2)) return;
+            
+            
+            var vec=this.getsurfz(x,y);
+            var anglex=vec.a;
+            var angley=vec.b;
+            var z123=vec.c;
+            
+            //przeciecie w (x,y,z123)
+            if (z<z123)
+            {
+                this.j[Axis.Z]=z123+this.gms.player_height;
+                if (jump) 
+                {
+                    this.gms.player_vel.c=this.gms.player_jumpvel;
+                }
+                else
+                if (this.physicsmodel==PhysicsModel.ACCURATE)
+                {
+                    
+                    //rozloz wektor predkosci
+                    dv=Math.sqrt(this.gms.player_vel.a*this.gms.player_vel.a+this.gms.player_vel.c*this.gms.player_vel.c);
+                    var vzx=Math.abs(dv*Math.sin(anglex));
+                    dv=Math.sqrt(this.gms.player_vel.b*this.gms.player_vel.b+this.gms.player_vel.c*this.gms.player_vel.c);
+                    var vzy=Math.abs(dv*Math.sin(angley));
+                    this.gms.player_vel.c=-Math.sqrt(vzx*vzx+vzy*vzy);
+                
+                    /*var dvx=Math.sqrt(this.gms.player_vel.a*this.gms.player_vel.a+this.gms.player_vel.c*this.gms.player_vel.c);
+                    var vanglex=aMath.cos(this.gms.player_vel.a/dvx);
+                    var vpx=dvx*Math.cos(vanglex-anglex);
+                    this.gms.player_vel.a=vpx*Math.cos(anglex);
+                    
+                    var dvy=Math.sqrt(this.gms.player_vel.b*this.gms.player_vel.b+this.gms.player_vel.c*this.gms.player_vel.c);
+                    var vangley=aMath.cos(this.gms.player_vel.b/dvy);
+                    var vpy=dvy*Math.cos(vangley-angley);
+                    this.gms.player_vel.b=vpy*Math.cos(angley);
+                    
+                    var ax2: number;
+            var ay2: number;
+                    var z123_2=this.getsurfz(x+this.gms.player_vel.a,y+this.gms.player_vel.b,ax2,ay2);
+                    var dvxy=Math.sqrt(this.gms.player_vel.a*this.gms.player_vel.a+this.gms.player_vel.b*this.gms.player_vel.b);
+                    var dvxyz=Math.sqrt(this.gms.player_vel.a*this.gms.player_vel.a+this.gms.player_vel.b*this.gms.player_vel.b
+                    +this.gms.player_vel.c*this.gms.player_vel.c);
+                    if (dvxy==0) this.gms.player_vel.c=0;
+                    else
+                    {
+                        var anglez=aMath.sin((z123_2-z123)/
+                        Math.sqrt(this.gms.player_vel.a*this.gms.player_vel.a+this.gms.player_vel.b*this.gms.player_vel.b+
+                        (z123_2-z123)*(z123_2-z123)));
+                        var vanglez=aMath.sin(this.gms.player_vel.c/dvxyz);
+                        var vpz=dvxyz*Math.cos(vanglez-anglez);
+                        this.gms.player_vel.c=vpz*Math.sin(anglez);
+                    }*/
+                    
+                    //this.gms.player_vel.c=-(vpx*Math.sin(anglex)+vpy*Math.sin(angley));
+                    //DEBUG_Prnumberf("%f %f %f %f\n",this.gms.player_vel.a,this.gms.player_vel.b,this.gms.player_vel.c,
+                    //Math.sin(anglex)*Math.cos(vanglex-anglex)+Math.sin(angley)*Math.cos(vangley-angley));
+                    
+                    
+                    //okresl wektor sily
+                    var F=this.gms.grav*this.gms.player_mass;
+                    
+                    var F1x=F*Math.sin(anglex);
+                    var F2x=F*Math.cos(anglex);
+                    var Ffx=F2x*this.gms.friction;
+                    //F1x=(Math.absF1x)-Math.absFTx)>0)? F1x-FTx:0;
+                    
+                    var F1y=F*Math.sin(angley);
+                    var F2y=F*Math.cos(angley);
+                    var Ffy=F2y*this.gms.friction;
+                    //F1y=(Math.absF1y)-Math.absFTy)>0)? F1y-FTy:0;
+                    
+                    var Fx=F1x*Math.cos(anglex);
+                    var Fy=F1y*Math.cos(angley);
+                    
+                    //DEBUG_Prnumberf("ax %f ay %f| x %f %f %f| y %f %f %f| Fx %f Fy %f| %f %f \n",
+                    //anglex,angley,F1x,F2x,Ffx,F1y,F2y,Ffy,
+                    //Fx/this.gms.player_mass*deltatime,Fy/this.gms.player_mass*deltatime,Math.sin(anglex),Math.cos(anglex));
+                    
+                    this.gms.player_vel.a+=Fx/this.gms.player_mass*deltatime;
+                    this.gms.player_vel.b+=Fy/this.gms.player_mass*deltatime;
+                    
+                    //ustal tarcie
+                    dv=Math.sqrt(this.gms.player_vel.a*this.gms.player_vel.a+this.gms.player_vel.b*this.gms.player_vel.b);
+                    if (dv>0)
+                    {
+                        Ffx*=-this.gms.player_vel.a/dv;
+                        Ffy*=-this.gms.player_vel.b/dv;
+                        Ffx*=Math.cos(anglex);
+                        Ffy*=Math.cos(angley);
+                        var vx=this.gms.player_vel.a,vy=this.gms.player_vel.b;
+                        this.gms.player_vel.a+=Ffx/this.gms.player_mass*deltatime;
+                        this.gms.player_vel.b+=Ffy/this.gms.player_mass*deltatime;
+                        if (vx*this.gms.player_vel.a<0) this.gms.player_vel.a=0;
+                        if (vy*this.gms.player_vel.b<0) this.gms.player_vel.b=0;
+                    }
+                    else
+                    {
+                        this.gms.player_vel.c=0;
+                    }
+                }
+                else
+                {
+                    this.gms.player_vel.c=0;
+                }
+            }
+        }
+        
         Findx0(expr: cexpr,a: number,b: number,d: number,eps: number): number
         {
             var x1=a;
