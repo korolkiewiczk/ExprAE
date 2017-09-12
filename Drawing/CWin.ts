@@ -609,7 +609,7 @@ module ExprAE.Drawing {
 
         //rysowanie teksturowanego trojkata z 32-bitowym buforem z
         TTriangle_z(xa: number, ya: number, xb: number, yb: number, xc: number, yc: number, fua: number,
-            fva: number, fub: number, fvb: number, fuc: number, fvc: number, tex: CTex, ca: number, cb: number, cc: number, z: number, zbuf: number[]) {
+            fva: number, fub: number, fvb: number, fuc: number, fvc: number, tex: CTex, ca: number, cb: number, cc: number, z: number, zbuf: Uint32Array) {
             var left: number = 0, top = 0, right = this.width - 1, bottom = this.height - 1;
             if (((xa < left) && (xb < left) && (xc < left)) || ((ya < top) && (yb < top) && (yc < top)) ||
                 ((xa > right) && (xb > right) && (xc > right)) || ((ya > bottom) && (yb > bottom) && (yc > bottom)))
@@ -885,7 +885,7 @@ module ExprAE.Drawing {
                         var dc: number = ((cB - cA)) / (xB - xA + (1));
                         var c: number = cA + disp * dc;
 
-                        while (i--) {
+                        while (i-- > 0) {
                             if (z < zbuf[zwsk]) {
                                 this.buf[wsk] = this.FadeColor(tex.Peek(u, v), c);
                                 zbuf[zwsk] = z;
@@ -974,7 +974,7 @@ module ExprAE.Drawing {
                     var v: number = vA + disp * dv;
                     var dc: number = ((cB - cA)) / (xB - xA + (1));
                     var c: number = cA + disp * dc;
-                    while (i--) {
+                    while (i-- > 0) {
                         if (z < zbuf[zwsk]) {
                             this.buf[wsk] = this.FadeColor(tex.Peek(u, v), c);
                             zbuf[zwsk] = z;

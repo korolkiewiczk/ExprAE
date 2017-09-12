@@ -39,7 +39,8 @@ module ExprAE.Drawing {
 
         static getTexture(): CTex {
             var tex = new CTex();
-            tex.Load(new Uint8Array(ExprImg.data), ExprImg.EXPRIMG_WIDTH,ExprImg.EXPRIMG_HEIGHT);
+            var array=new Uint32Array(ExprImg.data);
+            tex.Load(new Uint8Array(array.buffer), ExprImg.EXPRIMG_WIDTH,ExprImg.EXPRIMG_HEIGHT);
             return tex;
         }
     }

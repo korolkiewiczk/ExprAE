@@ -25,14 +25,14 @@ module ExprAE.Drawing {
             
             //znajdz rozmiary tekstury
             var sw: number=1,lw=0;
-            while ((sw<this.width)&&(lw<CTex.MAXMIPMAPS))
+            while ((sw<width)&&(lw<CTex.MAXMIPMAPS))
             {
                 sw<<=1;
                 lw++;
             }
             
             var sh: number=1,lh=0;
-            while ((sh<this.height)&&(lh<CTex.MAXMIPMAPS))
+            while ((sh<height)&&(lh<CTex.MAXMIPMAPS))
             {
                 sh<<=1;
                 lh++;
@@ -59,14 +59,17 @@ module ExprAE.Drawing {
                 this.b[i]=new Uint32Array(j*j);
                 j>>=1;
             }
+
+            this.x0=0;
+            this.y0=0;
             
             //skaluj bufor
-            if ((this.width!=s)||(this.height!=s))
+            if ((width!=s)||(height!=s))
             {
                 wsk=this.b[0];
                 var wskl=0;
-                var dx: number=this.width/s;
-                var dy: number=this.height/s;
+                var dx: number=width/s;
+                var dy: number=height/s;
                 var x: number;
                 var y: number=0;
         
@@ -76,35 +79,37 @@ module ExprAE.Drawing {
                     x=0;
                     for (var i: number=0; i<s-1; i++)
                     {
-                        var d=((x | 0)+(y | 0)*this.width * 4) | 0;
-                        var x1: number=x-Math.floor(x | 0),y1=y-(y | 0);
+                        var d=(((x | 0)+(y | 0)*width)) << 2;
+                        var x1: number=x-Math.floor(x),y1=y-Math.floor(y);
                         var b1: number=bf[d];
                         var b2: number=bf[d+4];
-                        var b3: number=bf[d+this.width*4+4];
-                        var b4: number=bf[d+this.width*4];
+                        var b3: number=bf[d+width*4+4];
+                        var b4: number=bf[d+width*4];
                         var g1: number=bf[d+1];
                         var g2: number=bf[d+4+1];
-                        var g3: number=bf[d+this.width*4+4+1];
-                        var g4: number=bf[d+this.width*4+1];
+                        var g3: number=bf[d+width*4+4+1];
+                        var g4: number=bf[d+width*4+1];
                         var r1: number=bf[d+2];
                         var r2: number=bf[d+4+2];
-                        var r3: number=bf[d+this.width*4+4+2];
-                        var r4: number=bf[d+this.width*4+2];
+                        var r3: number=bf[d+width*4+4+2];
+                        var r4: number=bf[d+width*4+2];
                         r=((r1*(1-x1)+r2*x1)*(1-y1)+(r3*x1+r4*(1-x1))*y1) | 0;
                         g=((g1*(1-x1)+g2*x1)*(1-y1)+(g3*x1+g4*(1-x1))*y1) | 0;
                         b=((b1*(1-x1)+b2*x1)*(1-y1)+(b3*x1+b4*(1-x1))*y1) | 0;
-                        wsk[wskl]=D.RGB32(r,g,b)|0xff000000;
+                        wsk[wskl]=D.RGB32(r,g,b);
                         wskl++;
                         x+=dx;
                     }
-                    wsk[wskl]=bf[((x | 0)+(y | 0)*this.width) | 0];
+                    let ind=(((x | 0)+(y | 0)*width)) << 2;
+                    wsk[wskl]=D.RGB32(bf[ind+2],bf[ind+1], bf[ind]);
                     wskl++;
                     y+=dy;
                 }
                 x=0;
                 for (var i: number=0; i<s; i++)
                 {
-                    wsk[wskl]=bf[((x | 0)+(y | 0)*this.width) | 0];
+                    let ind=(((x | 0)+(y | 0)*width)) << 2;
+                    wsk[wskl]=D.RGB32(bf[ind+2],bf[ind+1], bf[ind]);
                     wskl++;
                     x+=dx;
                 }
@@ -170,6 +175,8 @@ module ExprAE.Drawing {
             return 1;
         }
 
+        IsLoaded(): boolean { return this.b[0]!=null; }
+
         GetU(x: number): number { return (x - this.x0) * this.w; }
         GetV(y: number): number { return (y - this.y0) * this.h; }
         GetSize(lev: number): number { return this.width >> lev; }
@@ -190,7 +197,7 @@ module ExprAE.Drawing {
         private BuildMipMaps(tbuf: Uint32Array[], twidth: number, tshift: number): void
         {
             var wsk: Uint32Array,pwsk: Uint32Array;
-            var wskl,pwskl: number;
+            var wskl: number, pwskl: number;
             var j: number;
             j=twidth>>1;
             for (var i: number=1; i<=tshift; i++)

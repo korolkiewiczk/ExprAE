@@ -250,7 +250,9 @@ module ExprAE.Graph {
             this.lightdist=CGraph.DEFAULTR*4;
 
             //todo textures
-            //for (i: number=0; i<CGraph.MAXFUNCCOUNT; i++) this.tex[i].Load(0);
+            for (var i=0; i<CGraph.MAXFUNCCOUNT; i++) {
+                this.tex[i]=Drawing.ExprImg.getTexture();
+            }
             //for (i: number=0; i<6; i++) {this.envmap[i].SetAsCubeMapTex(i,CGraph.CUBEMAPTEXID); this.envmap[i].Load(0);}
             
             //dla trybu gry standardowe ustawienia
@@ -1077,11 +1079,11 @@ module ExprAE.Graph {
                         {
                             if (this.lighting)
                             {
-                                //if (!this.drawfunc_K3DF2_soft_fill_tex_light(f)) return 0;
+                                if (!this.drawfunc_K3DF2_soft_fill_tex_light(f)) return 0;
                             }
                             else
                             {
-                                //if (!this.drawfunc_K3DF2_soft_fill_tex(f)) return 0;
+                                if (!this.drawfunc_K3DF2_soft_fill_tex(f)) return 0;
                             }
                         }
                     }
@@ -1708,6 +1710,24 @@ module ExprAE.Graph {
             this.light_vec[2]=this.compcoltabnormal_lightvec.c;
         }
 
+        comptexcoordtabref(x: number,y: number): void
+        {
+            this.tptr[G3DPtrs.twsk].set(new VEC2(this.circfunc_tex.GetU(x), this.circfunc_tex.GetV(-y)));
+        }
+        
+        comptexcoordtab(f: FUNCSTRUCT): void
+        {
+            if (this.hold>0) {this.dstate+=2; return;}
+            var status: number;
+            if (this.dstate==DS.TEX)
+            {
+                status=0;
+                this.dstate++;
+            } else status=1;
+            
+            if (this.circlefunc(null,f,status,this.R,G3DFlags.FTWSK,0,this.comptexcoordtabref.bind(this))) this.dstate++;
+        }
+
         //todo other comps & refs
 
         private drawfunc_K3DF2_soft_grid_rp: number; //
@@ -1901,6 +1921,135 @@ module ExprAE.Graph {
             this.drawfunc_K3DF2_soft_fillref.bind(this))) return 0;
             return 1;
         }
+        
+        drawfunc_K3DF2_soft_fill_texref(x: number,y: number): void
+        {
+            var prwsk=this.tptr[G3DPtrs.pwsk];
+            var texwsk=this.tptr[G3DPtrs.twsk];
+            var colwsk=this.tptr[G3DPtrs.cwsk];
+            var xp1: number;
+            var yp1: number;
+            var xp2: number;
+            var yp2: number;
+            var xp3: number;
+            var yp3: number;
+            var xp4: number;
+            var yp4: number;
+
+            var p1=prwsk.peek() as IPOINT;
+            var p2=prwsk.peek(1) as IPOINT;
+            var p3=prwsk.peek(this.N+1) as IPOINT;
+            var p4=prwsk.peek(this.N) as IPOINT;
+            if (p1==undefined || p2==undefined || p3==undefined || p4==undefined) return;
+            xp1=p1.x;
+            xp2=p2.x;
+            xp3=p3.x;
+            xp4=p4.x;
+            if (xp1==undefined || xp2==undefined || xp3==undefined || xp4==undefined) return;
+            yp1=p1.y;
+            yp2=p2.y;
+            yp3=p3.y;
+            yp4=p4.y;
+            
+            var xi=(CGraph.ZBUFMUL*(x-this.xs)) | 0;
+            var zi=(CGraph.ZBUFMUL*(this.tptr[G3DPtrs.vwsk].peek()-this.zs)) | 0;
+            var d=xi*xi+this.circfunc_disty+zi*zi;
+
+            var tex1=texwsk.peek();
+            var tex2=texwsk.peek(1);
+            var tex3=texwsk.peek(this.N+1);
+            var tex4=texwsk.peek(this.N);
+
+            if (tex1==undefined || tex2==undefined || tex3==undefined || tex4==undefined) return;
+        
+            this.TTriangle_z(xp1,yp1,xp2,yp2,xp3,yp3,
+                            tex1.u,tex1.v,
+                            tex2.u,tex2.v,
+                            tex3.u,tex3.v,
+                            this.circfunc_tex,
+                            colwsk.peek(),colwsk.peek(1),colwsk.peek(this.N+1),
+                            d,this.zbuf);
+            this.TTriangle_z(xp1,yp1,xp3,yp3,xp4,yp4,
+                            tex1.u,tex1.v,
+                            tex3.u,tex3.v,
+                            tex4.u,tex4.v,
+                            this.circfunc_tex,
+                            colwsk.peek(),colwsk.peek(this.N+1),colwsk.peek(this.N),
+                            d,this.zbuf);
+        }
+        
+        drawfunc_K3DF2_soft_fill_tex(f: FUNCSTRUCT): number
+        {
+            if (!this.tex[f.color].IsLoaded()) 
+            {
+                return this.drawfunc_K3DF2_soft_fill(f);
+            }
+            if (this.dstate<DS.PROJECT+2)
+            {
+                this.compprojecttab();
+                if (this.dstate!=DS.PROJECT+2) return 0;
+                this.dstate+=2;
+            }
+            if (this.dstate<DS.COL+2)
+            {
+                this.compcoltab(f.color);
+                if (this.dstate!=DS.COL+2) return 0;
+            }
+            if (this.dstate<DS.TEX+2)
+            {
+                this.comptexcoordtab(f);
+                if (this.dstate!=DS.TEX+2) return 0;
+            }
+            
+            var status: number;
+            if (this.dstate==DS.DRAW)
+            {
+                status=0;
+                this.dstate++;
+            } else status=1;
+            if (!this.circlefunc(null,f,status,this.R-this.D,G3DFlags.FVWSK|G3DFlags.FPWSK|G3DFlags.FCWSK|G3DFlags.FTWSK,0,
+            this.drawfunc_K3DF2_soft_fill_texref.bind(this))) return 0;
+            return 1;
+        }
+        
+        drawfunc_K3DF2_soft_fill_tex_light(f: FUNCSTRUCT): number
+        {
+            if (!this.tex[f.color].IsLoaded()) 
+            {
+                return this.drawfunc_K3DF2_soft_fill_light(f);
+            }
+            if (this.dstate<DS.PROJECT+2)
+            {
+                this.compprojecttab();
+                if (this.dstate!=DS.PROJECT+2) return 0;
+            }
+            if (this.dstate<DS.NORMAL+2)
+            {
+                this.compnormaltab();
+                if (this.dstate!=DS.NORMAL+2) return 0;
+            }
+            if (this.dstate<DS.COL+2)
+            {
+                this.compcoltabnormal(f.color);
+                if (this.dstate!=DS.COL+2) return 0;
+            }
+            if (this.dstate<DS.TEX+2)
+            {
+                this.comptexcoordtab(f);
+                if (this.dstate!=DS.TEX+2) return 0;
+            }
+            
+            var status: number;
+            if (this.dstate==DS.DRAW)
+            {
+                status=0;
+                this.dstate++;
+            } else status=1;
+            if (!this.circlefunc(null,f,status,this.R-this.D,G3DFlags.FVWSK|G3DFlags.FPWSK|G3DFlags.FCWSK|G3DFlags.FTWSK,0,
+            this.drawfunc_K3DF2_soft_fill_texref.bind(this))) return 0;
+            return 1;
+        }
+        
 
         drawsun(): void {
             //todo only opengl
