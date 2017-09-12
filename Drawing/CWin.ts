@@ -268,17 +268,16 @@ module ExprAE.Drawing {
             var pal: number[][] = [];
             var ch: number;
             if (this.fontheight < 16) ch = 8; else ch = 16;
-            for (var k= 0; k <= System.CSys.Color.length; k++)
-            {
-                pal[k]=[];
-                var d=(CWin.TEXT_FADE2-CWin.TEXT_FADE1)/ch;
-                var d2=CWin.TEXT_FADEL/ch;
-                var f=CWin.TEXT_FADE1;
+            for (var k = 0; k <= System.CSys.Color.length; k++) {
+                pal[k] = [];
+                var d = (CWin.TEXT_FADE2 - CWin.TEXT_FADE1) / ch;
+                var d2 = CWin.TEXT_FADEL / ch;
+                var f = CWin.TEXT_FADE1;
                 var col: number;
-                if (k<System.CSys.Color.length)
-                    col=this.FadeColor(System.CSys.Color[k],fade);
+                if (k < System.CSys.Color.length)
+                    col = this.FadeColor(System.CSys.Color[k], fade);
                 else
-                    col=this.FadeColor(color,fade);
+                    col = this.FadeColor(color, fade);
                 for (var j = 0; j < ch; j++) {
                     var cf = f;
                     for (var i = 0; i < 8; i++) {
@@ -289,47 +288,42 @@ module ExprAE.Drawing {
                     f += d;
                 }
             }
-            var palno=System.CSys.Color.length;
-            var fcol=0;
-            var num=0;
-            var txt=0;
-            var bsl=0;
+            var palno = System.CSys.Color.length;
+            var fcol = 0;
+            var num = 0;
+            var txt = 0;
+            var bsl = 0;
             for (var i = 0; i < s.length; i++) {
-                var c=s[i];
-                if (fcol==0)
-                    {
-                        if (c=='\\') bsl=1-bsl;
-                        else
-                        if ((c=='"')||(c=='\'')) 
-                        {
-                            if (bsl==0)
-                            txt=1-txt;
-                            bsl=0;
-                            palno=System.CSys.CTxt;
+                var c = s[i];
+                if (fcol == 0) {
+                    if (c == '\\') bsl = 1 - bsl;
+                    else
+                        if ((c == '"') || (c == '\'')) {
+                            if (bsl == 0)
+                                txt = 1 - txt;
+                            bsl = 0;
+                            palno = System.CSys.CTxt;
                         }
                         else
-                        if (txt==0)
-                        {
-                        if (c=='$') num=1;
-                        else
-                        if ((c>='0')&&(c<='9')) palno=System.CSys.CNum;
-                        else
-                        if (((c>='A')&&(c<='Z'))||((c>='a')&&(c<='z'))) palno=System.CSys.Color.length;
-                        else
-                        {
-                            palno=System.CSys.COp;
-                            num=0;
-                        }
-                        if (num) palno=System.CSys.CNum;
-                        }
-                        else bsl=0;
-                    }
-                    if (c.charCodeAt(0)<=System.CSys.Color.length) 
-                    {
-                        palno=c.charCodeAt(0)-1;
-                        fcol=1;
-                        continue;
-                    }
+                            if (txt == 0) {
+                                if (c == '$') num = 1;
+                                else
+                                    if ((c >= '0') && (c <= '9')) palno = System.CSys.CNum;
+                                    else
+                                        if (((c >= 'A') && (c <= 'Z')) || ((c >= 'a') && (c <= 'z'))) palno = System.CSys.Color.length;
+                                        else {
+                                            palno = System.CSys.COp;
+                                            num = 0;
+                                        }
+                                if (num) palno = System.CSys.CNum;
+                            }
+                            else bsl = 0;
+                }
+                if (c.charCodeAt(0) <= System.CSys.Color.length) {
+                    palno = c.charCodeAt(0) - 1;
+                    fcol = 1;
+                    continue;
+                }
                 if (this.fontheight < 16)
                     this.DrawChar8X8(x, y, pal[palno], s.charCodeAt(i));
                 else
@@ -342,7 +336,7 @@ module ExprAE.Drawing {
             if (y + 5 > this.height) return;
             if (y < 0) return;
             var cont = 0;
-            x=(x | 0);
+            x = (x | 0);
             var wsk = (y | 0) * this.width + x;
             for (var k = 0; k < s.length; k++) {
                 if (x >= this.width - 4) return;
@@ -614,7 +608,7 @@ module ExprAE.Drawing {
         }
 
         //rysowanie teksturowanego trojkata z 32-bitowym buforem z
-        /*TTriangle_z(xa: number, ya: number, xb: number, yb: number, xc: number, yc: number, fua: number,
+        TTriangle_z(xa: number, ya: number, xb: number, yb: number, xc: number, yc: number, fua: number,
             fva: number, fub: number, fvb: number, fuc: number, fvc: number, tex: CTex, ca: number, cb: number, cc: number, z: number, zbuf: number[]) {
             var left: number = 0, top = 0, right = this.width - 1, bottom = this.height - 1;
             if (((xa < left) && (xb < left) && (xc < left)) || ((ya < top) && (yb < top) && (yc < top)) ||
@@ -831,189 +825,178 @@ module ExprAE.Drawing {
             if (fd > 1) {
                 var l: number = 0;
                 while ((fd > 1) && (l < tex.GetMaxLev())) {
-                    fd *= 0.5f;
+                    fd *= 0.5;
                     l++;
                 }
                 lev = l;
             }
             tex.SetPeekLev(lev);
 
-            if (part == 2) goto part2;
-            //1 czesc - od y1 do y2
+            if (part != 2) {
+                //1 czesc - od y1 do y2
 
-            d12 = ((x2 - x1)) / (y2 - y1);
+                d12 = ((x2 - x1)) / (y2 - y1);
+                d13 = ((x3 - x1)) / (y3 - y1);
+                dc12 = ((c2 - c1)) / (y2 - y1);
+                dc13 = ((c3 - c1)) / (y3 - y1);
+                du12 = Math.floor((fu2 - fu1) * tex.GetSize(lev)) / (y2 - y1);
+                dv12 = Math.floor((fv2 - fv1) * tex.GetSize(lev)) / (y2 - y1);
+                du13 = Math.floor((fu3 - fu1) * tex.GetSize(lev)) / (y3 - y1);
+                dv13 = Math.floor((fv3 - fv1) * tex.GetSize(lev)) / (y3 - y1);
+                if (d12 > d13) {
+                    var pom: number = d12;
+                    d12 = d13;
+                    d13 = pom;
+                    pom = dc12;
+                    dc12 = dc13;
+                    dc13 = pom;
+                    pom = du12;
+                    du12 = du13;
+                    du13 = pom;
+                    pom = dv12;
+                    dv12 = dv13;
+                    dv13 = pom;
+                }
+                xA = (x1) + disp1 * d12;
+                xB = (x1) + disp1 * d13;
+                cA = (c1) + disp1 * dc12;
+                cB = (c1) + disp1 * dc13;
+                uA = ((Math.floor(fu1 * tex.GetSize(lev)))) + disp1 * du12;
+                vA = ((Math.floor(fv1 * tex.GetSize(lev)))) + disp1 * dv12;
+                uB = ((Math.floor(fu1 * tex.GetSize(lev)))) + disp1 * du13;
+                vB = ((Math.floor(fv1 * tex.GetSize(lev)))) + disp1 * dv13;
+                y = _y1;
+                while (y <= _y2) {
+                    var _xA: number = (xA);
+                    var _xB: number = (xB);
+                    var disp: number;
+                    if (!(_xA > right || _xB < left)) {
+                        disp = 0;
+                        if (_xA < left) { disp = left - _xA; _xA = left; }
+                        if (_xB > right) _xB = right;
+                        i = _xB - _xA + 1;
+                        wsk = (_xA | 0) + (y | 0) * this.width;
+                        zwsk = (_xA | 0) + (y | 0) * this.width;
+
+                        var du: number = ((uB - uA)) / (xB - xA + (1));
+                        var dv: number = ((vB - vA)) / (xB - xA + (1));
+                        var u: number = uA + disp * du;
+                        var v: number = vA + disp * dv;
+                        var dc: number = ((cB - cA)) / (xB - xA + (1));
+                        var c: number = cA + disp * dc;
+
+                        while (i--) {
+                            if (z < zbuf[zwsk]) {
+                                this.buf[wsk] = this.FadeColor(tex.Peek(u, v), c);
+                                zbuf[zwsk] = z;
+                            }
+                            wsk++;
+                            zwsk++;
+                            u += du;
+                            v += dv;
+                            c += dc;
+                        }
+                    }
+                    xA += d12;
+                    xB += d13;
+                    cA += dc12;
+                    cB += dc13;
+                    uA += du12;
+                    vA += dv12;
+                    uB += du13;
+                    vB += dv13;
+                    y++;
+                }
+
+                if (part == 1) return;
+            }
+            //2 czesc od y2 do y3
+
+            d23 = ((x3 - x2)) / (y3 - y2);
             d13 = ((x3 - x1)) / (y3 - y1);
-            dc12 = ((c2 - c1)) / (y2 - y1);
+            dc23 = ((c3 - c2)) / (y3 - y2);
             dc13 = ((c3 - c1)) / (y3 - y1);
-            du12 = Math.floor((fu2 - fu1) * tex.GetSize(lev)) / (y2 - y1);
-            dv12 = Math.floor((fv2 - fv1) * tex.GetSize(lev)) / (y2 - y1);
+            du23 = Math.floor((fu3 - fu2) * tex.GetSize(lev)) / (y3 - y2);
+            dv23 = Math.floor((fv3 - fv2) * tex.GetSize(lev)) / (y3 - y2);
             du13 = Math.floor((fu3 - fu1) * tex.GetSize(lev)) / (y3 - y1);
             dv13 = Math.floor((fv3 - fv1) * tex.GetSize(lev)) / (y3 - y1);
-            if (d12 > d13) {
-                var pom: number = d12;
-                d12 = d13;
+            xA = (x2) + disp2 * d23;
+            xB = (x1) + (_y2 - y1) * d13;
+            cA = (c2) + disp2 * dc23;
+            cB = (c1) + (_y2 - y1) * dc13;
+            uA = ((Math.floor(fu2 * tex.GetSize(lev)))) + disp2 * du23;
+            vA = ((Math.floor(fv2 * tex.GetSize(lev)))) + disp2 * dv23;
+            uB = ((Math.floor(fu1 * tex.GetSize(lev)))) + (_y2 - y1) * du13;
+            vB = ((Math.floor(fv1 * tex.GetSize(lev)))) + (_y2 - y1) * dv13;
+            if (xA > xB) {
+                var pom: number = d23;
+                d23 = d13;
                 d13 = pom;
-                pom = dc12;
-                dc12 = dc13;
+                pom = xB;
+                xB = xA;
+                xA = pom;
+                pom = dc23;
+                dc23 = dc13;
                 dc13 = pom;
-                pom = du12;
-                du12 = du13;
+                pom = cB;
+                cB = cA;
+                cA = pom;
+                pom = du23;
+                du23 = du13;
                 du13 = pom;
-                pom = dv12;
-                dv12 = dv13;
+                pom = dv23;
+                dv23 = dv13;
                 dv13 = pom;
+                pom = uB;
+                uB = uA;
+                uA = pom;
+                pom = vB;
+                vB = vA;
+                vA = pom;
             }
-            xA = (x1) + disp1 * d12;
-            xB = (x1) + disp1 * d13;
-            cA = (c1) + disp1 * dc12;
-            cB = (c1) + disp1 * dc13;
-            uA = ((Math.floor(fu1 * tex.GetSize(lev)))) + disp1 * du12;
-            vA = ((Math.floor(fv1 * tex.GetSize(lev)))) + disp1 * dv12;
-            uB = ((Math.floor(fu1 * tex.GetSize(lev)))) + disp1 * du13;
-            vB = ((Math.floor(fv1 * tex.GetSize(lev)))) + disp1 * dv13;
-            y = _y1;
-            while (y <= _y2) {
+            y = _y2;
+            while (y <= _y3) {
+                if (xB < xA) xB = xA;
                 var _xA: number = (xA);
                 var _xB: number = (xB);
                 var disp: number;
-                if (_xA > right) goto nodrawloop1;
-                if (_xB < left) goto nodrawloop1;
-                disp = 0;
-                if (_xA < left) { disp = left - _xA; _xA = left; }
-                if (_xB > right) _xB = right;
-                i = _xB - _xA + 1;
-                wsk = (number *)(buf + ((_xA + y * this.width) * sizeof)); remember to floor
-                zwsk = (number *)(zbuf + ((_xA + y * this.width) * sizeof));
+                if (!(_xA > right || _xB < left)) {
+                    disp = 0;
+                    if (_xA < left) { disp = left - _xA; _xA = left; }
+                    if (_xB > right) _xB = right;
+                    i = _xB - _xA + 1;
+                    wsk = (_xA | 0) + (y | 0) * this.width;
+                    zwsk = (_xA | 0) + (y | 0) * this.width;
 
-                var du: number = ((uB - uA)) / (xB - xA + (1));
-                var dv: number = ((vB - vA)) / (xB - xA + (1));
-                var u: number = uA + disp * du;
-                var v: number = vA + disp * dv;
-                var dc: number = ((cB - cA)) / (xB - xA + (1));
-                var c: number = cA + disp * dc;
-                #ifdef X861
-                #include "asm\CWin_TTriangle_z.c"
-                #else
-        while(i--)
-        {
-            if (z <*zwsk) {
-*wsk=System.CSys.FadeColor(tex.Peek(u, v), c);
-*zwsk=z;
+                    var du: number = ((uB - uA)) / (xB - xA + (1));
+                    var dv: number = ((vB - vA)) / (xB - xA + (1));
+                    var u: number = uA + disp * du;
+                    var v: number = vA + disp * dv;
+                    var dc: number = ((cB - cA)) / (xB - xA + (1));
+                    var c: number = cA + disp * dc;
+                    while (i--) {
+                        if (z < zbuf[zwsk]) {
+                            this.buf[wsk] = this.FadeColor(tex.Peek(u, v), c);
+                            zbuf[zwsk] = z;
+                        }
+                        wsk++;
+                        zwsk++;
+                        u += du;
+                        v += dv;
+                        c += dc;
+                    }
+                }
+                xA += d23;
+                xB += d13;
+                cA += dc23;
+                cB += dc13;
+                uA += du23;
+                vA += dv23;
+                uB += du13;
+                vB += dv13;
+                y++;
             }
-            wsk++;
-            zwsk++;
-            u += du;
-            v += dv;
-            c += dc;
         }
-        #endif
-        nodrawloop1:
-        xA+=d12;
-        xB+=d13;
-        cA+=dc12;
-        cB+=dc13;
-        uA+=du12;
-        vA+=dv12;
-        uB+=du13;
-        vB+=dv13;
-        y++;
-    }
-
-    if (part == 1) goto part_end;
-    part2:
-    //2 czesc od y2 do y3
-
-    d23 = ((x3 - x2)) / (y3 - y2);
-    d13 = ((x3 - x1)) / (y3 - y1);
-    dc23 = ((c3 - c2)) / (y3 - y2);
-    dc13 = ((c3 - c1)) / (y3 - y1);
-    du23 = Math.floor((fu3 - fu2) * tex.GetSize(lev)) / (y3 - y2);
-    dv23 = Math.floor((fv3 - fv2) * tex.GetSize(lev)) / (y3 - y2);
-    du13 = Math.floor((fu3 - fu1) * tex.GetSize(lev)) / (y3 - y1);
-    dv13 = Math.floor((fv3 - fv1) * tex.GetSize(lev)) / (y3 - y1);
-    xA = (x2) + disp2 * d23;
-    xB = (x1) + (_y2 - y1) * d13;
-    cA = (c2) + disp2 * dc23;
-    cB = (c1) + (_y2 - y1) * dc13;
-    uA = ((Math.floor(fu2 * tex.GetSize(lev)))) + disp2 * du23;
-    vA = ((Math.floor(fv2 * tex.GetSize(lev)))) + disp2 * dv23;
-    uB = ((Math.floor(fu1 * tex.GetSize(lev)))) + (_y2 - y1) * du13;
-    vB = ((Math.floor(fv1 * tex.GetSize(lev)))) + (_y2 - y1) * dv13;
-    if (xA > xB) {
-        var pom: number = d23;
-        d23 = d13;
-        d13 = pom;
-        pom = xB;
-        xB = xA;
-        xA = pom;
-        pom = dc23;
-        dc23 = dc13;
-        dc13 = pom;
-        pom = cB;
-        cB = cA;
-        cA = pom;
-        pom = du23;
-        du23 = du13;
-        du13 = pom;
-        pom = dv23;
-        dv23 = dv13;
-        dv13 = pom;
-        pom = uB;
-        uB = uA;
-        uA = pom;
-        pom = vB;
-        vB = vA;
-        vA = pom;
-    }
-    y = _y2;
-    while (y <= _y3) {
-        if (xB < xA) xB = xA;
-        var _xA: number = (xA);
-        var _xB: number = (xB);
-        var disp: number;
-        if (_xA > right) goto nodrawloop2;
-        if (_xB < left) goto nodrawloop2;
-        disp = 0;
-        if (_xA < left) { disp = left - _xA; _xA = left; }
-        if (_xB > right) _xB = right;
-        i = _xB - _xA + 1;
-        wsk = (number *)(buf + ((_xA + y * this.width) * sizeof));
-        zwsk = (number *)(zbuf + ((_xA + y * this.width) * sizeof));
-
-        var du: number = ((uB - uA)) / (xB - xA + (1));
-        var dv: number = ((vB - vA)) / (xB - xA + (1));
-        var u: number = uA + disp * du;
-        var v: number = vA + disp * dv;
-        var dc: number = ((cB - cA)) / (xB - xA + (1));
-        var c: number = cA + disp * dc;
-        #ifdef X862
-        #include "asm\CWin_TTriangle_z.c"
-        #else
-        while (i--) {
-            if (z <*zwsk) {
-*wsk=System.CSys.FadeColor(tex.Peek(u, v), c);
-*zwsk=z;
-            }
-            wsk++;
-            zwsk++;
-            u += du;
-            v += dv;
-            c += dc;
-        }
-        #endif
-        nodrawloop2:
-        xA += d23;
-        xB += d13;
-        cA += dc23;
-        cB += dc13;
-        uA += du23;
-        vA += dv23;
-        uB += du13;
-        vB += dv13;
-        y++;
-    }
-    part_end: ;
-}*/
 
         FadeColor(c: number, fade: number) {
             return (((((c >> 16) & 255) * fade) << 8) & 0xff0000) | ((((c >> 8) & 255) * fade) & 0xff00) |
