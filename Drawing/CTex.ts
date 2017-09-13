@@ -93,6 +93,12 @@ module ExprAE.Drawing {
                         var r2: number=bf[d+4+2];
                         var r3: number=bf[d+width*4+4+2];
                         var r4: number=bf[d+width*4+2];
+                        if (!r3) r3=r2;
+                        if (!r4) r4=r1;
+                        if (!g3) g3=g2;
+                        if (!g4) g4=g1;
+                        if (!b3) b3=b2;
+                        if (!b4) b4=b1;
                         r=((r1*(1-x1)+r2*x1)*(1-y1)+(r3*x1+r4*(1-x1))*y1) | 0;
                         g=((g1*(1-x1)+g2*x1)*(1-y1)+(g3*x1+g4*(1-x1))*y1) | 0;
                         b=((b1*(1-x1)+b2*x1)*(1-y1)+(b3*x1+b4*(1-x1))*y1) | 0;
