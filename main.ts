@@ -21,6 +21,9 @@ module ExprAE {
             var graphTester = new Graph.CGraphTester(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf());
 
             this.graph = new Graph.CGraph(System.CSys.ScrWidth, System.CSys.ScrHeight, System.CSys.getBuf(), stdlib)
+
+            var imagesLib=new Libraries.Images(this.graph);
+            imagesLib.init(library);
             /*sound=new CSound(System.CSys.ScrWidth,System.CSys.ScrHeight,buf);
             CGraph::currentgraph=graph;
             CSound::currentsound=sound;

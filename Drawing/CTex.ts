@@ -123,7 +123,7 @@ module ExprAE.Drawing {
             }
             else
             {
-                this.b[0] = bf;
+                this.b[0] = new Uint32Array(bf.buffer);
                 this.SetParameters(this.x0,this.y0,1,1);
             }
                        

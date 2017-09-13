@@ -144,8 +144,8 @@ module ExprAE.Graph {
         private dstackl: number = 0;
         
         //tekstrury dla wykresow
-        tex: Drawing.CTex[] = [];
-        envmap: Drawing.CTex[] = [];
+        private tex: Drawing.CTex[] = [];
+        private envmap: Drawing.CTex[] = [];
 
         //tablica wskaznikow
 	    private tptr: Iterator[] = [];
@@ -2665,6 +2665,10 @@ module ExprAE.Graph {
                 x2+=d;
             }
             return 0;
+        }
+
+        loadTex(numberOfFunc: number, tex: Drawing.CTex): void {
+            this.tex[numberOfFunc%CGraph.MAXFUNCCOUNT] = tex;
         }
     }
 

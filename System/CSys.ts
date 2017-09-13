@@ -159,10 +159,6 @@ module ExprAE.System {
                 CSys.mouseWhellDelta = -event.deltaY;
             }
 
-            document.onclick = function (event: Event) {
-                event.preventDefault();
-            }
-
             document.addEventListener('contextmenu', event => event.preventDefault());
         }
 
