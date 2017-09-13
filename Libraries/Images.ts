@@ -12,12 +12,19 @@ module ExprAE.Libraries {
             return lib;
         }
 
-        private loadImage(numberOfFunc: number): number {
+        private loadImage(numberOfFunc: number): string {
             var th = this;
             const fileUpload = "fileUpload";
             var existing = document.getElementById(fileUpload)
             if (existing) {
-                return 0;
+                if (numberOfFunc==-1) {
+                    existing.remove();
+                    return "Selector closed";
+                }
+                return "Selector is opened. Set argument to -1 for closing it.";
+            }
+            if (numberOfFunc<0) {
+                return "Argument must be positive";
             }
             var input = document.createElement('input');
             input.id = fileUpload;
@@ -57,7 +64,7 @@ module ExprAE.Libraries {
                 fr.readAsDataURL(f);
             }
 
-            return 1;
+            return "Select texture";
         }
 
         private funclist: Expressions.ELEMENT[] = new Array(

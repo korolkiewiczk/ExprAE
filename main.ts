@@ -48,8 +48,13 @@ module ExprAE {
             var th = this;
             var result = (th.expr as Expressions.CExpr).set(s);
             if (result==Expressions.ErrorCodes.NoErr) {
-                th.graph.SetExpr(s, th.expr, System.CSys.DColor, System.CSys.DColor);
-                return s+"="+th.expr.do();
+                var value = th.expr.do();
+                if (typeof value == "number") {
+                    th.graph.SetExpr(s, th.expr, System.CSys.DColor, System.CSys.DColor);
+                    return s+"="+value;
+                } else {
+                    return value;
+                }
             }
             else {
                 return "\04"+Expressions.ErrorCodes[result];
