@@ -185,7 +185,7 @@ module ExprAE.Graph {
             this.vangle=CGraph.DEFAULTVANLGE;
             this.setzdist();
             this.N=0;
-            this.valtab=[];
+            //this.valtab=[];
             this.fitscr=0;
             this.changepos3dmode=0;
             this.gms=new GAMEMODESTRUCT();
@@ -197,11 +197,11 @@ module ExprAE.Graph {
             
             //dexprlist[CGraph.MAXFUNCCOUNT]=cexpr(cexpr.GetLib());
             //this.dexprlist[CGraph.MAXFUNCCOUNT+1]=cexpr(cexpr.GetLib());
-            this.valtab=[];
+            /*this.valtab=[];
             this.projecttab=[];
             this.normaltab=[];
             this.colortab=[];
-            this.texcoordtab=[];
+            this.texcoordtab=[];*/
             this.zbuf=new Uint32Array(width*height);
         /*#ifdef OPENGL
             gl_colortab=0;
@@ -1635,7 +1635,7 @@ module ExprAE.Graph {
                 if (this.hold>0) {this.dstate+=2; return;}
                 var c=Math.round(this.lightdist);
                 if (c>255)c=255;
-                this.colortab=[];
+                this.colortab.fill(c);
                 this.dstate+=2;
                 return;
             }

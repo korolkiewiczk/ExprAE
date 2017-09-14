@@ -57,7 +57,7 @@ module ExprAE {
                 }
             }
             else {
-                return "\04"+Expressions.ErrorCodes[result];
+                return "\u0004"+Expressions.ErrorCodes[result];
             }
         }
     }

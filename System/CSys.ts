@@ -82,7 +82,7 @@ module ExprAE.System {
         static SRand0 = 0;
 
         private static buf: Uint32Array;
-        private static buf8: Uint8Array;
+        private static buf8: Uint8ClampedArray;
         private static imgData: ImageData;
 
         /*#ifdef MENU
@@ -125,11 +125,13 @@ module ExprAE.System {
                 event = event || window.event as KeyboardEvent;
                 if(event.keyCode == Keys.K_BACK_SPACE 
                     || event.keyCode == Keys.K_F1
+                    || event.keyCode == Keys.K_F4
                     || event.keyCode == Keys.K_F5
                     || event.keyCode == Keys.K_F6
                     || event.keyCode == Keys.K_F7
                     || event.keyCode == Keys.K_TAB) {
-                    event.preventDefault();
+                        event.preventDefault();
+                        event.returnValue = false;
                 }
                 CSys.keytab[event.keyCode as Keys] = 1;
             }
@@ -159,7 +161,10 @@ module ExprAE.System {
                 CSys.mouseWhellDelta = -event.deltaY;
             }
 
-            document.addEventListener('contextmenu', event => event.preventDefault());
+            document.addEventListener('contextmenu', event => {
+                event.preventDefault();
+                event.returnValue = false;
+            });
         }
 
         static Run(): void {

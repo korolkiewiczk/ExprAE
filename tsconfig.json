@@ -5,7 +5,8 @@
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true,
-        "outFile": "combined.js"
+        "outFile": "combined.js",
+        "target": "es2015"
     },
     "exclude": [
         "Tests"

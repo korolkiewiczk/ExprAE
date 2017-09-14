@@ -182,7 +182,7 @@ module ExprAE.Expressions {
                             }
                             this.strdata[strl++] = c;
                             if (strl >= this.STRDATALEN - 1) return ErrorCodes.BufOverflow;
-                            if (c == '\0') c = '\1';
+                            if (c == '\u0000') c = '\u0001';
                             strbson = 0;
                         }
                 }

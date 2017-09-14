@@ -50,7 +50,7 @@ module ExprAE.Libraries {
                         ctx.drawImage(t, 0, 0);
                         var data = ctx.getImageData(0, 0, w, h);
                         var tex = new Drawing.CTex();
-                        tex.Load(data.data, data.width, data.height);
+                        tex.Load(new Uint8Array(data.data.buffer), data.width, data.height);
                         th.graph.loadTex(numberOfFunc, tex);
 
                         var toRemove = document.getElementById(fileUpload)
