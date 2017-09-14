@@ -317,5 +317,10 @@ module ExprAE.Console {
             }
             this.wsklv = this.wskl;
         }
+
+        Exec(s: string) {
+            this.edit[this.wske%CCon.EDIT]=s;
+            this.Enter();
+        }
     }
 }

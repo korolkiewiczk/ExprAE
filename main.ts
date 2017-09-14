@@ -41,6 +41,7 @@ module ExprAE {
             //System.CSys.SetActiveWin(System.CSys.Win_Con);
             //System.CSys.SetActiveWindow(System.Windows.Win_Graph);
             System.CSys.SetActiveWindow(System.Windows.Win_Con);
+            con.Exec("sin(dist(x,y))");
             System.CSys.Run();
         }
 
