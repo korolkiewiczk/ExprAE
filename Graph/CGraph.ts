@@ -2352,7 +2352,7 @@ module ExprAE.Graph {
             {
                 this.dexprlist[num%CGraph.MAXFUNCCOUNT]=expr;
                 this.dfuncstruct[num%CGraph.MAXFUNCCOUNT].color=color%CGraph.Color.length;
-                this.dfuncstruct[num%CGraph.MAXFUNCCOUNT].status=1;
+                this.dfuncstruct[num%CGraph.MAXFUNCCOUNT].status=expr? 1:0;
             }
         }
         

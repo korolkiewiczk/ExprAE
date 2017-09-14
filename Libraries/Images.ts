@@ -1,6 +1,8 @@
 module ExprAE.Libraries {
     export class Images {
 
+        private images: ImageData[] = [];
+
         constructor(
             private graph: Graph.CGraph
         ) {
@@ -12,18 +14,18 @@ module ExprAE.Libraries {
             return lib;
         }
 
-        private loadImage(numberOfFunc: number): string {
+        private loadImageBase(done: ICallback, numberOfImage: number = 0): string {
             var th = this;
             const fileUpload = "fileUpload";
             var existing = document.getElementById(fileUpload)
             if (existing) {
-                if (numberOfFunc==-1) {
+                if (numberOfImage==-1) {
                     existing.remove();
                     return "Selector closed";
                 }
                 return "Selector is opened. Set argument to -1 for closing it.";
             }
-            if (numberOfFunc<0) {
+            if (numberOfImage<0) {
                 return "Argument must be positive";
             }
             var input = document.createElement('input');
@@ -48,15 +50,16 @@ module ExprAE.Libraries {
 
                         var ctx = canvas.getContext("2d");
                         ctx.drawImage(t, 0, 0);
-                        var data = ctx.getImageData(0, 0, w, h);
-                        var tex = new Drawing.CTex();
-                        tex.Load(new Uint8Array(data.data.buffer), data.width, data.height);
-                        th.graph.loadTex(numberOfFunc, tex);
+                        var data: ImageData = ctx.getImageData(0, 0, w, h);
+                        
+                        done(data);
 
                         var toRemove = document.getElementById(fileUpload)
                         if (toRemove) {
                             toRemove.remove();
                         }
+
+                        th.images[numberOfImage] = data;
                     }
                     image.src = ev2.target.result;
                 };
@@ -67,7 +70,29 @@ module ExprAE.Libraries {
             return "Select texture";
         }
 
+        private loadImageTex(numberOfFunc: number): string {
+            var th=this;
+            return this.loadImageBase((data: ImageData) => {
+                var tex = new Drawing.CTex();
+                
+                tex.Load(new Uint8Array(data.data.buffer), data.width, data.height);
+                th.graph.loadTex(numberOfFunc, tex);
+            }, numberOfFunc);
+        }
+
+        private loadImage(numberOfImage: number): string {
+            return this.loadImageBase((data: ImageData) => {}, numberOfImage);
+        }
+
+        private peek(numberOfImage: number, x: number, y: number): number {
+            var img=this.images[numberOfImage];
+            var pos=((x%img.width|0)+(y%img.height|0)*img.width)*4;
+            return (img.data[pos]+img.data[pos+1]+img.data[pos+2])/(3*256);
+        }
+
         private funclist: Expressions.ELEMENT[] = new Array(
-            new Expressions.ELEMENT("LOAD_TEX", this.loadImage, Expressions.CLib.VAL_FLOAT, 1, Expressions.CLib.VAL_FLOAT, 0, this));
+            new Expressions.ELEMENT("TEX_LOAD", this.loadImageTex, Expressions.CLib.VAL_FLOAT, 1, Expressions.CLib.VAL_FLOAT, 0, this),
+            new Expressions.ELEMENT("IMG_LOAD", this.loadImage, Expressions.CLib.VAL_FLOAT, 1, Expressions.CLib.VAL_FLOAT, 0, this),
+            new Expressions.ELEMENT("IMG_PEEK", this.peek, Expressions.CLib.VAL_FLOAT, 3, 0, 0, this));
     }
 }

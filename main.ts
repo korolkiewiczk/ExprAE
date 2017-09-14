@@ -47,13 +47,14 @@ module ExprAE {
 
         comp(s: string): string {
             var th = this;
-            var result = (th.expr as Expressions.CExpr).set(s);
+            var result = (th.expr as Expressions.CExpr).set(s); //todo many expressions
             if (result==Expressions.ErrorCodes.NoErr) {
                 var value = th.expr.do();
                 if (typeof value == "number") {
                     th.graph.SetExpr(s, th.expr, System.CSys.DColor, System.CSys.DColor);
                     return s+"="+value;
                 } else {
+                    th.graph.SetExpr(s, undefined, System.CSys.DColor, System.CSys.DColor);
                     return value;
                 }
             }
