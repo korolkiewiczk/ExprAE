@@ -1624,7 +1624,7 @@ module ExprAE.Graph {
             var d=Math.sqrt(x*x+y*y+z*z);
             if (d>this.lightdist) this.tptr[G3DPtrs.cwsk].set(0);
             else
-            this.tptr[G3DPtrs.cwsk].set((255-d*this._255_lightdist)&255);
+            this.tptr[G3DPtrs.cwsk].set((255-d*this._255_lightdist)|0);
         }
         
         //oblicz wartosci jasnosci kolorow dla rysowania trojkatow
@@ -1654,10 +1654,10 @@ module ExprAE.Graph {
             x-=this.xs;   
             y-=this.ys;
             var d=Math.sqrt(x*x+y*y+z*z);
-            if (d>this.lightdist) this.tptr[G3DPtrs.cwsk].set(0xff000000);
+            if (d>this.lightdist) this.tptr[G3DPtrs.cwsk].set(0);
             else
             {
-                var c=(this.dotproduct(this.tptr[G3DPtrs.nwsk].peek(),VEC.fromArray(this.light_vec))*(255-d*this._255_lightdist)) & 255;
+                var c=(this.dotproduct(this.tptr[G3DPtrs.nwsk].peek(),VEC.fromArray(this.light_vec))*(255-d*this._255_lightdist)) | 0;
                 if (c<0) c=0;
                 this.tptr[G3DPtrs.cwsk].set(c);
             }
@@ -1665,7 +1665,7 @@ module ExprAE.Graph {
         
         compcoltabnormalcconstref(x: number,y: number): void
         {
-            var c=(this.dotproduct(this.tptr[G3DPtrs.nwsk].peek(),VEC.fromArray(this.light_vec))*this.circfunc_constcol) & 255;
+            var c=(this.dotproduct(this.tptr[G3DPtrs.nwsk].peek(),VEC.fromArray(this.light_vec))*this.circfunc_constcol) | 0;
             if (c<0) c=0;
             this.tptr[G3DPtrs.cwsk].set(c);
         }
