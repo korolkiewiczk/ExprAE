@@ -87,7 +87,7 @@ module ExprAE.Console {
             var edited = this.edit[this.wske % CCon.EDIT]
             if (!edited) return;
             //currentcon=this;
-            var bf = this.reffunc(edited)+"";
+            var bf = this.reffunc(edited) + "";
 
             if (!bf) {
                 this.lines[this.wskl % CCon.LINES], this.edit[this.wske % CCon.EDIT]
@@ -130,10 +130,12 @@ module ExprAE.Console {
             if (csys.MouseKeyPressed(keys.M_RIGHT)) k |= keys.K_ESCAPE;
             k &= keys.REGULAR;
             if (k == keys.K_TAB) {
-                this.libwinon = 1 - this.libwinon;
-                if (this.libwinon) {
+                if (!this.libwinon) {
+                    this.libwinon = 1;
                     this.libwin.Clear();
                     this.libwin.Set("");
+                } else {
+                    this.libwin.KeyFunc(k);
                 }
             }
             else
@@ -159,58 +161,45 @@ module ExprAE.Console {
                                 if (this.ecursor < this.elen) this.ecursor++;
                         }
                         else
-                            if (this.libwinon) {
-                                this.libwin.KeyFunc(k);
-                                var i=0;
-                                if (this.libwin.retbuf.length>0)
-                                {
-                                    while (i<this.libwin.retbuf.length)
-                                    {
-                                        this.Edit(this.libwin.retbuf[i++]);
-                                    }
-                                    this.libwin.retbuf="";
-                                }
-                            }
+                            if (k == keys.K_HOME) this.ecursor = 0;
                             else
-                                if (k == keys.K_HOME) this.ecursor = 0;
+                                if (k == keys.K_END) this.ecursor = this.elen;
                                 else
-                                    if (k == keys.K_END) this.ecursor = this.elen;
+                                    if (k == keys.K_UP && !this.libwinon) {
+                                        if (this.wskh > 0)
+                                            this.edit[this.wske % CCon.EDIT] = this.edit[(--this.wskh) % CCon.EDIT];
+                                        this.ecursor = this.elen = this.edit[this.wske % CCon.EDIT].length;
+                                        this.estart = 0;
+                                    }
                                     else
-                                        if (k == keys.K_UP) {
-                                            if (this.wskh > 0)
-                                                this.edit[this.wske % CCon.EDIT] = this.edit[(--this.wskh) % CCon.EDIT];
+                                        if (k == keys.K_DOWN && !this.libwinon) {
+                                            if (this.wskh < this.wske - 1)
+                                                this.edit[this.wske % CCon.EDIT] = this.edit[(++this.wskh) % CCon.EDIT];
+                                            else
+                                                if (this.wskh < this.wske) {
+                                                    this.edit[this.wske % CCon.EDIT] = "";
+                                                    this.wskh++;
+                                                }
                                             this.ecursor = this.elen = this.edit[this.wske % CCon.EDIT].length;
                                             this.estart = 0;
                                         }
                                         else
-                                            if (k == keys.K_DOWN) {
-                                                if (this.wskh < this.wske - 1)
-                                                    this.edit[this.wske % CCon.EDIT] = this.edit[(++this.wskh) % CCon.EDIT];
-                                                else
-                                                    if (this.wskh < this.wske) {
-                                                        this.edit[this.wske % CCon.EDIT] = "";
-                                                        this.wskh++;
-                                                    }
-                                                this.ecursor = this.elen = this.edit[this.wske % CCon.EDIT].length;
-                                                this.estart = 0;
+                                            if (k == keys.K_PAGE_UP) {
+                                                if (this.wsklv > 0)
+                                                    this.wsklv--;
                                             }
                                             else
-                                                if (k == keys.K_PAGE_UP) {
-                                                    if (this.wsklv > 0)
-                                                        this.wsklv--;
+                                                if (k == keys.K_PAGE_DOWN) {
+                                                    if (this.wsklv < this.wskl)
+                                                        this.wsklv++;
                                                 }
                                                 else
-                                                    if (k == keys.K_PAGE_DOWN) {
-                                                        if (this.wsklv < this.wskl)
-                                                            this.wsklv++;
+                                                    if ((k == keys.K_ENTER) && (shift)) {
+                                                        //var *t;
+                                                        //t=csys.GetClipboardText();
+                                                        //if (t)
+                                                        //while (*t) Edit(*(t++));
                                                     }
-                                                    else
-                                                        if ((k == keys.K_ENTER) && (shift)) {
-                                                            //var *t;
-                                                            //t=csys.GetClipboardText();
-                                                            //if (t)
-                                                            //while (*t) Edit(*(t++));
-                                                        }
                                                         else {
 
                                                             var c = '\0';
@@ -220,10 +209,25 @@ module ExprAE.Console {
                                                                     break;
                                                                 }
                                                             }
-                                                            if (c == '\n') this.Enter();
-                                                            else
-                                                                if (c.charCodeAt(0) != 0)
-                                                                    this.Edit(c);
+                                                            if (this.libwinon && c!="*"&& c!="/"&& c!="+"&& c!="-" && !(c>='0' && c<='9')) {
+                                                                this.libwin.KeyFunc(k);
+                                                                var i = 0;
+                                                                if (this.libwin.retbuf.length > 0) {
+                                                                    var prevCursorPos = this.ecursor;
+                                                                    while (i < this.libwin.retbuf.length) {
+                                                                        this.Edit(this.libwin.retbuf[i++]);
+                                                                    }
+                                                                    var setCurPos = this.libwin.retbuf.indexOf("(")
+                                                                    if (setCurPos != -1)
+                                                                        this.ecursor = prevCursorPos + setCurPos + 1;
+                                                                    this.libwin.retbuf = "";
+                                                                }
+                                                            } else {
+                                                                if (c == '\n') this.Enter();
+                                                                else
+                                                                    if (c.charCodeAt(0) != 0)
+                                                                        this.Edit(c);
+                                                            }
                                                         }
             if ((this.ecursor - this.estart) < 0) this.estart = this.ecursor;
             var ewidth = (this.width - this.fontwidth) / this.fontwidth - (this.prompt ? this.prompt.length : 0);
@@ -319,7 +323,7 @@ module ExprAE.Console {
         }
 
         Exec(s: string) {
-            this.edit[this.wske%CCon.EDIT]=s;
+            this.edit[this.wske % CCon.EDIT] = s;
             this.Enter();
         }
     }

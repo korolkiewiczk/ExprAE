@@ -66,7 +66,7 @@ module ExprAE.Console {
                 this.pos--;
             }
             else
-            if (k==keys.K_ENTER)
+            if (k==keys.K_ENTER || k==keys.K_TAB)
             {
                 var pom: string;
                 if (this.tbuf.length==0) return;
@@ -98,16 +98,19 @@ module ExprAE.Console {
                     if (this.lib.getPar(n.partypes,i)==Expressions.CLib.VAL_STR) this.retbuf+='""';
                     this.retbuf += ")";
                 }
+
+                this.Clear();
+                this.Set("");
             }
             else
             {
                 var c: string = "\0";
-                if ((k>keys.K_1)&&(k<=keys.K_9))  //***
+                /*if ((k>keys.K_1)&&(k<=keys.K_9))  //***
                 {
                     this.ebuf+= CLibWin.Num2Char[k-keys.K_1-1];
                     this.ebuf += "|";
                 }
-                else
+                else*/
                 {
                     for (var i=0; i<keyMap.KEYMAPLEN; i++)
                     {
