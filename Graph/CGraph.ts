@@ -113,7 +113,7 @@ module ExprAE.Graph {
         //TABLICE DANYCH WYKRESU
         private valtab: number[] = []; //tablica z obliczonymi wartosciami funkcji, przydzielana dynamicznie
         private projecttab: IPOINT[] = []; //tablica przetworzonych-rzutowanych wierzcholkow
-        private colortab: number[] = []; //bufor koloru dla rysowania trojkatow
+        private colortab: Uint8Array; //bufor koloru dla rysowania trojkatow
         private normaltab: VEC[] = []; //tablica wektorow normalnych
         private texcoordtab: VEC2[] = []; //tablica wspolzednych tekstury
         
@@ -967,7 +967,7 @@ module ExprAE.Graph {
                         this.normaltab=new Array<VEC>(size);
                     }
                     
-                    this.colortab=new Array<number>(size);
+                    this.colortab=new Uint8Array(size);
                                         
                     if (this.dmethod==DrawMethod.MTEX)
                     {
@@ -2812,7 +2812,7 @@ module ExprAE.Graph {
             }
 
         next(): any {
-            return this.ptr[this.i++];
+            this.i++;
         }
 
         peek(diff: number = 0): any {
