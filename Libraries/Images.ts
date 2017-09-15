@@ -86,8 +86,9 @@ module ExprAE.Libraries {
 
         private peek(numberOfImage: number, x: number, y: number): number {
             var img=this.images[numberOfImage];
-            var pos=((x%img.width|0)+(y%img.height|0)*img.width)*4;
-            return (img.data[pos]+img.data[pos+1]+img.data[pos+2])/(3*256);
+            if (x<0 || y<0 || x>=img.width || y>=img.height) return 0;
+            var pos=((x|0)+(y|0)*img.width) << 2;
+            return (img.data[pos]+img.data[pos+1]+img.data[pos+2])*0.001302083;
         }
 
         private funclist: Expressions.ELEMENT[] = new Array(
